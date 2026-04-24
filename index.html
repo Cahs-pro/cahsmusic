@@ -868,20 +868,152 @@ document.getElementById("v-ico").onclick=()=>{if(!S.ytOk)return;S.ytp.isMuted()?
 document.getElementById("vfill").style.width=S.vol+"%";
 
 /* ═══════════════════════════════════════════════════════════
-   ⬇ DOWNLOAD — /api/download?v=ID vasitəsilə birbaşa endirmə
+   ⬇ DOWNLOAD — Tam Client-Side, Backend Yoxdur
    
    Necə işləyir:
-   1. Client /api/download?v=VIDEO_ID sorğusu göndərir
-   2. Vercel serverless function yt-dlp ilə audio stream qaytarır
-   3. fetch() → ReadableStream → Uint8Array → IndexedDB (Dexie)
-   4. İstifadəçi yalnız progress bar görür, fayl sisteminə heç nə düşmür
-   5. Növbəti dəfə həmin mahnı blob-dan offline çalınır
+   1. Cobalt.tools public API-si → audio URL alınır
+   2. Piped/Invidious API → fallback audio URL
+   3. fetch(audioUrl) → ReadableStream → Blob → IndexedDB
+   4. İstifadəçi yalnız progress bar görür
+   5. Oflayn: blob-dan birbaşa çalınır
+   
+   ✅ Localhost-da işləyir
+   ✅ Vercel/GitHub Pages/hər yerdə işləyir  
+   ✅ Heç bir backend lazım deyil
 ═══════════════════════════════════════════════════════════ */
+
+/* ── Audio URL əldə etmək üçün API-lər (sıra ilə cəhd edilir) ── */
+
+const DL_APIS = [
+  // 1. Cobalt.tools — ən etibarlı public downloader API
+  async (videoId) => {
+    const r = await fetch("https://api.cobalt.tools/", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Accept":"application/json"},
+      body: JSON.stringify({
+        url: `https://www.youtube.com/watch?v=${videoId}`,
+        downloadMode: "audio",
+        audioFormat: "best",
+        audioBitrate: "128",
+      }),
+    });
+    if(!r.ok) throw new Error("cobalt http "+r.status);
+    const j = await r.json();
+    // cobalt returns {status:"tunnel"|"redirect"|"picker", url:...}
+    if(j.status==="error") throw new Error(j.error?.code||"cobalt error");
+    if(j.url) return {url: j.url, mime:"audio/mp4"};
+    if(j.status==="picker"&&j.picker?.length) return {url: j.picker[0].url, mime:"audio/mp4"};
+    throw new Error("cobalt: URL tapılmadı");
+  },
+
+  // 2. Piped API (public instances)
+  async (videoId) => {
+    const instances = [
+      "https://pipedapi.adminforge.de",
+      "https://pipedapi.moomoo.me",
+      "https://piped-api.garudalinux.org",
+      "https://api.piped.projectsegfau.lt",
+    ];
+    for(const base of instances){
+      try{
+        const r = await fetch(`${base}/streams/${videoId}`, {signal: AbortSignal.timeout(8000)});
+        if(!r.ok) continue;
+        const d = await r.json();
+        const streams = (d.audioStreams||[]).sort((a,b)=>(b.bitrate||0)-(a.bitrate||0));
+        const best = streams.find(s=>s.mimeType?.includes("audio"))||streams[0];
+        if(best?.url) return {url: best.url, mime: best.mimeType||"audio/webm"};
+      } catch(_){ continue; }
+    }
+    throw new Error("Piped: stream tapılmadı");
+  },
+
+  // 3. Invidious API
+  async (videoId) => {
+    const instances = [
+      "https://invidious.snopyta.org",
+      "https://inv.riverside.rocks",
+      "https://invidious.io",
+      "https://y.com.sb",
+    ];
+    for(const base of instances){
+      try{
+        const r = await fetch(`${base}/api/v1/videos/${videoId}?fields=adaptiveFormats`, {signal: AbortSignal.timeout(8000)});
+        if(!r.ok) continue;
+        const d = await r.json();
+        const audio = (d.adaptiveFormats||[])
+          .filter(f=>f.type?.startsWith("audio"))
+          .sort((a,b)=>(parseInt(b.bitrate)||0)-(parseInt(a.bitrate)||0));
+        if(audio[0]?.url) return {url: audio[0].url, mime: audio[0].type||"audio/webm"};
+      } catch(_){ continue; }
+    }
+    throw new Error("Invidious: stream tapılmadı");
+  },
+];
+
+/* ── Fetch + Progress + IndexedDB ── */
+async function fetchAndSave(song, audioUrl, mime, setProgress, badgeEl){
+  // CORS proxy vasitəsilə fetch (bəzi API URL-ləri birbaşa fetch-ə icazə vermir)
+  const proxies = [
+    u => u,  // birbaşa
+    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  ];
+
+  let resp = null;
+  for(const proxy of proxies){
+    try{
+      const url = proxy(audioUrl);
+      const r = await fetch(url, {signal: AbortSignal.timeout(60000)});
+      if(r.ok){ resp = r; break; }
+    } catch(_){ continue; }
+  }
+
+  if(!resp) throw new Error("Audio URL-indən yükləmək mümkün olmadı");
+
+  const total = parseInt(resp.headers.get("Content-Length")||"0",10);
+  const reader = resp.body.getReader();
+  const chunks = [];
+  let received = 0;
+  let tick = 0;
+
+  while(true){
+    const {done, value} = await reader.read();
+    if(done) break;
+    chunks.push(value);
+    received += value.byteLength;
+    if(total > 0) setProgress(Math.min(95, Math.round(received/total*100)));
+    else { tick++; setProgress(Math.min(90, tick*3)); } // simulate
+  }
+
+  const blob = new Blob(chunks, {type: mime||"audio/webm"});
+  const buf  = await blob.arrayBuffer();
+  const data = new Uint8Array(buf);
+
+  // İki cədvələ yaz
+  await ldb.downloads.put({
+    videoId:song.videoId, title:song.title, artist:song.artist,
+    thumb:song.thumb||TH(song.videoId), mime:mime||"audio/webm",
+    blob:data, addedAt:Date.now(),
+  });
+  await ldb.offline.put({
+    videoId:song.videoId, title:song.title, artist:song.artist,
+    thumb:song.thumb||TH(song.videoId), mime:mime||"audio/webm", blob:data,
+  });
+
+  S.downloads.add(song.videoId);
+  S.offline.add(song.videoId);
+
+  // Kart düyməsini yenilə
+  const card = document.querySelector(`.card[data-vid="${song.videoId}"]`);
+  if(card){
+    const sb = card.querySelector(".cb-save");
+    if(sb){ sb.className="cb cb-save on"; sb.textContent=T("saved"); sb.disabled=false; }
+  }
+}
 
 /**
  * startDownload(song, badgeEl, barEl, onDone, onFail)
- * Fetch API ilə /api/download endpoint-indən audio blob alır,
- * IndexedDB-yə yazır. badgeEl/barEl nullable.
+ * Tamamilə client-side. Localhost + istənilən hosting-də işləyir.
  */
 async function startDownload(song, badgeEl, barEl, onDone, onFail){
   if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){
@@ -901,86 +1033,40 @@ async function startDownload(song, badgeEl, barEl, onDone, onFail){
     if(barEl) barEl.querySelector(".recbar-fill").style.width = pct + "%";
   };
 
-  try {
-    toast(`⬇ "${song.title}" endirilir...`);
+  toast(`⬇ "${song.title}" endirilir...`);
 
-    const resp = await fetch(`/api/download?v=${encodeURIComponent(song.videoId)}`);
-    if(!resp.ok){
-      let errMsg = "Endirmə xətası";
-      try{ const j=await resp.json(); errMsg=j.error||errMsg; } catch(_){}
-      throw new Error(errMsg);
+  let lastErr = null;
+  for(const api of DL_APIS){
+    try{
+      setProgress(5);
+      const {url, mime} = await api(song.videoId);
+      setProgress(15);
+      await fetchAndSave(song, url, mime, p=>setProgress(15+p*0.83), badgeEl);
+
+      setProgress(100);
+      setTimeout(()=>{
+        if(barEl) barEl.classList.remove("show");
+        if(badgeEl){badgeEl.className="svbadge offline"; badgeEl.textContent=T("rec_ok");}
+        toast(`✅ "${song.title}" endirildi — oflayn dinləyə bilərsən!`);
+        renderDownloads();
+        onDone&&onDone();
+      }, 400);
+      S._downloading = false;
+      return; // uğurlu — çıx
+    } catch(err){
+      console.warn("[download] API failed:", err.message);
+      lastErr = err;
+      // növbəti API-yə keç
     }
-
-    // Response headers-dən metadata al
-    const title  = decodeURIComponent(resp.headers.get("X-Song-Title")  || "") || song.title;
-    const artist = decodeURIComponent(resp.headers.get("X-Song-Artist") || "") || song.artist;
-    const thumb  = decodeURIComponent(resp.headers.get("X-Song-Thumb")  || "") || song.thumb || TH(song.videoId);
-    const mime   = resp.headers.get("Content-Type") || "audio/webm";
-
-    // Content-Length varsa progress hesabla
-    const total  = parseInt(resp.headers.get("Content-Length") || "0", 10);
-
-    // Stream-i oxu
-    const reader  = resp.body.getReader();
-    const chunks  = [];
-    let received  = 0;
-
-    while(true){
-      const { done, value } = await reader.read();
-      if(done) break;
-      chunks.push(value);
-      received += value.byteLength;
-      if(total > 0) setProgress(Math.min(97, Math.round(received / total * 100)));
-      else {
-        // Məlum deyil: animasiya kimi pulse et
-        const pulse = (Math.sin(Date.now()/400) * 15 + 50);
-        setProgress(pulse);
-      }
-    }
-
-    // Blob yığ
-    const blob = new Blob(chunks, { type: mime });
-    const buf  = await blob.arrayBuffer();
-    const data = new Uint8Array(buf);
-
-    // IndexedDB-yə yaz
-    await ldb.downloads.put({
-      videoId: song.videoId, title, artist, thumb,
-      mime, blob: data, addedAt: Date.now(),
-    });
-    await ldb.offline.put({
-      videoId: song.videoId, title, artist, thumb,
-      mime, blob: data,
-    });
-
-    S.downloads.add(song.videoId);
-    S.offline.add(song.videoId);
-
-    // Kart düyməsini yenilə
-    const card = document.querySelector(`.card[data-vid="${song.videoId}"]`);
-    if(card){
-      const sb = card.querySelector(".cb-save");
-      if(sb){ sb.className="cb cb-save on"; sb.textContent=T("saved"); sb.disabled=false; }
-    }
-
-    setProgress(100);
-    setTimeout(()=>{
-      if(barEl) barEl.classList.remove("show");
-      if(badgeEl){ badgeEl.className="svbadge offline"; badgeEl.textContent=T("rec_ok"); }
-      toast(`✅ "${title}" endirildi — oflayn dinləyə bilərsən!`);
-      renderDownloads();
-      onDone&&onDone();
-    }, 400);
-
-  } catch(err){
-    if(barEl) barEl.classList.remove("show");
-    if(badgeEl){ badgeEl.className="svbadge"; badgeEl.textContent="⬇"; }
-    toast("❌ " + (err.message||"Endirmə uğursuz oldu").substring(0,90));
-    console.error("Download error:", err);
-    onFail&&onFail();
-  } finally {
-    S._downloading = false;
   }
+
+  // Bütün API-lər uğursuz
+  if(barEl) barEl.classList.remove("show");
+  if(badgeEl){badgeEl.className="svbadge"; badgeEl.textContent="⬇";}
+  toast("❌ Endirmə uğursuz oldu. İnternet bağlantısını yoxlayın.");
+  console.error("All download APIs failed:", lastErr);
+  onFail&&onFail();
+  S._downloading = false;
 }
 
 /* ═══ CARD ═══ */
