@@ -1,7 +1,7 @@
-const CACHE_NAME   = 'mu-shell-v2';
-const THUMB_CACHE  = 'mu-thumbs-v2';
-const FONT_CACHE   = 'mu-fonts-v2';
-const CDN_CACHE    = 'mu-cdn-v2';
+const CACHE_NAME   = 'mu-shell-v4';
+const THUMB_CACHE  = 'mu-thumbs-v4';
+const FONT_CACHE   = 'mu-fonts-v4';
+const CDN_CACHE    = 'mu-cdn-v4';
 
 /* App Shell — bu fayllar həmişə cache-də olur */
 const SHELL_URLS = [
@@ -18,7 +18,15 @@ const THUMB_FALLBACK = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/sv
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(SHELL_URLS);
+      // addAll ilə bir URL uğursuz olsa hamısı bloklanır.
+      // Hər URL-i ayrıca cache-ə əlavə edirik ki, xəta izolyasiya olsun.
+      return Promise.allSettled(
+        SHELL_URLS.map(url =>
+          cache.add(url).catch(err => {
+            console.warn('[SW] Shell cache skip:', url, err.message);
+          })
+        )
+      );
     }).then(() => self.skipWaiting())
   );
 });

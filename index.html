@@ -776,7 +776,7 @@ document.querySelectorAll(".pill").forEach(b=>b.addEventListener("click",()=>{
 window.onYouTubeIframeAPIReady=()=>{
   S.ytp=new YT.Player("yt-player",{
     height:"1",width:"1",
-    playerVars:{autoplay:0,controls:0,disablekb:1,enablejsapi:1,fs:0,iv_load_policy:3,modestbranding:1,rel:0,playsinline:1},
+    playerVars:{autoplay:0,controls:0,disablekb:1,enablejsapi:1,fs:0,iv_load_policy:3,modestbranding:1,rel:0,playsinline:1,origin:location.origin},
     events:{onReady:e=>{S.ytOk=true;e.target.setVolume(S.vol);},onStateChange:onYTS,onError:onYTE}
   });
 };
@@ -885,38 +885,62 @@ document.getElementById("vfill").style.width=S.vol+"%";
 /* ── Audio URL əldə etmək üçün API-lər (sıra ilə cəhd edilir) ── */
 
 const DL_APIS = [
-  // 1. Cobalt.tools — ən etibarlı public downloader API
+  // 1. Cobalt.tools v7+ — yeni format
   async (videoId) => {
-    const r = await fetch("https://api.cobalt.tools/", {
-      method: "POST",
-      headers: {"Content-Type":"application/json","Accept":"application/json"},
-      body: JSON.stringify({
-        url: `https://www.youtube.com/watch?v=${videoId}`,
-        downloadMode: "audio",
-        audioFormat: "best",
-        audioBitrate: "128",
-      }),
-    });
-    if(!r.ok) throw new Error("cobalt http "+r.status);
-    const j = await r.json();
-    // cobalt returns {status:"tunnel"|"redirect"|"picker", url:...}
-    if(j.status==="error") throw new Error(j.error?.code||"cobalt error");
-    if(j.url) return {url: j.url, mime:"audio/mp4"};
-    if(j.status==="picker"&&j.picker?.length) return {url: j.picker[0].url, mime:"audio/mp4"};
-    throw new Error("cobalt: URL tapılmadı");
+    // v7+ API: GET https://cobalt.tools/ ilə deyil, POST /api/json formatında
+    const endpoints = [
+      "https://api.cobalt.tools/",
+      "https://cobalt.tools/api/json",
+    ];
+    for (const endpoint of endpoints) {
+      try {
+        const r = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+          },
+          body: JSON.stringify({
+            url: `https://www.youtube.com/watch?v=${videoId}`,
+            downloadMode: "audio",
+            audioFormat: "mp3",
+            audioBitrate: "128",
+            filenameStyle: "basic",
+          }),
+          signal: AbortSignal.timeout(12000),
+        });
+        if (!r.ok) {
+          const txt = await r.text().catch(() => "");
+          throw new Error(`cobalt http ${r.status}: ${txt.slice(0, 80)}`);
+        }
+        const j = await r.json();
+        if (j.status === "error") throw new Error(j.error?.code || "cobalt error");
+        if (j.url) return { url: j.url, mime: "audio/mp3" };
+        if (j.status === "picker" && j.picker?.length) return { url: j.picker[0].url, mime: "audio/mp3" };
+        if (j.status === "tunnel" && j.url) return { url: j.url, mime: "audio/mp3" };
+        throw new Error("cobalt: URL tapılmadı");
+      } catch (err) {
+        console.warn("[cobalt] endpoint xəta:", endpoint, err.message);
+      }
+    }
+    throw new Error("cobalt: bütün endpointlər uğursuz");
   },
 
-  // 2. Piped API (public instances)
+  // 2. Piped API (aktiv public instancelar — 2025)
   async (videoId) => {
     const instances = [
+      "https://pipedapi.kavin.rocks",
+      "https://pipedapi.tokhmi.xyz",
+      "https://piped-api.privacy.com.de",
+      "https://api.piped.yt",
       "https://pipedapi.adminforge.de",
-      "https://pipedapi.moomoo.me",
-      "https://piped-api.garudalinux.org",
-      "https://api.piped.projectsegfau.lt",
     ];
     for(const base of instances){
       try{
-        const r = await fetch(`${base}/streams/${videoId}`, {signal: AbortSignal.timeout(8000)});
+        const r = await fetch(`${base}/streams/${videoId}`, {
+          signal: AbortSignal.timeout(8000),
+          headers: { "Accept": "application/json" },
+        });
         if(!r.ok) continue;
         const d = await r.json();
         const streams = (d.audioStreams||[]).sort((a,b)=>(b.bitrate||0)-(a.bitrate||0));
@@ -927,17 +951,21 @@ const DL_APIS = [
     throw new Error("Piped: stream tapılmadı");
   },
 
-  // 3. Invidious API
+  // 3. Invidious API (aktiv instancelar — CORS açıq olanlar)
   async (videoId) => {
     const instances = [
-      "https://invidious.snopyta.org",
-      "https://inv.riverside.rocks",
-      "https://invidious.io",
-      "https://y.com.sb",
+      "https://invidious.nerdvpn.de",
+      "https://invidious.privacyredirect.com",
+      "https://inv.tux.pizza",
+      "https://invidious.fdn.fr",
+      "https://vid.puffyan.us",
     ];
     for(const base of instances){
       try{
-        const r = await fetch(`${base}/api/v1/videos/${videoId}?fields=adaptiveFormats`, {signal: AbortSignal.timeout(8000)});
+        const r = await fetch(`${base}/api/v1/videos/${videoId}?fields=adaptiveFormats`, {
+          signal: AbortSignal.timeout(8000),
+          headers: { "Accept": "application/json" },
+        });
         if(!r.ok) continue;
         const d = await r.json();
         const audio = (d.adaptiveFormats||[])
@@ -955,8 +983,9 @@ async function fetchAndSave(song, audioUrl, mime, setProgress, badgeEl){
   // CORS proxy vasitəsilə fetch (bəzi API URL-ləri birbaşa fetch-ə icazə vermir)
   const proxies = [
     u => u,  // birbaşa
-    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+    u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
     u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    u => `https://thingproxy.freeboard.io/fetch/${u}`,
   ];
 
   let resp = null;
