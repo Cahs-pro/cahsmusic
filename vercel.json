@@ -1,15 +1,9 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/dl", "destination": "/dl.js" },
-    { "source": "/((?!dl).*)", "destination": "/index.html" }
+    { "source": "/dl", "destination": "/api/dl" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
-  "functions": {
-    "dl.js": {
-      "maxDuration": 60,
-      "memory": 512
-    }
-  },
   "headers": [
     {
       "source": "/sw.js",
