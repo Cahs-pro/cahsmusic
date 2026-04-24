@@ -1,7 +1,7 @@
-const CACHE_NAME   = 'mu-shell-v4';
-const THUMB_CACHE  = 'mu-thumbs-v4';
-const FONT_CACHE   = 'mu-fonts-v4';
-const CDN_CACHE    = 'mu-cdn-v4';
+const CACHE_NAME   = 'mu-shell-v5';
+const THUMB_CACHE  = 'mu-thumbs-v5';
+const FONT_CACHE   = 'mu-fonts-v5';
+const CDN_CACHE    = 'mu-cdn-v5';
 
 /* App Shell — bu fayllar həmişə cache-də olur */
 const SHELL_URLS = [
@@ -75,6 +75,24 @@ self.addEventListener('fetch', event => {
   /* 5. Firebase — həmişə şəbəkə */
   if (url.hostname.includes('firebase') || url.hostname.includes('firebaseio.com') || url.hostname.includes('googleapis.com')) {
     return; // SW keçir, şəbəkə işləsin
+  }
+
+  /* 5b. Download/Audio API-ləri — heç vaxt cache-ləmə, birbaşa şəbəkəyə göndər
+         (Piped, Invidious, Cobalt, CORS proxies — CORS xətası olan sorğular
+          cache-ə düşə bilmər, cəhd etmək mənasızdır) */
+  if (
+    url.hostname.includes('pipedapi') ||
+    url.hostname.includes('piped-api') ||
+    url.hostname.includes('piped.yt') ||
+    url.hostname.includes('invidious') ||
+    url.hostname.includes('inv.tux') ||
+    url.hostname.includes('vid.puffyan') ||
+    url.hostname.includes('cobalt.tools') ||
+    url.hostname.includes('corsproxy.io') ||
+    url.hostname.includes('allorigins.win') ||
+    url.hostname.includes('thingproxy')
+  ) {
+    return; // SW keçir, birbaşa şəbəkə işləsin
   }
 
   /* 6. CDN (jsdelivr, gstatic) — cache-first */

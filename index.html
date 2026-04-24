@@ -26,7 +26,8 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-<script src="https://www.youtube.com/iframe_api"></script>
+<!-- YouTube IFrame API — async ki, əsas render bloklanmasın -->
+<script src="https://www.youtube.com/iframe_api" async></script>
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -926,7 +927,7 @@ const DL_APIS = [
     throw new Error("cobalt: bütün endpointlər uğursuz");
   },
 
-  // 2. Piped API (aktiv public instancelar — 2025)
+  // 2. Piped API — CORS proxy ilə (birbaşa çağırılanda bloklanır)
   async (videoId) => {
     const instances = [
       "https://pipedapi.kavin.rocks",
@@ -935,23 +936,32 @@ const DL_APIS = [
       "https://api.piped.yt",
       "https://pipedapi.adminforge.de",
     ];
+    // CORS proxy zənciri: əvvəl birbaşa, uğursuz olsa proxy ilə cəhd et
+    const corsWrap = [
+      u => u,
+      u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+      u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    ];
     for(const base of instances){
-      try{
-        const r = await fetch(`${base}/streams/${videoId}`, {
-          signal: AbortSignal.timeout(8000),
-          headers: { "Accept": "application/json" },
-        });
-        if(!r.ok) continue;
-        const d = await r.json();
-        const streams = (d.audioStreams||[]).sort((a,b)=>(b.bitrate||0)-(a.bitrate||0));
-        const best = streams.find(s=>s.mimeType?.includes("audio"))||streams[0];
-        if(best?.url) return {url: best.url, mime: best.mimeType||"audio/webm"};
-      } catch(_){ continue; }
+      const apiUrl = `${base}/streams/${videoId}`;
+      for(const wrap of corsWrap){
+        try{
+          const r = await fetch(wrap(apiUrl), {
+            signal: AbortSignal.timeout(8000),
+            headers: { "Accept": "application/json" },
+          });
+          if(!r.ok) continue;
+          const d = await r.json();
+          const streams = (d.audioStreams||[]).sort((a,b)=>(b.bitrate||0)-(a.bitrate||0));
+          const best = streams.find(s=>s.mimeType?.includes("audio"))||streams[0];
+          if(best?.url) return {url: best.url, mime: best.mimeType||"audio/webm"};
+        } catch(_){ continue; }
+      }
     }
     throw new Error("Piped: stream tapılmadı");
   },
 
-  // 3. Invidious API (aktiv instancelar — CORS açıq olanlar)
+  // 3. Invidious API — CORS proxy ilə (birbaşa çağırılanda bloklanır)
   async (videoId) => {
     const instances = [
       "https://invidious.nerdvpn.de",
@@ -960,19 +970,27 @@ const DL_APIS = [
       "https://invidious.fdn.fr",
       "https://vid.puffyan.us",
     ];
+    const corsWrap = [
+      u => u,
+      u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+      u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    ];
     for(const base of instances){
-      try{
-        const r = await fetch(`${base}/api/v1/videos/${videoId}?fields=adaptiveFormats`, {
-          signal: AbortSignal.timeout(8000),
-          headers: { "Accept": "application/json" },
-        });
-        if(!r.ok) continue;
-        const d = await r.json();
-        const audio = (d.adaptiveFormats||[])
-          .filter(f=>f.type?.startsWith("audio"))
-          .sort((a,b)=>(parseInt(b.bitrate)||0)-(parseInt(a.bitrate)||0));
-        if(audio[0]?.url) return {url: audio[0].url, mime: audio[0].type||"audio/webm"};
-      } catch(_){ continue; }
+      const apiUrl = `${base}/api/v1/videos/${videoId}?fields=adaptiveFormats`;
+      for(const wrap of corsWrap){
+        try{
+          const r = await fetch(wrap(apiUrl), {
+            signal: AbortSignal.timeout(8000),
+            headers: { "Accept": "application/json" },
+          });
+          if(!r.ok) continue;
+          const d = await r.json();
+          const audio = (d.adaptiveFormats||[])
+            .filter(f=>f.type?.startsWith("audio"))
+            .sort((a,b)=>(parseInt(b.bitrate)||0)-(parseInt(a.bitrate)||0));
+          if(audio[0]?.url) return {url: audio[0].url, mime: audio[0].type||"audio/webm"};
+        } catch(_){ continue; }
+      }
     }
     throw new Error("Invidious: stream tapılmadı");
   },
@@ -980,24 +998,32 @@ const DL_APIS = [
 
 /* ── Fetch + Progress + IndexedDB ── */
 async function fetchAndSave(song, audioUrl, mime, setProgress, badgeEl){
-  // CORS proxy vasitəsilə fetch (bəzi API URL-ləri birbaşa fetch-ə icazə vermir)
+  // CORS proxy zənciri — birbaşa uğursuz olsa ardıcıl proxy-lərlə cəhd edilir
   const proxies = [
-    u => u,  // birbaşa
-    u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
-    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    u => `https://thingproxy.freeboard.io/fetch/${u}`,
+    u => u,                                                                   // 1. birbaşa
+    u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,               // 2. corsproxy.io
+    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,      // 3. allorigins
+    u => `https://thingproxy.freeboard.io/fetch/${u}`,                       // 4. thingproxy
   ];
 
   let resp = null;
+  let usedProxy = "";
   for(const proxy of proxies){
     try{
-      const url = proxy(audioUrl);
-      const r = await fetch(url, {signal: AbortSignal.timeout(60000)});
-      if(r.ok){ resp = r; break; }
-    } catch(_){ continue; }
+      const proxyUrl = proxy(audioUrl);
+      const r = await fetch(proxyUrl, {
+        signal: AbortSignal.timeout(60000),
+        headers: { "Accept": "*/*" },
+      });
+      if(r.ok){ resp = r; usedProxy = proxyUrl.slice(0,40); break; }
+      console.warn("[fetchAndSave] proxy cavabsız:", proxyUrl.slice(0,60), r.status);
+    } catch(e){
+      console.warn("[fetchAndSave] proxy xəta:", e.message?.slice(0,60));
+      continue;
+    }
   }
 
-  if(!resp) throw new Error("Audio URL-indən yükləmək mümkün olmadı");
+  if(!resp) throw new Error("Audio URL-indən yükləmək mümkün olmadı (bütün proxy-lər uğursuz)");
 
   const total = parseInt(resp.headers.get("Content-Length")||"0",10);
   const reader = resp.body.getReader();
@@ -1042,7 +1068,7 @@ async function fetchAndSave(song, audioUrl, mime, setProgress, badgeEl){
 
 /**
  * startDownload(song, badgeEl, barEl, onDone, onFail)
- * Tamamilə client-side. Localhost + istənilən hosting-də işləyir.
+ * Tamamilə client-side. Cobalt → Piped (CORS proxy) → Invidious (CORS proxy) ardıcıllığı.
  */
 async function startDownload(song, badgeEl, barEl, onDone, onFail){
   if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){
@@ -1059,16 +1085,25 @@ async function startDownload(song, badgeEl, barEl, onDone, onFail){
   if(barEl) barEl.classList.add("show");
 
   const setProgress = pct => {
-    if(barEl) barEl.querySelector(".recbar-fill").style.width = pct + "%";
+    if(barEl){
+      const fill = barEl.querySelector(".recbar-fill");
+      if(fill) fill.style.width = pct + "%";
+    }
   };
 
   toast(`⬇ "${song.title}" endirilir...`);
 
+  const apiNames = ["Cobalt", "Piped", "Invidious"];
   let lastErr = null;
-  for(const api of DL_APIS){
+
+  for(let i = 0; i < DL_APIS.length; i++){
     try{
-      setProgress(5);
-      const {url, mime} = await api(song.videoId);
+      setProgress(5 + i * 3);
+      console.info(`[download] ${apiNames[i]} API cəhd edilir...`);
+      // İstifadəçiyə hansı API-nin işlədiyini göstər
+      if(i > 0) toast(`🔄 ${apiNames[i]} API yoxlanılır...`);
+
+      const {url, mime} = await DL_APIS[i](song.videoId);
       setProgress(15);
       await fetchAndSave(song, url, mime, p=>setProgress(15+p*0.83), badgeEl);
 
@@ -1083,7 +1118,7 @@ async function startDownload(song, badgeEl, barEl, onDone, onFail){
       S._downloading = false;
       return; // uğurlu — çıx
     } catch(err){
-      console.warn("[download] API failed:", err.message);
+      console.warn(`[download] ${apiNames[i]} API failed:`, err.message);
       lastErr = err;
       // növbəti API-yə keç
     }
@@ -1092,8 +1127,8 @@ async function startDownload(song, badgeEl, barEl, onDone, onFail){
   // Bütün API-lər uğursuz
   if(barEl) barEl.classList.remove("show");
   if(badgeEl){badgeEl.className="svbadge"; badgeEl.textContent="⬇";}
-  toast("❌ Endirmə uğursuz oldu. İnternet bağlantısını yoxlayın.");
-  console.error("All download APIs failed:", lastErr);
+  toast("❌ Bütün API-lər uğursuz. Adblock/VPN-i söndürüb yenidən cəhd edin.");
+  console.error("All download APIs failed:", lastErr?.message);
   onFail&&onFail();
   S._downloading = false;
 }
