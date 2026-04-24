@@ -27,11 +27,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <!-- YouTube IFrame API — async ki, əsas render bloklanmasın -->
-<script src="https://www.youtube.com/iframe_api" async></script>
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
 
 <style>
 /* ══ TOKENS ══ */
@@ -924,7 +924,6 @@ async function fetchAndSave(song, audioUrlOrBlob, mime, setProgress, badgeEl, is
       headers: { "Accept": "*/*" },
     });
     if(!resp || !resp.ok) throw new Error(`Audio URL xətası: ${resp?.status}`);
-    var resp = resp;
 
     const total = parseInt(resp.headers.get("Content-Length")||"0",10);
     const reader = resp.body.getReader();
