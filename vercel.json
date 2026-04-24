@@ -1,14 +1,28 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/dl", "destination": "/dl.js" },
+    { "source": "/((?!dl).*)", "destination": "/index.html" }
   ],
+  "functions": {
+    "dl.js": {
+      "maxDuration": 60,
+      "memory": 512
+    }
+  },
   "headers": [
     {
       "source": "/sw.js",
       "headers": [
         { "key": "Cache-Control", "value": "no-cache" },
         { "key": "Service-Worker-Allowed", "value": "/" }
+      ]
+    },
+    {
+      "source": "/dl",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" }
       ]
     },
     {

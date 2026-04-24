@@ -28,10 +28,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <!-- YouTube IFrame API — async ki, əsas render bloklanmasın -->
 <script src="https://www.youtube.com/iframe_api" async></script>
-<script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js" defer></script>
 
 <style>
 /* ══ TOKENS ══ */
@@ -869,196 +869,179 @@ document.getElementById("v-ico").onclick=()=>{if(!S.ytOk)return;S.ytp.isMuted()?
 document.getElementById("vfill").style.width=S.vol+"%";
 
 /* ═══════════════════════════════════════════════════════════
-   ⬇ DOWNLOAD — Tam Client-Side, Backend Yoxdur
+   ⬇ DOWNLOAD — Hibrid Arxitektura (2026)
    
-   Necə işləyir:
-   1. Cobalt.tools public API-si → audio URL alınır
-   2. Piped/Invidious API → fallback audio URL
-   3. fetch(audioUrl) → ReadableStream → Blob → IndexedDB
-   4. İstifadəçi yalnız progress bar görür
-   5. Oflayn: blob-dan birbaşa çalınır
+   Strategiya (sıra ilə):
+   1. /dl?v=ID  →  Öz Vercel Serverless Function-umuz
+      • instances.cobalt.best-dən dinamik cobalt instance yükləyir
+      • Server tərəfdən stream edir → CORS problemi YOX
+   2. Dinamik cobalt instancelar (CORS açıq, auth yox, YT dəstəkli)
+      instances.cobalt.best API-dən real-time yüklənir
    
-   ✅ Localhost-da işləyir
-   ✅ Vercel/GitHub Pages/hər yerdə işləyir  
-   ✅ Heç bir backend lazım deyil
+   ✅ CORS problemi həll edilib (server-side proxy ilə)
+   ✅ Sabit instancelar deyil, dinamik yüklənir — köhnəlmir
+   ✅ Cobalt v10/v11 API formatı (doğru parametrlər)
 ═══════════════════════════════════════════════════════════ */
 
-/* ── Audio URL əldə etmək üçün API-lər (sıra ilə cəhd edilir) ── */
+/* ── Runtime cobalt instance cache (brauzer tərəfi) ── */
+let _cobaltInstances = null;
+let _cobaltCacheTime = 0;
+
+async function getCobaltInstancesBrowser() {
+  const now = Date.now();
+  if (_cobaltInstances && now - _cobaltCacheTime < 5 * 60 * 1000) return _cobaltInstances;
+  try {
+    const r = await fetch("https://instances.cobalt.best/api", {
+      headers: { "User-Agent": "music-universe/3.2 (+https://cahsmusic.vercel.app)" },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!r.ok) throw new Error("instances list " + r.status);
+    const list = await r.json();
+    const good = list
+      .filter(i => i.online && i.info?.cors === true && i.info?.auth === false && i.services?.youtube === true)
+      .sort((a, b) => (b.score || 0) - (a.score || 0))
+      .slice(0, 6)
+      .map(i => `${i.protocol}://${i.api}`);
+    _cobaltInstances = good.length ? good : COBALT_FALLBACK;
+    _cobaltCacheTime = now;
+    console.log("[cobalt] instancelar:", _cobaltInstances);
+  } catch (e) {
+    console.warn("[cobalt] instance list xətası:", e.message);
+    _cobaltInstances = COBALT_FALLBACK;
+  }
+  return _cobaltInstances;
+}
+
+// Sabit fallback instancelar (CORS wildcard açıq, auth tələb etmir)
+const COBALT_FALLBACK = [
+  "https://cobalt.synzr.space",
+  "https://capi.oak.li",
+  "https://cobalt.api.timelessnesses.me",
+];
+
+/* ── Cobalt v10/v11 POST sorğusu (rəsmi API formatı) ── */
+async function cobaltPost(baseUrl, videoId) {
+  const r = await fetch(`${baseUrl}/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify({
+      url: `https://www.youtube.com/watch?v=${videoId}`,
+      downloadMode: "audio",
+      audioFormat: "mp3",
+      audioBitrate: "128",
+      filenameStyle: "basic",
+    }),
+    signal: AbortSignal.timeout(12000),
+  });
+  if (!r.ok) throw new Error(`cobalt ${r.status}`);
+  const j = await r.json();
+  if (j.status === "error") throw new Error(j.error?.code || "cobalt error");
+  if (j.url) return j.url;
+  if (j.status === "picker" && j.picker?.length) return j.picker[0].url;
+  throw new Error("cobalt: audio URL tapılmadı");
+}
 
 const DL_APIS = [
-  // 1. Cobalt.tools v7+ — yeni format
+  // 1. ÖZ VERCEL SERVERLESS FUNCTION-UMUZ (/api/dl)
+  //    Server tərəfdən cobalt instance-larına sorğu edir
+  //    CORS problemi tamamilə yoxdur — eyni domain
   async (videoId) => {
-    // v7+ API: GET https://cobalt.tools/ ilə deyil, POST /api/json formatında
-    const endpoints = [
-      "https://api.cobalt.tools/",
-      "https://cobalt.tools/api/json",
-    ];
-    for (const endpoint of endpoints) {
+    const r = await fetch(`/dl?v=${videoId}`, {
+      signal: AbortSignal.timeout(58000),
+    });
+    if (!r.ok) {
+      const j = await r.json().catch(() => ({}));
+      throw new Error(`/dl ${r.status}: ${j.message || j.error || ""}`);
+    }
+    // Server artıq audio blob-u stream edir
+    return { blob: await r.blob(), mime: r.headers.get("content-type") || "audio/mpeg", fromServer: true };
+  },
+
+  // 2. Brauzer tərəfindən dinamik cobalt instancelar
+  //    instances.cobalt.best-dən real-time yüklənir
+  async (videoId) => {
+    const instances = await getCobaltInstancesBrowser();
+    let lastErr = null;
+    for (const base of instances) {
       try {
-        const r = await fetch(endpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-          },
-          body: JSON.stringify({
-            url: `https://www.youtube.com/watch?v=${videoId}`,
-            downloadMode: "audio",
-            audioFormat: "mp3",
-            audioBitrate: "128",
-            filenameStyle: "basic",
-          }),
-          signal: AbortSignal.timeout(12000),
-        });
-        if (!r.ok) {
-          const txt = await r.text().catch(() => "");
-          throw new Error(`cobalt http ${r.status}: ${txt.slice(0, 80)}`);
-        }
-        const j = await r.json();
-        if (j.status === "error") throw new Error(j.error?.code || "cobalt error");
-        if (j.url) return { url: j.url, mime: "audio/mp3" };
-        if (j.status === "picker" && j.picker?.length) return { url: j.picker[0].url, mime: "audio/mp3" };
-        if (j.status === "tunnel" && j.url) return { url: j.url, mime: "audio/mp3" };
-        throw new Error("cobalt: URL tapılmadı");
-      } catch (err) {
-        console.warn("[cobalt] endpoint xəta:", endpoint, err.message);
+        const audioUrl = await cobaltPost(base, videoId);
+        return { url: audioUrl, mime: "audio/mpeg" };
+      } catch (e) {
+        console.warn(`[cobalt-browser] ${base}:`, e.message);
+        lastErr = e;
       }
     }
-    throw new Error("cobalt: bütün endpointlər uğursuz");
-  },
-
-  // 2. Piped API — CORS proxy ilə (birbaşa çağırılanda bloklanır)
-  async (videoId) => {
-    const instances = [
-      "https://pipedapi.kavin.rocks",
-      "https://pipedapi.tokhmi.xyz",
-      "https://piped-api.privacy.com.de",
-      "https://api.piped.yt",
-      "https://pipedapi.adminforge.de",
-    ];
-    // CORS proxy zənciri: əvvəl birbaşa, uğursuz olsa proxy ilə cəhd et
-    const corsWrap = [
-      u => u,
-      u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
-      u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    ];
-    for(const base of instances){
-      const apiUrl = `${base}/streams/${videoId}`;
-      for(const wrap of corsWrap){
-        try{
-          const r = await fetch(wrap(apiUrl), {
-            signal: AbortSignal.timeout(8000),
-            headers: { "Accept": "application/json" },
-          });
-          if(!r.ok) continue;
-          const d = await r.json();
-          const streams = (d.audioStreams||[]).sort((a,b)=>(b.bitrate||0)-(a.bitrate||0));
-          const best = streams.find(s=>s.mimeType?.includes("audio"))||streams[0];
-          if(best?.url) return {url: best.url, mime: best.mimeType||"audio/webm"};
-        } catch(_){ continue; }
-      }
-    }
-    throw new Error("Piped: stream tapılmadı");
-  },
-
-  // 3. Invidious API — CORS proxy ilə (birbaşa çağırılanda bloklanır)
-  async (videoId) => {
-    const instances = [
-      "https://invidious.nerdvpn.de",
-      "https://invidious.privacyredirect.com",
-      "https://inv.tux.pizza",
-      "https://invidious.fdn.fr",
-      "https://vid.puffyan.us",
-    ];
-    const corsWrap = [
-      u => u,
-      u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
-      u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    ];
-    for(const base of instances){
-      const apiUrl = `${base}/api/v1/videos/${videoId}?fields=adaptiveFormats`;
-      for(const wrap of corsWrap){
-        try{
-          const r = await fetch(wrap(apiUrl), {
-            signal: AbortSignal.timeout(8000),
-            headers: { "Accept": "application/json" },
-          });
-          if(!r.ok) continue;
-          const d = await r.json();
-          const audio = (d.adaptiveFormats||[])
-            .filter(f=>f.type?.startsWith("audio"))
-            .sort((a,b)=>(parseInt(b.bitrate)||0)-(parseInt(a.bitrate)||0));
-          if(audio[0]?.url) return {url: audio[0].url, mime: audio[0].type||"audio/webm"};
-        } catch(_){ continue; }
-      }
-    }
-    throw new Error("Invidious: stream tapılmadı");
+    throw lastErr || new Error("Cobalt instanceları uğursuz");
   },
 ];
 
 /* ── Fetch + Progress + IndexedDB ── */
-async function fetchAndSave(song, audioUrl, mime, setProgress, badgeEl){
-  // CORS proxy zənciri — birbaşa uğursuz olsa ardıcıl proxy-lərlə cəhd edilir
-  const proxies = [
-    u => u,                                                                   // 1. birbaşa
-    u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,               // 2. corsproxy.io
-    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,      // 3. allorigins
-    u => `https://thingproxy.freeboard.io/fetch/${u}`,                       // 4. thingproxy
-  ];
+/**
+ * fetchAndSave — iki rejimdə işləyir:
+ *   1. fromServer: true  → API blob artıq hazırdır, birbaşa yaz
+ *   2. url var          → URL-dən stream al, IndexedDB-yə yaz
+ */
+async function fetchAndSave(song, audioUrlOrBlob, mime, setProgress, badgeEl, isBlob){
+  let data;
 
-  let resp = null;
-  let usedProxy = "";
-  for(const proxy of proxies){
-    try{
-      const proxyUrl = proxy(audioUrl);
-      const r = await fetch(proxyUrl, {
-        signal: AbortSignal.timeout(60000),
-        headers: { "Accept": "*/*" },
-      });
-      if(r.ok){ resp = r; usedProxy = proxyUrl.slice(0,40); break; }
-      console.warn("[fetchAndSave] proxy cavabsız:", proxyUrl.slice(0,60), r.status);
-    } catch(e){
-      console.warn("[fetchAndSave] proxy xəta:", e.message?.slice(0,60));
-      continue;
+  if(isBlob && audioUrlOrBlob instanceof Blob){
+    // Serverless function blob qaytardı — birbaşa istifadə et
+    setProgress(80);
+    const buf = await audioUrlOrBlob.arrayBuffer();
+    data = new Uint8Array(buf);
+    setProgress(95);
+  } else {
+    // URL-dən stream al (cobalt browser-side)
+    const audioUrl = audioUrlOrBlob;
+    const proxies = [
+      u => u,
+      u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+      u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    ];
+
+    let resp = null;
+    for(const proxy of proxies){
+      try{
+        const r = await fetch(proxy(audioUrl), {
+          signal: AbortSignal.timeout(60000),
+          headers: { "Accept": "*/*" },
+        });
+        if(r.ok){ resp = r; break; }
+      } catch(_){ continue; }
     }
+    if(!resp) throw new Error("Audio URL-indən yükləmək mümkün olmadı");
+
+    const total = parseInt(resp.headers.get("Content-Length")||"0",10);
+    const reader = resp.body.getReader();
+    const chunks = [];
+    let received = 0, tick = 0;
+    while(true){
+      const {done, value} = await reader.read();
+      if(done) break;
+      chunks.push(value);
+      received += value.byteLength;
+      if(total > 0) setProgress(Math.min(95, Math.round(received/total*100)));
+      else { tick++; setProgress(Math.min(90, tick*3)); }
+    }
+    const blob = new Blob(chunks, {type: mime||"audio/webm"});
+    const buf = await blob.arrayBuffer();
+    data = new Uint8Array(buf);
   }
 
-  if(!resp) throw new Error("Audio URL-indən yükləmək mümkün olmadı (bütün proxy-lər uğursuz)");
-
-  const total = parseInt(resp.headers.get("Content-Length")||"0",10);
-  const reader = resp.body.getReader();
-  const chunks = [];
-  let received = 0;
-  let tick = 0;
-
-  while(true){
-    const {done, value} = await reader.read();
-    if(done) break;
-    chunks.push(value);
-    received += value.byteLength;
-    if(total > 0) setProgress(Math.min(95, Math.round(received/total*100)));
-    else { tick++; setProgress(Math.min(90, tick*3)); } // simulate
-  }
-
-  const blob = new Blob(chunks, {type: mime||"audio/webm"});
-  const buf  = await blob.arrayBuffer();
-  const data = new Uint8Array(buf);
-
-  // İki cədvələ yaz
+  // IndexedDB-yə yaz
   await ldb.downloads.put({
     videoId:song.videoId, title:song.title, artist:song.artist,
-    thumb:song.thumb||TH(song.videoId), mime:mime||"audio/webm",
+    thumb:song.thumb||TH(song.videoId), mime:mime||"audio/mpeg",
     blob:data, addedAt:Date.now(),
   });
   await ldb.offline.put({
     videoId:song.videoId, title:song.title, artist:song.artist,
-    thumb:song.thumb||TH(song.videoId), mime:mime||"audio/webm", blob:data,
+    thumb:song.thumb||TH(song.videoId), mime:mime||"audio/mpeg", blob:data,
   });
 
   S.downloads.add(song.videoId);
   S.offline.add(song.videoId);
 
-  // Kart düyməsini yenilə
   const card = document.querySelector(`.card[data-vid="${song.videoId}"]`);
   if(card){
     const sb = card.querySelector(".cb-save");
@@ -1067,8 +1050,7 @@ async function fetchAndSave(song, audioUrl, mime, setProgress, badgeEl){
 }
 
 /**
- * startDownload(song, badgeEl, barEl, onDone, onFail)
- * Tamamilə client-side. Cobalt → Piped (CORS proxy) → Invidious (CORS proxy) ardıcıllığı.
+ * startDownload — Server API → Cobalt Browser ardıcıllığı (2026)
  */
 async function startDownload(song, badgeEl, barEl, onDone, onFail){
   if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){
@@ -1093,19 +1075,27 @@ async function startDownload(song, badgeEl, barEl, onDone, onFail){
 
   toast(`⬇ "${song.title}" endirilir...`);
 
-  const apiNames = ["Cobalt", "Piped", "Invidious"];
+  const apiNames = ["Server API (/dl)", "Cobalt (browser)"];
   let lastErr = null;
 
   for(let i = 0; i < DL_APIS.length; i++){
     try{
-      setProgress(5 + i * 3);
-      console.info(`[download] ${apiNames[i]} API cəhd edilir...`);
-      // İstifadəçiyə hansı API-nin işlədiyini göstər
-      if(i > 0) toast(`🔄 ${apiNames[i]} API yoxlanılır...`);
+      setProgress(5 + i * 5);
+      console.info(`[download] ${apiNames[i]} cəhd edilir...`);
+      if(i > 0) toast(`🔄 ${apiNames[i]} yoxlanılır...`);
 
-      const {url, mime} = await DL_APIS[i](song.videoId);
-      setProgress(15);
-      await fetchAndSave(song, url, mime, p=>setProgress(15+p*0.83), badgeEl);
+      const result = await DL_APIS[i](song.videoId);
+      setProgress(20);
+
+      if(result.fromServer && result.blob){
+        // Serverless function audio blob-u stream etdi
+        await fetchAndSave(song, result.blob, result.mime, p=>setProgress(20+p*0.78), badgeEl, true);
+      } else if(result.url){
+        // Cobalt browser-side: URL-dən stream et
+        await fetchAndSave(song, result.url, result.mime, p=>setProgress(20+p*0.78), badgeEl, false);
+      } else {
+        throw new Error("Nə blob nə URL tapılmadı");
+      }
 
       setProgress(100);
       setTimeout(()=>{
@@ -1116,19 +1106,18 @@ async function startDownload(song, badgeEl, barEl, onDone, onFail){
         onDone&&onDone();
       }, 400);
       S._downloading = false;
-      return; // uğurlu — çıx
+      return;
     } catch(err){
-      console.warn(`[download] ${apiNames[i]} API failed:`, err.message);
+      console.warn(`[download] ${apiNames[i]} uğursuz:`, err.message);
       lastErr = err;
-      // növbəti API-yə keç
     }
   }
 
-  // Bütün API-lər uğursuz
+  // Bütün yollar uğursuz
   if(barEl) barEl.classList.remove("show");
   if(badgeEl){badgeEl.className="svbadge"; badgeEl.textContent="⬇";}
-  toast("❌ Bütün API-lər uğursuz. Adblock/VPN-i söndürüb yenidən cəhd edin.");
-  console.error("All download APIs failed:", lastErr?.message);
+  toast("❌ Endirmə uğursuz. Serverdə xəta — bir az sonra yenidən cəhd edin.");
+  console.error("[download] Bütün API-lər uğursuz:", lastErr?.message);
   onFail&&onFail();
   S._downloading = false;
 }

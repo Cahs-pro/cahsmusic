@@ -1,7 +1,7 @@
-const CACHE_NAME   = 'mu-shell-v5';
-const THUMB_CACHE  = 'mu-thumbs-v5';
-const FONT_CACHE   = 'mu-fonts-v5';
-const CDN_CACHE    = 'mu-cdn-v5';
+const CACHE_NAME   = 'mu-shell-v3';
+const THUMB_CACHE  = 'mu-thumbs-v3';
+const FONT_CACHE   = 'mu-fonts-v3';
+const CDN_CACHE    = 'mu-cdn-v3';
 
 /* App Shell — bu fayllar həmişə cache-də olur */
 const SHELL_URLS = [
@@ -77,9 +77,7 @@ self.addEventListener('fetch', event => {
     return; // SW keçir, şəbəkə işləsin
   }
 
-  /* 5b. Download/Audio API-ləri — heç vaxt cache-ləmə, birbaşa şəbəkəyə göndər
-         (Piped, Invidious, Cobalt, CORS proxies — CORS xətası olan sorğular
-          cache-ə düşə bilmər, cəhd etmək mənasızdır) */
+  /* 5b. Download/Audio API-ləri — heç vaxt cache-ləmə, birbaşa şəbəkəyə göndər */
   if (
     url.hostname.includes('pipedapi') ||
     url.hostname.includes('piped-api') ||
@@ -88,6 +86,10 @@ self.addEventListener('fetch', event => {
     url.hostname.includes('inv.tux') ||
     url.hostname.includes('vid.puffyan') ||
     url.hostname.includes('cobalt.tools') ||
+    url.hostname.includes('cobalt.best') ||      // instances.cobalt.best
+    url.hostname.includes('cobalt.synzr') ||
+    url.hostname.includes('oak.li') ||
+    url.hostname.includes('timelessnesses.me') ||
     url.hostname.includes('corsproxy.io') ||
     url.hostname.includes('allorigins.win') ||
     url.hostname.includes('thingproxy')
