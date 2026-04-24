@@ -1,7 +1,7 @@
-const CACHE_NAME   = 'mu-shell-v3';
-const THUMB_CACHE  = 'mu-thumbs-v3';
-const FONT_CACHE   = 'mu-fonts-v3';
-const CDN_CACHE    = 'mu-cdn-v3';
+const CACHE_NAME   = 'mu-shell-v6';
+const THUMB_CACHE  = 'mu-thumbs-v6';
+const FONT_CACHE   = 'mu-fonts-v6';
+const CDN_CACHE    = 'mu-cdn-v6';
 
 /* App Shell — bu fayllar həmişə cache-də olur */
 const SHELL_URLS = [
@@ -77,22 +77,10 @@ self.addEventListener('fetch', event => {
     return; // SW keçir, şəbəkə işləsin
   }
 
-  /* 5b. Download/Audio API-ləri — heç vaxt cache-ləmə, birbaşa şəbəkəyə göndər */
+  /* 5b. YouTube audio stream-ləri — cache-ləmə (dinamik, imzalı URL-lər) */
   if (
-    url.hostname.includes('pipedapi') ||
-    url.hostname.includes('piped-api') ||
-    url.hostname.includes('piped.yt') ||
-    url.hostname.includes('invidious') ||
-    url.hostname.includes('inv.tux') ||
-    url.hostname.includes('vid.puffyan') ||
-    url.hostname.includes('cobalt.tools') ||
-    url.hostname.includes('cobalt.best') ||      // instances.cobalt.best
-    url.hostname.includes('cobalt.synzr') ||
-    url.hostname.includes('oak.li') ||
-    url.hostname.includes('timelessnesses.me') ||
-    url.hostname.includes('corsproxy.io') ||
-    url.hostname.includes('allorigins.win') ||
-    url.hostname.includes('thingproxy')
+    url.hostname.includes('googlevideo.com') ||
+    url.hostname.includes('youtube.com') && url.pathname.includes('/videoplayback')
   ) {
     return; // SW keçir, birbaşa şəbəkə işləsin
   }

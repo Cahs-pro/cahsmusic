@@ -1,5 +1,9 @@
 {
   "name": "music-universe",
-  "version": "4.0.0",
-  "engines": { "node": ">=18" }
+  "version": "4.1.0",
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "youtubei.js": "^17.0.1"
+  }
 }

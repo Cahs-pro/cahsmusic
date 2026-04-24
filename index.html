@@ -28,10 +28,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <!-- YouTube IFrame API — async ki, əsas render bloklanmasın -->
 <script src="https://www.youtube.com/iframe_api" async></script>
-<script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js" defer></script>
 
 <style>
 /* ══ TOKENS ══ */
@@ -869,109 +869,35 @@ document.getElementById("v-ico").onclick=()=>{if(!S.ytOk)return;S.ytp.isMuted()?
 document.getElementById("vfill").style.width=S.vol+"%";
 
 /* ═══════════════════════════════════════════════════════════
-   ⬇ DOWNLOAD — Hibrid Arxitektura (2026)
-   
-   Strategiya (sıra ilə):
-   1. /dl?v=ID  →  Öz Vercel Serverless Function-umuz
-      • instances.cobalt.best-dən dinamik cobalt instance yükləyir
-      • Server tərəfdən stream edir → CORS problemi YOX
-   2. Dinamik cobalt instancelar (CORS açıq, auth yox, YT dəstəkli)
-      instances.cobalt.best API-dən real-time yüklənir
-   
-   ✅ CORS problemi həll edilib (server-side proxy ilə)
-   ✅ Sabit instancelar deyil, dinamik yüklənir — köhnəlmir
-   ✅ Cobalt v10/v11 API formatı (doğru parametrlər)
+   ⬇ DOWNLOAD — Vercel Serverless (youtubei.js / InnerTube)
+
+   Necə işləyir:
+   GET /api/dl?v=VIDEO_ID
+   → Vercel server youtubei.js ilə YouTube InnerTube API-dən
+     audio stream URL alır və birbaşa client-ə ötürür.
+
+   ✅ Cobalt yoxdur
+   ✅ Proxy yoxdur
+   ✅ Xarici servis yoxdur
+   ✅ CORS problemi yoxdur (eyni domain)
 ═══════════════════════════════════════════════════════════ */
 
-/* ── Runtime cobalt instance cache (brauzer tərəfi) ── */
-let _cobaltInstances = null;
-let _cobaltCacheTime = 0;
-
-async function getCobaltInstancesBrowser() {
-  const now = Date.now();
-  if (_cobaltInstances && now - _cobaltCacheTime < 5 * 60 * 1000) return _cobaltInstances;
-  try {
-    const r = await fetch("https://instances.cobalt.best/api", {
-      headers: { "User-Agent": "music-universe/3.2 (+https://cahsmusic.vercel.app)" },
-      signal: AbortSignal.timeout(6000),
-    });
-    if (!r.ok) throw new Error("instances list " + r.status);
-    const list = await r.json();
-    const good = list
-      .filter(i => i.online && i.info?.cors === true && i.info?.auth === false && i.services?.youtube === true)
-      .sort((a, b) => (b.score || 0) - (a.score || 0))
-      .slice(0, 6)
-      .map(i => `${i.protocol}://${i.api}`);
-    _cobaltInstances = good.length ? good : COBALT_FALLBACK;
-    _cobaltCacheTime = now;
-    console.log("[cobalt] instancelar:", _cobaltInstances);
-  } catch (e) {
-    console.warn("[cobalt] instance list xətası:", e.message);
-    _cobaltInstances = COBALT_FALLBACK;
-  }
-  return _cobaltInstances;
-}
-
-// Sabit fallback instancelar (CORS wildcard açıq, auth tələb etmir)
-const COBALT_FALLBACK = [
-  "https://cobalt.synzr.space",
-  "https://capi.oak.li",
-  "https://cobalt.api.timelessnesses.me",
-];
-
-/* ── Cobalt v10/v11 POST sorğusu (rəsmi API formatı) ── */
-async function cobaltPost(baseUrl, videoId) {
-  const r = await fetch(`${baseUrl}/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Accept": "application/json" },
-    body: JSON.stringify({
-      url: `https://www.youtube.com/watch?v=${videoId}`,
-      downloadMode: "audio",
-      audioFormat: "mp3",
-      audioBitrate: "128",
-      filenameStyle: "basic",
-    }),
-    signal: AbortSignal.timeout(12000),
-  });
-  if (!r.ok) throw new Error(`cobalt ${r.status}`);
-  const j = await r.json();
-  if (j.status === "error") throw new Error(j.error?.code || "cobalt error");
-  if (j.url) return j.url;
-  if (j.status === "picker" && j.picker?.length) return j.picker[0].url;
-  throw new Error("cobalt: audio URL tapılmadı");
-}
-
 const DL_APIS = [
-  // 1. ÖZ VERCEL SERVERLESS FUNCTION-UMUZ (/api/dl)
-  //    Server tərəfdən cobalt instance-larına sorğu edir
-  //    CORS problemi tamamilə yoxdur — eyni domain
+  // Tək API — öz Vercel serverless function-umuz
+  // Arxada: youtubei.js → YouTube InnerTube → audio stream
   async (videoId) => {
-    const r = await fetch(`/dl?v=${videoId}`, {
+    const r = await fetch(`/api/dl?v=${videoId}`, {
       signal: AbortSignal.timeout(58000),
     });
     if (!r.ok) {
       const j = await r.json().catch(() => ({}));
-      throw new Error(`/dl ${r.status}: ${j.message || j.error || ""}`);
+      throw new Error(`Server xətası ${r.status}: ${j.detail || j.error || ""}`);
     }
-    // Server artıq audio blob-u stream edir
-    return { blob: await r.blob(), mime: r.headers.get("content-type") || "audio/mpeg", fromServer: true };
-  },
-
-  // 2. Brauzer tərəfindən dinamik cobalt instancelar
-  //    instances.cobalt.best-dən real-time yüklənir
-  async (videoId) => {
-    const instances = await getCobaltInstancesBrowser();
-    let lastErr = null;
-    for (const base of instances) {
-      try {
-        const audioUrl = await cobaltPost(base, videoId);
-        return { url: audioUrl, mime: "audio/mpeg" };
-      } catch (e) {
-        console.warn(`[cobalt-browser] ${base}:`, e.message);
-        lastErr = e;
-      }
-    }
-    throw lastErr || new Error("Cobalt instanceları uğursuz");
+    return {
+      blob: await r.blob(),
+      mime: r.headers.get("content-type") || "audio/webm",
+      fromServer: true,
+    };
   },
 ];
 
@@ -991,25 +917,14 @@ async function fetchAndSave(song, audioUrlOrBlob, mime, setProgress, badgeEl, is
     data = new Uint8Array(buf);
     setProgress(95);
   } else {
-    // URL-dən stream al (cobalt browser-side)
+    // URL-dən birbaşa stream al
     const audioUrl = audioUrlOrBlob;
-    const proxies = [
-      u => u,
-      u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
-      u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    ];
-
-    let resp = null;
-    for(const proxy of proxies){
-      try{
-        const r = await fetch(proxy(audioUrl), {
-          signal: AbortSignal.timeout(60000),
-          headers: { "Accept": "*/*" },
-        });
-        if(r.ok){ resp = r; break; }
-      } catch(_){ continue; }
-    }
-    if(!resp) throw new Error("Audio URL-indən yükləmək mümkün olmadı");
+    const resp = await fetch(audioUrl, {
+      signal: AbortSignal.timeout(60000),
+      headers: { "Accept": "*/*" },
+    });
+    if(!resp || !resp.ok) throw new Error(`Audio URL xətası: ${resp?.status}`);
+    var resp = resp;
 
     const total = parseInt(resp.headers.get("Content-Length")||"0",10);
     const reader = resp.body.getReader();
@@ -1050,7 +965,7 @@ async function fetchAndSave(song, audioUrlOrBlob, mime, setProgress, badgeEl, is
 }
 
 /**
- * startDownload — Server API → Cobalt Browser ardıcıllığı (2026)
+ * startDownload — /api/dl (youtubei.js · InnerTube)
  */
 async function startDownload(song, badgeEl, barEl, onDone, onFail){
   if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){
@@ -1075,7 +990,7 @@ async function startDownload(song, badgeEl, barEl, onDone, onFail){
 
   toast(`⬇ "${song.title}" endirilir...`);
 
-  const apiNames = ["Server API (/dl)", "Cobalt (browser)"];
+  const apiNames = ["Vercel/InnerTube"];
   let lastErr = null;
 
   for(let i = 0; i < DL_APIS.length; i++){
