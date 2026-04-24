@@ -2,9 +2,28 @@
 <html lang="az" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <title>Music Universe</title>
-<link rel="icon" type="image/png" href="/icon.png">
+
+<!-- PWA Meta -->
+<meta name="theme-color" content="#080c12"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Music Universe"/>
+<meta name="application-name" content="Music Universe"/>
+<meta name="description" content="Music Universe - Musiqi Dünyası. Oflayn çalın, yükləyin, playlists yaradın."/>
+
+<!-- Icons -->
+<link rel="icon" type="image/png" href="/icon.png"/>
+<link rel="apple-touch-icon" href="/icon.png"/>
+<link rel="apple-touch-icon" sizes="152x152" href="/icon.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="/icon.png"/>
+<link rel="apple-touch-icon" sizes="167x167" href="/icon.png"/>
+
+<!-- Manifest -->
+<link rel="manifest" href="/manifest.json"/>
+
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://www.youtube.com/iframe_api"></script>
@@ -121,6 +140,7 @@ img{display:block}
 .eqbar span:nth-child(3){height:8px;animation:eq .8s ease-in-out .26s infinite alternate}
 .eqbar span:nth-child(4){height:13px;animation:eq .8s ease-in-out .07s infinite alternate}
 @keyframes eq{0%{transform:scaleY(.3)}100%{transform:scaleY(1)}}
+@keyframes slideUp{0%{transform:translateX(-50%) translateY(20px);opacity:0}100%{transform:translateX(-50%) translateY(0);opacity:1}}
 .cinfo{padding:11px 12px 5px}
 .ctit{font-family:var(--fh);font-weight:700;font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;letter-spacing:-.1px}
 .cart{font-size:.72rem;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
@@ -331,8 +351,8 @@ img{display:block}
       <span id="n-disc">Kəşfet</span>
     </button>
     <button class="pill" data-pg="saved">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-      <span id="n-save">Saxlanılmış</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span id="n-save">Endirilmiş</span>
     </button>
     <button class="pill" data-pg="playlists">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg>
@@ -393,11 +413,11 @@ img{display:block}
   </div>
 
   <div id="page-saved" class="page">
-    <div class="sh"><span class="dot"></span><span id="sv-h">Saxlanılmış Mahnılar</span></div>
+    <div class="sh"><span class="dot"></span><span id="sv-h">Endirilmiş Mahnılar</span></div>
     <div class="svlist" id="svlist">
       <div id="no-sv">
-        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        <p id="no-sv-p">Hələ saxlanılmış mahnı yoxdur.</p>
+        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M21 15V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <p id="no-sv-p">Hələ endirilmiş mahnı yoxdur.<br><strong style="color:var(--g)">⬇ Endir</strong> düyməsinə bas.</p>
       </div>
     </div>
   </div>
@@ -538,18 +558,18 @@ const fbD = FB ? firebase.database() : null;
 
 /* ═══ I18N ═══ */
 const TX = {
-  az:{disc:"Kəşfet",save:"Saxlanılmış",pls:"Playlistlər",soc:"Sosial",
+  az:{disc:"Kəşfet",save:"Endirilmiş",pls:"Playlistlər",soc:"Sosial",
     hh:"Musiqinin <em>Kainatı</em>nı<br>Kəşf Elə",hp:"YouTube-un bütün musiqisi — tamamilə pulsuz.",
-    c1:"100% Pulsuz",c2:"Oflayn saxlama",c3:"Playlist",c4:"Dostlarla chat",
-    pop:"Populyar Mahnılar",svh:"Saxlanılmış Mahnılar",
-    nosv:"Hələ saxlanılmış mahnı yoxdur.<br><strong style='color:var(--g)'>🔖 Saxla</strong>.",
+    c1:"100% Pulsuz",c2:"Oflayn dinlə",c3:"Playlist",c4:"Dostlarla chat",
+    pop:"Populyar Mahnılar",svh:"Endirilmiş Mahnılar",
+    nosv:"Hələ endirilmiş mahnı yoxdur.<br><strong style='color:var(--g)'>⬇ Endir</strong> düyməsinə bas.",
     plh:"Mənim Playlistlərim",newpl:"Yeni Playlist Yarat",
     wallh:"Dostlarla Söhbət",wallp:"Dost siyahına əlavə et, DM yaz, onların dinlədiklərinə bax.",
     gsign:"Google ilə daxil ol",fr:"Dostlar",rq:"İstəklər",add:"Əlavə et",
     frph:"E-mail ilə dost axtar...",sph:"Mahnı, ifaçı axtar...",
     signin:"Giriş",signout:"Çıxış",
-    play:"▶ Oynat",dosave:"🔖 Saxla",saved:"✓ Saxlandı",addpl:"+ Playlist",
-    rec:"⏺ Yaz",rec_ing:"⏺ Yazılır...",rec_ok:"✓ Saxlandı",
+    play:"▶ Oynat",dosave:"⬇ Endir",saved:"✓ Endirildi",addpl:"+ Playlist",
+    rec:"⬇ Endir",rec_ing:"⬇ Endirilir...",rec_ok:"✓ Endirildi",
     plph:"Playlist adı...",create:"Yarat",cancel:"Ləğv et",
     nopl:"Playlist yoxdur.",plem:"Playlist boşdur.",
     del:"Sil",playall:"▶ Hamısını çal",
@@ -558,20 +578,23 @@ const TX = {
     dmbtn:"💬 Mesaj göndər",nowpl:"İndi çalınır",online:"onlayn",
     selfr:"Dost seçin",selhint:"Sol tərəfdən dost seçin.",
     typemsg:"Mesaj yaz...",selsong:"Mahnı seçin",resfor:"Nəticələr",
-    rec_tip:"Mahnı çalarkən ⏺ düyməsinə basın — audio avtomatik saxlanılır.",
+    rec_tip:"Mahnını çal, sonra ⬇ Endir düyməsinə bas — audio cihazında saxlanılır.",
+    dl_hint:"Mahnı endirilir, bir az gözləyin...",
+    dl_done:"Endirildi — oflayn dinləyə bilərsən!",
+    dl_fail:"Endirmə mümkün olmadı. Mahnını çalın, sonra yenidən cəhd edin.",
   },
-  en:{disc:"Discover",save:"Saved",pls:"Playlists",soc:"Social",
+  en:{disc:"Discover",save:"Downloads",pls:"Playlists",soc:"Social",
     hh:"Discover the <em>Universe</em><br>of Music",hp:"All YouTube music — completely free.",
-    c1:"100% Free",c2:"Offline save",c3:"Playlist",c4:"Chat with friends",
-    pop:"Popular Songs",svh:"Saved Songs",
-    nosv:"No saved songs yet.<br><strong style='color:var(--g)'>🔖 Save</strong>.",
+    c1:"100% Free",c2:"Offline listen",c3:"Playlist",c4:"Chat with friends",
+    pop:"Popular Songs",svh:"Downloaded Songs",
+    nosv:"No downloads yet.<br><strong style='color:var(--g)'>⬇ Download</strong> any song.",
     plh:"My Playlists",newpl:"Create New Playlist",
     wallh:"Chat with Friends",wallp:"Add friends, send DMs, see what they're listening to.",
     gsign:"Continue with Google",fr:"Friends",rq:"Requests",add:"Add",
     frph:"Search by email...",sph:"Search songs, artists...",
     signin:"Sign In",signout:"Sign Out",
-    play:"▶ Play",dosave:"🔖 Save",saved:"✓ Saved",addpl:"+ Playlist",
-    rec:"⏺ Record",rec_ing:"⏺ Recording...",rec_ok:"✓ Saved",
+    play:"▶ Play",dosave:"⬇ Download",saved:"✓ Downloaded",addpl:"+ Playlist",
+    rec:"⬇ Download",rec_ing:"⬇ Downloading...",rec_ok:"✓ Downloaded",
     plph:"Playlist name...",create:"Create",cancel:"Cancel",
     nopl:"No playlists yet.",plem:"Playlist is empty.",
     del:"Delete",playall:"▶ Play All",
@@ -580,20 +603,23 @@ const TX = {
     dmbtn:"💬 Send message",nowpl:"Now playing",online:"online",
     selfr:"Select friend",selhint:"Select a friend from the left.",
     typemsg:"Type a message...",selsong:"Select a song",resfor:"Results",
-    rec_tip:"While a song plays, press ⏺ — audio is saved automatically.",
+    rec_tip:"Play the song, then press ⬇ Download — audio is saved to your device storage.",
+    dl_hint:"Downloading, please wait...",
+    dl_done:"Downloaded — available offline!",
+    dl_fail:"Download failed. Play the song first, then try again.",
   },
-  ru:{disc:"Открыть",save:"Сохранено",pls:"Плейлисты",soc:"Социальное",
+  ru:{disc:"Открыть",save:"Загрузки",pls:"Плейлисты",soc:"Социальное",
     hh:"Исследуй <em>Вселенную</em><br>Музыки",hp:"Вся музыка YouTube — совершенно бесплатно.",
-    c1:"100% Бесплатно",c2:"Офлайн",c3:"Плейлист",c4:"Чат с друзьями",
-    pop:"Популярные Песни",svh:"Сохранённые Песни",
-    nosv:"Нет сохранённых песен.<br><strong style='color:var(--g)'>🔖 Сохранить</strong>.",
+    c1:"100% Бесплатно",c2:"Слушай офлайн",c3:"Плейлист",c4:"Чат с друзьями",
+    pop:"Популярные Песни",svh:"Загруженные Песни",
+    nosv:"Нет загруженных песен.<br><strong style='color:var(--g)'>⬇ Скачать</strong>.",
     plh:"Мои Плейлисты",newpl:"Создать Плейлист",
     wallh:"Чат с Друзьями",wallp:"Добавляй друзей, пиши ЛС, смотри что слушают.",
     gsign:"Войти через Google",fr:"Друзья",rq:"Запросы",add:"Добавить",
     frph:"Поиск по e-mail...",sph:"Поиск песен, исполнителей...",
     signin:"Войти",signout:"Выйти",
-    play:"▶ Играть",dosave:"🔖 Сохранить",saved:"✓ Сохранено",addpl:"+ Плейлист",
-    rec:"⏺ Записать",rec_ing:"⏺ Запись...",rec_ok:"✓ Сохранено",
+    play:"▶ Играть",dosave:"⬇ Скачать",saved:"✓ Скачано",addpl:"+ Плейлист",
+    rec:"⬇ Скачать",rec_ing:"⬇ Скачивается...",rec_ok:"✓ Скачано",
     plph:"Название плейлиста...",create:"Создать",cancel:"Отмена",
     nopl:"Плейлистов нет.",plem:"Плейлист пуст.",
     del:"Удалить",playall:"▶ Играть все",
@@ -602,7 +628,10 @@ const TX = {
     dmbtn:"💬 Написать",nowpl:"Сейчас играет",online:"онлайн",
     selfr:"Выберите друга",selhint:"Выберите друга слева.",
     typemsg:"Написать...",selsong:"Выберите песню",resfor:"Результаты",
-    rec_tip:"Пока играет песня, нажмите ⏺ — аудио сохранится автоматически.",
+    rec_tip:"Воспроизведи песню, затем нажми ⬇ Скачать — аудио сохранится в браузере.",
+    dl_hint:"Загрузка, подождите...",
+    dl_done:"Загружено — доступно офлайн!",
+    dl_fail:"Не удалось загрузить. Сначала воспроизведи песню.",
   }
 };
 
@@ -617,6 +646,14 @@ ldb.version(1).stores({
   offline:  "++id, &videoId, title, artist, thumb, mime",
   playlists:"++id, name, createdAt",
   pl_songs: "++id, [playlistId+videoId], playlistId, videoId, title, artist, thumb",
+});
+// v11: downloads replaces both saved+offline (backwards compat: we keep old tables)
+ldb.version(2).stores({
+  saved:     "++id, &videoId, title, artist, thumb",
+  offline:   "++id, &videoId, title, artist, thumb, mime",
+  downloads: "++id, &videoId, title, artist, thumb, mime, addedAt",
+  playlists: "++id, name, createdAt",
+  pl_songs:  "++id, [playlistId+videoId], playlistId, videoId, title, artist, thumb",
 });
 
 /* ═══ CATALOG ═══ */
@@ -670,13 +707,13 @@ const S={
   ytOk:false,ytp:null,
   list:SONGS.map(s=>({videoId:s.v,title:s.t,artist:s.a,thumb:TH(s.v),kw:s.k})),
   idx:-1,playing:false,repeat:false,shuffle:false,vol:72,
-  saved:new Set(),offline:new Set(),
+  saved:new Set(),offline:new Set(),downloads:new Set(),
   user:null,timer:null,
   chatUid:null,chatTarget:null,
   friends:{},chatListeners:[],
   offAudio:null,
-  /* MediaRecorder state */
-  recorder:null,recChunks:[],recSong:null,recStartTime:0,recTimer:null,
+  /* download state */
+  _downloading: false,
 };
 
 /* ═══ UTILS ═══ */
@@ -731,7 +768,7 @@ document.querySelectorAll(".pill").forEach(b=>b.addEventListener("click",()=>{
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
   b.classList.add("on");
   document.getElementById(`page-${b.dataset.pg}`).classList.add("on");
-  if(b.dataset.pg==="saved")renderSaved();
+  if(b.dataset.pg==="saved")renderDownloads();
   if(b.dataset.pg==="playlists")renderPlaylists();
 }));
 
@@ -750,8 +787,7 @@ function onYTS(e){
   else if(e.data===P.BUFFERING){setPUI("loading");}
   else if(e.data===P.ENDED){
     S.playing=false;stopTimer();
-    // Avtomatik saxlama: mahnı bitdikdə recording-i dayandır
-    if(S.recorder&&S.recorder.state==="recording") S.recorder.stop();
+    // Avtomatik saxlama: mahnı bitdikdə endirməni dayandır (fetch özü bitər)
     S.repeat?(S.ytp.seekTo(0),S.ytp.playVideo()):nextSong();
   }
 }
@@ -763,8 +799,7 @@ async function playSong(song){
   stopOffAudio();
 
   // Əvvəlki recording varsa dayandır
-  if(S.recorder&&S.recorder.state==="recording") S.recorder.stop();
-
+  // Başqa mahnı çalındıqda aktiv endirməni ləğv etmirik (arxa planda davam edir)
   let idx=S.list.findIndex(s=>s.videoId===song.videoId);
   if(idx<0){S.list.push({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)});idx=S.list.length-1;}
   S.idx=idx;
@@ -833,219 +868,125 @@ document.getElementById("v-ico").onclick=()=>{if(!S.ytOk)return;S.ytp.isMuted()?
 document.getElementById("vfill").style.width=S.vol+"%";
 
 /* ═══════════════════════════════════════════════════════════
-   🎙 MEDIARECORDER — YT Audio-nu Birbaşa Tut
+   ⬇ DOWNLOAD — /api/download?v=ID vasitəsilə birbaşa endirmə
    
    Necə işləyir:
-   1. YT IFrame player audio çalır
-   2. Web Audio API → AudioContext yaradılır
-   3. IFrame içindəki audio-nu capture edə BİLMİRİK (cross-origin)
-   4. Amma: getDisplayMedia({audio:true, video:false}) + tab audio — işləyir!
-      Brauzerin "tab audio" capture xüsusiyyəti ilə YT audio-nu tuta bilərik.
-   
-   ALTERNATİV (daha sadə, hər zaman işləyir):
-   - getUserMedia ilə mikrofon deyil, tab audio seçilir (Chrome: "Share tab audio")
-   - Yoxsa: destinationNode stream — YT video-nun audio node-unu tut
-   
-   EN ETİBARLI HƏLL:
-   captureStream() → MediaRecorder
-   YT IFrame video elementinin .captureStream() metodundan istifadə edirik.
-   Bu CORS problemini keçir çünki stream eyni origin-dən gəlmir,
-   lakin video element özündən stream alınır.
+   1. Client /api/download?v=VIDEO_ID sorğusu göndərir
+   2. Vercel serverless function yt-dlp ilə audio stream qaytarır
+   3. fetch() → ReadableStream → Uint8Array → IndexedDB (Dexie)
+   4. İstifadəçi yalnız progress bar görür, fayl sisteminə heç nə düşmür
+   5. Növbəti dəfə həmin mahnı blob-dan offline çalınır
 ═══════════════════════════════════════════════════════════ */
 
 /**
- * YT iframe video elementindən audio stream alır və MediaRecorder ilə yazır.
- * Mahnı bitdikdə və ya istifadəçi dayandırdıqda blob IndexedDB-yə yazılır.
+ * startDownload(song, badgeEl, barEl, onDone, onFail)
+ * Fetch API ilə /api/download endpoint-indən audio blob alır,
+ * IndexedDB-yə yazır. badgeEl/barEl nullable.
  */
-async function startRecording(song, badgeEl, barEl){
-  // Artıq yazılıbsa
-  if(S.offline.has(song.videoId)){
-    toast(`📱 "${song.title}" artıq saxlanılıb`);
-    return;
+async function startDownload(song, badgeEl, barEl, onDone, onFail){
+  if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){
+    toast(`📱 "${song.title}" artıq endirilmişdir`);
+    onDone&&onDone(); return;
+  }
+  if(S._downloading){
+    toast("⏳ Başqa bir mahnı endirilir, gözləyin...");
+    onFail&&onFail(); return;
   }
 
-  // Artıq yazılır
-  if(S.recorder&&S.recorder.state==="recording"){
-    toast("⏹ Əvvəlki yazılma dayandırılır...");
-    S.recorder.stop();
-    return;
-  }
+  S._downloading = true;
+  if(badgeEl){badgeEl.className="svbadge rec"; badgeEl.textContent=T("rec_ing");}
+  if(barEl) barEl.classList.add("show");
 
-  // Mahnı çalınırmı?
-  if(!S.ytOk||!S.ytp||S.playing===false){
-    toast("⚠ Əvvəl mahnını çalın, sonra ⏺ basın");
-    return;
-  }
+  const setProgress = pct => {
+    if(barEl) barEl.querySelector(".recbar-fill").style.width = pct + "%";
+  };
 
   try {
-    // ── ÜSUL 1: iframe video elementinin captureStream() ──
-    // YT iframe-in içindəki <video> elementini tap
-    const iframe = document.querySelector("#yt-player iframe") || document.querySelector("#yt-wrap iframe");
-    let stream = null;
+    toast(`⬇ "${song.title}" endirilir...`);
 
-    if(iframe){
-      try {
-        // Iframe içindəki video-nun captureStream-i cəhd et
-        const iframeDoc = iframe.contentDocument||iframe.contentWindow?.document;
-        if(iframeDoc){
-          const vid=iframeDoc.querySelector("video");
-          if(vid&&vid.captureStream){
-            stream=vid.captureStream();
-            // Yalnız audio track-ları saxla
-            const audioTracks=stream.getAudioTracks();
-            if(audioTracks.length>0){
-              stream=new MediaStream(audioTracks);
-            }
-          }
-        }
-      } catch(_){
-        // cross-origin — bu üsul işləməyəcək, növbəti cəhd
+    const resp = await fetch(`/api/download?v=${encodeURIComponent(song.videoId)}`);
+    if(!resp.ok){
+      let errMsg = "Endirmə xətası";
+      try{ const j=await resp.json(); errMsg=j.error||errMsg; } catch(_){}
+      throw new Error(errMsg);
+    }
+
+    // Response headers-dən metadata al
+    const title  = decodeURIComponent(resp.headers.get("X-Song-Title")  || "") || song.title;
+    const artist = decodeURIComponent(resp.headers.get("X-Song-Artist") || "") || song.artist;
+    const thumb  = decodeURIComponent(resp.headers.get("X-Song-Thumb")  || "") || song.thumb || TH(song.videoId);
+    const mime   = resp.headers.get("Content-Type") || "audio/webm";
+
+    // Content-Length varsa progress hesabla
+    const total  = parseInt(resp.headers.get("Content-Length") || "0", 10);
+
+    // Stream-i oxu
+    const reader  = resp.body.getReader();
+    const chunks  = [];
+    let received  = 0;
+
+    while(true){
+      const { done, value } = await reader.read();
+      if(done) break;
+      chunks.push(value);
+      received += value.byteLength;
+      if(total > 0) setProgress(Math.min(97, Math.round(received / total * 100)));
+      else {
+        // Məlum deyil: animasiya kimi pulse et
+        const pulse = (Math.sin(Date.now()/400) * 15 + 50);
+        setProgress(pulse);
       }
     }
 
-    // ── ÜSUL 2: getDisplayMedia (tab audio capture) ──
-    if(!stream||!stream.getAudioTracks().length){
-      try {
-        // Chrome-da: istifadəçi "Share tab audio" seçməlidir
-        stream = await navigator.mediaDevices.getDisplayMedia({
-          video: false,
-          audio: {
-            echoCancellation: false,
-            noiseSuppression: false,
-            sampleRate: 44100,
-          },
-          preferCurrentTab: true,   // Chrome 109+: cari tab avtomatik seçilir
-        });
-        // Video track-ları sil, yalnız audio saxla
-        stream.getVideoTracks().forEach(t=>t.stop());
-        const audioOnly=new MediaStream(stream.getAudioTracks());
-        stream=audioOnly;
-      } catch(e){
-        if(e.name==="NotAllowedError"){
-          toast("⚠ İzin rədd edildi — başqa cəhd edilir...");
-          stream=null;
-        } else { throw e; }
-      }
+    // Blob yığ
+    const blob = new Blob(chunks, { type: mime });
+    const buf  = await blob.arrayBuffer();
+    const data = new Uint8Array(buf);
+
+    // IndexedDB-yə yaz
+    await ldb.downloads.put({
+      videoId: song.videoId, title, artist, thumb,
+      mime, blob: data, addedAt: Date.now(),
+    });
+    await ldb.offline.put({
+      videoId: song.videoId, title, artist, thumb,
+      mime, blob: data,
+    });
+
+    S.downloads.add(song.videoId);
+    S.offline.add(song.videoId);
+
+    // Kart düyməsini yenilə
+    const card = document.querySelector(`.card[data-vid="${song.videoId}"]`);
+    if(card){
+      const sb = card.querySelector(".cb-save");
+      if(sb){ sb.className="cb cb-save on"; sb.textContent=T("saved"); sb.disabled=false; }
     }
 
-    // ── ÜSUL 3: Web Audio API + Destination Node ──
-    // YT player-in AudioContext-ə qoşulması
-    if(!stream||!stream.getAudioTracks().length){
-      try {
-        const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-        const dest = audioCtx.createMediaStreamDestination();
-        // YT IFrame player-i MediaElement kimi audio-ya qoşa bilmirik
-        // Amma AudioContext.createMediaElementSource() cəhd edə bilərik
-        const ytIframe = document.querySelector("#yt-wrap iframe");
-        if(ytIframe){
-          const ytDoc=ytIframe.contentDocument||ytIframe.contentWindow?.document;
-          if(ytDoc){
-            const ytVid=ytDoc.querySelector("video");
-            if(ytVid){
-              const src=audioCtx.createMediaElementSource(ytVid);
-              src.connect(dest);
-              src.connect(audioCtx.destination); // audio eşidilsin
-              stream=dest.stream;
-            }
-          }
-        }
-        if(!stream||!stream.getAudioTracks().length) audioCtx.close();
-      } catch(_){ stream=null; }
-    }
-
-    if(!stream||!stream.getAudioTracks().length){
-      toast("❌ Brauzeriniz tab audio capture-ı dəstəkləmir.\n\nChrome-da: Saxla düyməsinə basın → 'Share tab audio' seçin.");
-      return;
-    }
-
-    // ── MediaRecorder qur ──
-    const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-      ? "audio/webm;codecs=opus"
-      : MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm"
-      : MediaRecorder.isTypeSupported("audio/ogg") ? "audio/ogg"
-      : "";
-
-    S.recorder = new MediaRecorder(stream, mimeType ? {mimeType} : {});
-    S.recChunks = [];
-    S.recSong   = song;
-    S.recStartTime = Date.now();
-
-    // UI: yazılır göstər
-    badgeEl.className="svbadge rec";
-    badgeEl.textContent=T("rec_ing");
-    barEl.classList.add("show");
-
-    // Mahnının uzunluğunu al
-    const dur = S.ytp.getDuration()||0;
-
-    // Progress timer
-    S.recTimer = setInterval(()=>{
-      const elapsed=(Date.now()-S.recStartTime)/1000;
-      const pct = dur>0 ? Math.min(99,Math.round(elapsed/dur*100)) : Math.min(99,Math.round(elapsed/3*100));
-      barEl.querySelector(".recbar-fill").style.width=pct+"%";
-    },1000);
-
-    S.recorder.ondataavailable=e=>{if(e.data&&e.data.size>0)S.recChunks.push(e.data);};
-
-    S.recorder.onstop=async()=>{
-      clearInterval(S.recTimer);
-      stream.getTracks().forEach(t=>t.stop());
-
-      if(!S.recChunks.length){
-        barEl.classList.remove("show");
-        badgeEl.className="svbadge"; badgeEl.textContent="🔖";
-        toast("⚠ Heç bir audio qeyd edilmədi");
-        S.recorder=null; return;
-      }
-
-      const blob=new Blob(S.recChunks,{type:mimeType||"audio/webm"});
-      const buf=await blob.arrayBuffer();
-
-      try{
-        await ldb.offline.put({
-          videoId:S.recSong.videoId,title:S.recSong.title,
-          artist:S.recSong.artist,thumb:S.recSong.thumb||TH(S.recSong.videoId),
-          mime:mimeType||"audio/webm",blob:new Uint8Array(buf),
-        });
-        S.offline.add(S.recSong.videoId);
-        barEl.querySelector(".recbar-fill").style.width="100%";
-        setTimeout(()=>{
-          barEl.classList.remove("show");
-          badgeEl.className="svbadge offline"; badgeEl.textContent=T("rec_ok");
-          toast(`✅ "${S.recSong.title}" saxlandı!`);
-          renderSaved();
-        },400);
-      } catch(err){
-        barEl.classList.remove("show");
-        badgeEl.className="svbadge"; badgeEl.textContent="⚠";
-        toast("❌ Saxlama xətası: "+err.message);
-      }
-      S.recorder=null; S.recChunks=[];
-    };
-
-    S.recorder.onerror=e=>{
-      clearInterval(S.recTimer); stream.getTracks().forEach(t=>t.stop());
-      barEl.classList.remove("show"); badgeEl.className="svbadge"; badgeEl.textContent="⚠";
-      toast("❌ Recorder xətası: "+e.error?.message);
-      S.recorder=null;
-    };
-
-    // Hər 1 saniyədə chunk al
-    S.recorder.start(1000);
-    toast(`⏺ "${song.title}" yazılır — mahnı bitdikdə avtomatik saxlanılır`);
+    setProgress(100);
+    setTimeout(()=>{
+      if(barEl) barEl.classList.remove("show");
+      if(badgeEl){ badgeEl.className="svbadge offline"; badgeEl.textContent=T("rec_ok"); }
+      toast(`✅ "${title}" endirildi — oflayn dinləyə bilərsən!`);
+      renderDownloads();
+      onDone&&onDone();
+    }, 400);
 
   } catch(err){
-    barEl.classList.remove("show");
-    badgeEl.className="svbadge"; badgeEl.textContent="⚠";
-    toast("❌ "+err.message.substring(0,80));
-    console.error("Record error:",err);
+    if(barEl) barEl.classList.remove("show");
+    if(badgeEl){ badgeEl.className="svbadge"; badgeEl.textContent="⬇"; }
+    toast("❌ " + (err.message||"Endirmə uğursuz oldu").substring(0,90));
+    console.error("Download error:", err);
+    onFail&&onFail();
+  } finally {
+    S._downloading = false;
   }
 }
 
 /* ═══ CARD ═══ */
 function mkCard(song){
   const d=document.createElement("div");d.className="card";d.dataset.vid=song.videoId;
-  const sv=S.saved.has(song.videoId);
+  const dl=S.downloads.has(song.videoId)||S.offline.has(song.videoId);
   d.innerHTML=`
 <div class="cimg">
   <img src="${song.thumb||PHO}" alt="${X(song.title)}" loading="lazy" onerror="this.onerror=null;this.src='${PHO}'"/>
@@ -1055,26 +996,32 @@ function mkCard(song){
 <div class="cinfo"><div class="ctit">${X(song.title)}</div><div class="cart">${X(song.artist)}</div></div>
 <div class="cbtns">
   <button class="cb cb-play"></button>
-  <button class="cb cb-save ${sv?"on":""}"></button>
+  <button class="cb cb-save ${dl?"on":""}"></button>
   <button class="cb cb-pl"></button>
 </div>`;
   d.querySelector(".cb-play").textContent=T("play");
-  d.querySelector(".cb-save").textContent=sv?T("saved"):T("dosave");
+  d.querySelector(".cb-save").textContent=dl?T("saved"):T("dosave");
   d.querySelector(".cb-pl").textContent=T("addpl");
   d.querySelector(".covl").onclick=()=>playSong(song);
   d.querySelector(".cb-play").onclick=e=>{e.stopPropagation();playSong(song);};
   const sb=d.querySelector(".cb-save");
   sb.onclick=async e=>{
     e.stopPropagation();
-    if(S.saved.has(song.videoId)){
-      await ldb.saved.where("videoId").equals(song.videoId).delete().catch(()=>{});
-      S.saved.delete(song.videoId);sb.className="cb cb-save";sb.textContent=T("dosave");toast(`🗑 "${song.title}"`);
-    } else {
-      try{
-        await ldb.saved.put({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)});
-        S.saved.add(song.videoId);sb.className="cb cb-save on";sb.textContent=T("saved");toast(`🔖 "${song.title}"`);
-      } catch(err){toast("❌ "+err.message);}
+    // Already downloaded
+    if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){
+      toast(`📱 "${song.title}" artıq endirilmişdir`);
+      return;
     }
+    // Start download (play first if needed, then record)
+    sb.disabled=true;sb.textContent="⏳";
+    if(!S.ytOk){toast("⏳ Player yüklənir...");sb.disabled=false;sb.textContent=T("dosave");return;}
+    if(S.idx<0||S.list[S.idx]?.videoId!==song.videoId){
+      playSong(song);
+      await new Promise(r=>setTimeout(r,2500));
+    }
+    await startDownload(song,null,null,()=>{
+      sb.className="cb cb-save on";sb.textContent=T("saved");sb.disabled=false;
+    },()=>{sb.disabled=false;sb.textContent=T("dosave");});
   };
   d.querySelector(".cb-pl").onclick=e=>{e.stopPropagation();openAddToPL(song);};
   return d;
@@ -1110,15 +1057,22 @@ function doSearch(q){
 }
 window.playVID=()=>{const v=document.getElementById("vid-inp")?.value.trim();if(!v){toast("⚠ ID daxil edin");return;}playSong({videoId:v,title:"Video "+v,artist:"YouTube",thumb:TH(v)});};
 
-/* ═══ SAVED ═══ */
-async function renderSaved(){
+/* ═══ DOWNLOADS (Endirilmiş Mahnılar) ═══ */
+async function renderDownloads(){
   const list=document.getElementById("svlist"),nodl=document.getElementById("no-sv");
-  const songs=await ldb.saved.toArray().catch(()=>[]);
+  // Downloads cədvəlindən al (yeni), yoxdursa offline-dan
+  let songs=[];
+  try{
+    songs=await ldb.downloads.orderBy("addedAt").reverse().toArray();
+    if(!songs.length) songs=await ldb.offline.toArray();
+  } catch(e){ songs=[]; }
+
   list.querySelectorAll(".svrow").forEach(x=>x.remove());
   if(!songs.length){nodl.style.display="block";return;}
   nodl.style.display="none";
+
   songs.forEach(song=>{
-    const isOff=S.offline.has(song.videoId);
+    const isDl=S.downloads.has(song.videoId)||S.offline.has(song.videoId);
     const row=document.createElement("div");row.className="svrow";
     row.innerHTML=`
 <div class="svthumb"><img src="${song.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div>
@@ -1126,16 +1080,10 @@ async function renderSaved(){
   <div class="svtit">${X(song.title)}</div><div class="svart">${X(song.artist)}</div>
   <div class="recbar" id="rb-${song.videoId}"><div class="recbar-fill"></div><div class="recbar-pulse"></div></div>
 </div>
-<span class="svbadge ${isOff?"offline":""}" id="bd-${song.videoId}">${isOff?T("rec_ok"):"🔖"}</span>
+<span class="svbadge offline" id="bd-${song.videoId}">✓ Endirildi</span>
 <div class="svacts">
   <button class="act play-a" title="${T("play")}">
     <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </button>
-  <button class="act ${isOff?"done":""} rec-a" title="${isOff?T("rec_ok"):T("rec")}">
-    ${isOff
-      ?`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
-      :`<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>`
-    }
   </button>
   <button class="act danger del-a" title="${T("del")}">
     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
@@ -1144,28 +1092,19 @@ async function renderSaved(){
 
     row.querySelector(".play-a").onclick=()=>playSong({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb});
 
-    const recBtn=row.querySelector(".rec-a");
-    recBtn.onclick=async()=>{
-      if(isOff||S.offline.has(song.videoId)){toast(`📱 "${song.title}" artıq saxlanılıb`);return;}
-      // Əvvəl mahnını çal, sonra yaz
-      if(S.idx<0||S.list[S.idx]?.videoId!==song.videoId){
-        playSong({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb});
-        // Bir az gözlə player hazır olsun
-        setTimeout(()=>startRecording(song,document.getElementById(`bd-${song.videoId}`),document.getElementById(`rb-${song.videoId}`)),2000);
-      } else {
-        startRecording(song,document.getElementById(`bd-${song.videoId}`),document.getElementById(`rb-${song.videoId}`));
-      }
-    };
-
     row.querySelector(".del-a").onclick=async()=>{
       if(!confirm(`"${song.title}" silinsin?`))return;
-      await ldb.saved.where("videoId").equals(song.videoId).delete().catch(()=>{});
+      await ldb.downloads.where("videoId").equals(song.videoId).delete().catch(()=>{});
       await ldb.offline.where("videoId").equals(song.videoId).delete().catch(()=>{});
-      S.saved.delete(song.videoId);S.offline.delete(song.videoId);toast("🗑");renderSaved();
+      S.downloads.delete(song.videoId);S.offline.delete(song.videoId);
+      toast(`🗑 "${song.title}" silindi`);renderDownloads();
     };
     list.appendChild(row);
   });
 }
+
+// Legacy alias
+function renderSaved(){ renderDownloads(); }
 
 /* ═══ PLAYLISTS ═══ */
 async function renderPlaylists(){
@@ -1383,9 +1322,95 @@ function clearCL(){S.chatListeners.forEach(fn=>{try{fn();}catch(e){}});S.chatLis
   try{
     (await ldb.saved.toArray()).forEach(s=>S.saved.add(s.videoId));
     (await ldb.offline.toArray()).forEach(s=>S.offline.add(s.videoId));
+    // Load downloads table (new unified table)
+    (await ldb.downloads.toArray()).forEach(s=>{S.downloads.add(s.videoId);S.offline.add(s.videoId);});
   } catch(e){console.warn("IndexedDB:",e);}
   applyLang();applyTheme();renderDefault();
   document.getElementById("vfill").style.width=S.vol+"%";
+})();
+
+/* ═══ SERVICE WORKER + PWA ═══ */
+(async()=>{
+  if(!('serviceWorker' in navigator)) return;
+
+  try {
+    const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    console.log('[SW] Qeydiyyat uğurlu:', reg.scope);
+
+    // Yeni SW gəldikdə xəbər ver
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          toast('🔄 Yeniləmə hazırdır — səhifəni yeniləyin');
+        }
+      });
+    });
+
+    // SW aktiv olandan sonra kritik resursları cache-ə əlavə et
+    navigator.serviceWorker.ready.then(sw => {
+      // Thumbnail-ları cache-ə göndər (arxa planda)
+      if (sw.active) {
+        const thumbUrls = SONGS.slice(0, 20).map(s => `https://img.youtube.com/vi/${s.v}/mqdefault.jpg`);
+        sw.active.postMessage({ type: 'CACHE_URLS', urls: thumbUrls });
+      }
+    });
+  } catch(e) {
+    console.warn('[SW] Xəta:', e);
+  }
+
+  // PWA Install prompt
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    showInstallBanner();
+  });
+
+  function showInstallBanner() {
+    if (document.getElementById('pwa-banner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'pwa-banner';
+    banner.style.cssText = `
+      position:fixed;bottom:calc(var(--pl) + 16px);left:50%;transform:translateX(-50%);
+      background:var(--c1);border:1.5px solid var(--g);border-radius:14px;
+      padding:11px 16px;display:flex;align-items:center;gap:10px;z-index:9999;
+      box-shadow:0 8px 32px rgba(30,215,96,.22);max-width:320px;width:calc(100% - 32px);
+      animation:slideUp .35s cubic-bezier(.34,1.4,.64,1);
+    `;
+    banner.innerHTML = `
+      <img src="/icon.png" style="width:36px;height:36px;border-radius:9px;object-fit:cover;flex-shrink:0"/>
+      <div style="flex:1;min-width:0">
+        <div style="font-family:var(--fh);font-weight:700;font-size:.83rem;margin-bottom:2px">Music Universe</div>
+        <div style="font-size:.71rem;color:var(--t2)">Ana ekrana əlavə et, oflayn işlə</div>
+      </div>
+      <button id="pwa-install" style="padding:7px 13px;border-radius:8px;background:var(--g);color:#000;font-size:.74rem;font-weight:700;border:none;cursor:pointer;white-space:nowrap;font-family:var(--fb)">Yüklə</button>
+      <button id="pwa-close" style="width:26px;height:26px;border-radius:50%;background:var(--c3);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:var(--t2)">✕</button>
+    `;
+    document.body.appendChild(banner);
+
+    document.getElementById('pwa-install').onclick = async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      banner.remove();
+      if (outcome === 'accepted') toast('✅ Music Universe quraşdırıldı!');
+    };
+    document.getElementById('pwa-close').onclick = () => banner.remove();
+
+    // 8 saniyə sonra öz-özünə bağlan
+    setTimeout(() => banner?.remove(), 8000);
+  }
+
+  // iOS üçün manual hint
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (isIOS && !isStandalone) {
+    setTimeout(() => {
+      toast('📲 Safari → Paylaş → Ana ekrana əlavə et');
+    }, 3500);
+  }
 })();
 </script>
 </body>
