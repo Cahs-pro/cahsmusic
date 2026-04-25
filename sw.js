@@ -1,7 +1,7 @@
-const CACHE_NAME   = 'mu-shell-v7';
-const THUMB_CACHE  = 'mu-thumbs-v7';
-const FONT_CACHE   = 'mu-fonts-v7';
-const CDN_CACHE    = 'mu-cdn-v7';
+const CACHE_NAME   = 'mu-shell-v8';
+const THUMB_CACHE  = 'mu-thumbs-v8';
+const FONT_CACHE   = 'mu-fonts-v8';
+const CDN_CACHE    = 'mu-cdn-v8';
 
 /* App Shell — bu fayllar həmişə cache-də olur */
 const SHELL_URLS = [
@@ -18,15 +18,7 @@ const THUMB_FALLBACK = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/sv
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      // addAll ilə bir URL uğursuz olsa hamısı bloklanır.
-      // Hər URL-i ayrıca cache-ə əlavə edirik ki, xəta izolyasiya olsun.
-      return Promise.allSettled(
-        SHELL_URLS.map(url =>
-          cache.add(url).catch(err => {
-            console.warn('[SW] Shell cache skip:', url, err.message);
-          })
-        )
-      );
+      return cache.addAll(SHELL_URLS);
     }).then(() => self.skipWaiting())
   );
 });
@@ -75,14 +67,6 @@ self.addEventListener('fetch', event => {
   /* 5. Firebase — həmişə şəbəkə */
   if (url.hostname.includes('firebase') || url.hostname.includes('firebaseio.com') || url.hostname.includes('googleapis.com')) {
     return; // SW keçir, şəbəkə işləsin
-  }
-
-  /* 5b. YouTube audio stream-ləri — cache-ləmə (dinamik, imzalı URL-lər) */
-  if (
-    url.hostname.includes('googlevideo.com') ||
-    url.hostname.includes('youtube.com') && url.pathname.includes('/videoplayback')
-  ) {
-    return; // SW keçir, birbaşa şəbəkə işləsin
   }
 
   /* 6. CDN (jsdelivr, gstatic) — cache-first */
