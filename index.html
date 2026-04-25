@@ -870,171 +870,114 @@ document.getElementById("v-ico").onclick=()=>{if(!S.ytOk)return;S.ytp.isMuted()?
 document.getElementById("vfill").style.width=S.vol+"%";
 
 /* ═══════════════════════════════════════════════════════════
-   ⬇ DOWNLOAD — Vercel Serverless (youtubei.js / InnerTube)
+   ⬇ DOWNLOAD — Vercel + RapidAPI (youtube-mp36)
 
-   Necə işləyir:
    GET /api/dl?v=VIDEO_ID
-   → Vercel server youtubei.js ilə YouTube InnerTube API-dən
-     audio stream URL alır və birbaşa client-ə ötürür.
+   Axın: Brauzer → Vercel (api/dl.js) → RapidAPI → MP3 → Brauzer
 
-   ✅ Cobalt yoxdur
-   ✅ Proxy yoxdur
-   ✅ Xarici servis yoxdur
-   ✅ CORS problemi yoxdur (eyni domain)
+   ✅ YouTube IP bloku yoxdur (RapidAPI öz serverindən gedir)
+   ✅ CORS yoxdur — eyni domain
+   ✅ API key gizlidir — yalnız Vercel env-də saxlanır
+   ✅ Heç bir npm package lazım deyil
 ═══════════════════════════════════════════════════════════ */
 
-const DL_APIS = [
-  // Tək API — öz Vercel serverless function-umuz
-  // Arxada: youtubei.js → YouTube InnerTube → audio stream
-  async (videoId) => {
-    const r = await fetch(`/api/dl?v=${videoId}`, {
-      signal: AbortSignal.timeout(58000),
-    });
-    if (!r.ok) {
-      const j = await r.json().catch(() => ({}));
-      throw new Error(`Server xətası ${r.status}: ${j.detail || j.error || ""}`);
-    }
-    return {
-      blob: await r.blob(),
-      mime: r.headers.get("content-type") || "audio/webm",
-      fromServer: true,
-    };
-  },
-];
-
-/* ── Fetch + Progress + IndexedDB ── */
-/**
- * fetchAndSave — iki rejimdə işləyir:
- *   1. fromServer: true  → API blob artıq hazırdır, birbaşa yaz
- *   2. url var          → URL-dən stream al, IndexedDB-yə yaz
- */
-async function fetchAndSave(song, audioUrlOrBlob, mime, setProgress, badgeEl, isBlob){
-  let data;
-
-  if(isBlob && audioUrlOrBlob instanceof Blob){
-    // Serverless function blob qaytardı — birbaşa istifadə et
-    setProgress(80);
-    const buf = await audioUrlOrBlob.arrayBuffer();
-    data = new Uint8Array(buf);
-    setProgress(95);
-  } else {
-    // URL-dən birbaşa stream al
-    const audioUrl = audioUrlOrBlob;
-    const resp = await fetch(audioUrl, {
-      signal: AbortSignal.timeout(60000),
-      headers: { "Accept": "*/*" },
-    });
-    if(!resp || !resp.ok) throw new Error(`Audio URL xətası: ${resp?.status}`);
-
-    const total = parseInt(resp.headers.get("Content-Length")||"0",10);
-    const reader = resp.body.getReader();
-    const chunks = [];
-    let received = 0, tick = 0;
-    while(true){
-      const {done, value} = await reader.read();
-      if(done) break;
-      chunks.push(value);
-      received += value.byteLength;
-      if(total > 0) setProgress(Math.min(95, Math.round(received/total*100)));
-      else { tick++; setProgress(Math.min(90, tick*3)); }
-    }
-    const blob = new Blob(chunks, {type: mime||"audio/webm"});
-    const buf = await blob.arrayBuffer();
-    data = new Uint8Array(buf);
+/* ── /api/dl-dən blob al → IndexedDB-yə yaz ── */
+async function downloadAndSave(song, setProgress){
+  // 1. Serverless function-a sorğu
+  const r = await fetch(`/api/dl?v=${song.videoId}`, {
+    signal: AbortSignal.timeout(58000),
+  });
+  if (!r.ok) {
+    const j = await r.json().catch(() => ({}));
+    throw new Error(`Server ${r.status}: ${j.detail || j.error || "xəta"}`);
   }
 
-  // IndexedDB-yə yaz
+  const mime = r.headers.get("content-type") || "audio/webm";
+
+  // 2. Stream oxu + progress göstər
+  const total = parseInt(r.headers.get("content-length") || "0", 10);
+  const reader = r.body.getReader();
+  const chunks = [];
+  let received = 0, tick = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    received += value.byteLength;
+    if (total > 0) setProgress(Math.min(95, Math.round(received / total * 100)));
+    else { tick++; setProgress(Math.min(90, tick * 2)); }
+  }
+
+  // 3. IndexedDB-yə yaz
+  const blob = new Blob(chunks, { type: mime });
+  const data = new Uint8Array(await blob.arrayBuffer());
+
   await ldb.downloads.put({
-    videoId:song.videoId, title:song.title, artist:song.artist,
-    thumb:song.thumb||TH(song.videoId), mime:mime||"audio/mpeg",
-    blob:data, addedAt:Date.now(),
+    videoId: song.videoId, title: song.title, artist: song.artist,
+    thumb: song.thumb || TH(song.videoId), mime,
+    blob: data, addedAt: Date.now(),
   });
   await ldb.offline.put({
-    videoId:song.videoId, title:song.title, artist:song.artist,
-    thumb:song.thumb||TH(song.videoId), mime:mime||"audio/mpeg", blob:data,
+    videoId: song.videoId, title: song.title, artist: song.artist,
+    thumb: song.thumb || TH(song.videoId), mime, blob: data,
   });
 
   S.downloads.add(song.videoId);
   S.offline.add(song.videoId);
 
+  // 4. Kart düyməsini yenilə
   const card = document.querySelector(`.card[data-vid="${song.videoId}"]`);
-  if(card){
+  if (card) {
     const sb = card.querySelector(".cb-save");
-    if(sb){ sb.className="cb cb-save on"; sb.textContent=T("saved"); sb.disabled=false; }
+    if (sb) { sb.className = "cb cb-save on"; sb.textContent = T("saved"); sb.disabled = false; }
   }
 }
 
 /**
- * startDownload — /api/dl (youtubei.js · InnerTube)
+ * startDownload — /api/dl → RapidAPI youtube-mp36 → MP3
  */
 async function startDownload(song, badgeEl, barEl, onDone, onFail){
-  if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){
+  if(S.downloads.has(song.videoId) || S.offline.has(song.videoId)){
     toast(`📱 "${song.title}" artıq endirilmişdir`);
-    onDone&&onDone(); return;
+    onDone && onDone(); return;
   }
   if(S._downloading){
     toast("⏳ Başqa bir mahnı endirilir, gözləyin...");
-    onFail&&onFail(); return;
+    onFail && onFail(); return;
   }
 
   S._downloading = true;
-  if(badgeEl){badgeEl.className="svbadge rec"; badgeEl.textContent=T("rec_ing");}
+  if(badgeEl){ badgeEl.className = "svbadge rec"; badgeEl.textContent = T("rec_ing"); }
   if(barEl) barEl.classList.add("show");
 
   const setProgress = pct => {
-    if(barEl){
-      const fill = barEl.querySelector(".recbar-fill");
-      if(fill) fill.style.width = pct + "%";
-    }
+    const fill = barEl?.querySelector(".recbar-fill");
+    if(fill) fill.style.width = pct + "%";
   };
 
+  setProgress(5);
   toast(`⬇ "${song.title}" endirilir...`);
+  console.info(`[download] /api/dl?v=${song.videoId}`);
 
-  const apiNames = ["Vercel/InnerTube"];
-  let lastErr = null;
-
-  for(let i = 0; i < DL_APIS.length; i++){
-    try{
-      setProgress(5 + i * 5);
-      console.info(`[download] ${apiNames[i]} cəhd edilir...`);
-      if(i > 0) toast(`🔄 ${apiNames[i]} yoxlanılır...`);
-
-      const result = await DL_APIS[i](song.videoId);
-      setProgress(20);
-
-      if(result.fromServer && result.blob){
-        // Serverless function audio blob-u stream etdi
-        await fetchAndSave(song, result.blob, result.mime, p=>setProgress(20+p*0.78), badgeEl, true);
-      } else if(result.url){
-        // Cobalt browser-side: URL-dən stream et
-        await fetchAndSave(song, result.url, result.mime, p=>setProgress(20+p*0.78), badgeEl, false);
-      } else {
-        throw new Error("Nə blob nə URL tapılmadı");
-      }
-
-      setProgress(100);
-      setTimeout(()=>{
-        if(barEl) barEl.classList.remove("show");
-        if(badgeEl){badgeEl.className="svbadge offline"; badgeEl.textContent=T("rec_ok");}
-        toast(`✅ "${song.title}" endirildi — oflayn dinləyə bilərsən!`);
-        renderDownloads();
-        onDone&&onDone();
-      }, 400);
-      S._downloading = false;
-      return;
-    } catch(err){
-      console.warn(`[download] ${apiNames[i]} uğursuz:`, err.message);
-      lastErr = err;
-    }
+  try {
+    await downloadAndSave(song, p => setProgress(5 + p * 0.93));
+    setProgress(100);
+    setTimeout(() => {
+      if(barEl) barEl.classList.remove("show");
+      if(badgeEl){ badgeEl.className = "svbadge offline"; badgeEl.textContent = T("rec_ok"); }
+      toast(`✅ "${song.title}" endirildi — oflayn dinləyə bilərsən!`);
+      renderDownloads();
+      onDone && onDone();
+    }, 400);
+  } catch(err) {
+    if(barEl) barEl.classList.remove("show");
+    if(badgeEl){ badgeEl.className = "svbadge"; badgeEl.textContent = "⬇"; }
+    toast("❌ Endirmə uğursuz — bir az sonra yenidən cəhd edin.");
+    console.error("[download] xəta:", err.message);
+    onFail && onFail();
+  } finally {
+    S._downloading = false;
   }
-
-  // Bütün yollar uğursuz
-  if(barEl) barEl.classList.remove("show");
-  if(badgeEl){badgeEl.className="svbadge"; badgeEl.textContent="⬇";}
-  toast("❌ Endirmə uğursuz. Serverdə xəta — bir az sonra yenidən cəhd edin.");
-  console.error("[download] Bütün API-lər uğursuz:", lastErr?.message);
-  onFail&&onFail();
-  S._downloading = false;
 }
 
 /* ═══ CARD ═══ */
