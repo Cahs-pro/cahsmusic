@@ -3,6 +3,7 @@
   "short_name": "MusicUni",
   "description": "Music Universe - Musiqi Dünyası",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#080c12",
   "theme_color": "#080c12",
