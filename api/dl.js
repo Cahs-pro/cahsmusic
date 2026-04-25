@@ -1,7 +1,8 @@
 /**
- * api/dl.js — Music Universe · Vercel Serverless Function
+ * api/dl.js — Music Universe · Vercel Serverless
  * GET /api/dl?v=VIDEO_ID
- * CommonJS format — Vercel Node.js runtime ilə tam uyğun
+ * → RapidAPI youtube-mp36-dən MP3 link alır, JSON cavab verir
+ * Client özü həmin linkdən endirir (stream yox, redirect)
  */
 
 module.exports = async function handler(req, res) {
@@ -23,64 +24,45 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    let link = null;
+    let link  = null;
     let title = videoId;
 
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (attempt > 0) await new Promise(r => setTimeout(r, 3000));
+    // Max 5 cəhd, hər biri 4 saniyə fasilə ilə
+    for (let i = 0; i < 5; i++) {
+      if (i > 0) await new Promise(r => setTimeout(r, 4000));
 
-      const apiRes = await fetch(
+      const r = await fetch(
         `https://youtube-mp36.p.rapidapi.com/dl?id=${videoId}`,
         {
           headers: {
             "X-RapidAPI-Key":  RAPIDAPI_KEY,
             "X-RapidAPI-Host": "youtube-mp36.p.rapidapi.com",
           },
-          signal: AbortSignal.timeout(25000),
+          signal: AbortSignal.timeout(20000),
         }
       );
 
-      if (!apiRes.ok) throw new Error(`RapidAPI HTTP ${apiRes.status}`);
-
-      const data = await apiRes.json();
-      console.log(`[dl] attempt ${attempt + 1}: status=${data.status}`);
+      const data = await r.json();
+      console.log(`[dl] cəhd ${i+1}: status=${data.status} link=${!!data.link}`);
 
       if (data.status === "ok" && data.link) {
         link  = data.link;
         title = data.title || videoId;
         break;
       }
-      if (data.status === "fail") throw new Error(data.msg || "RapidAPI fail");
-      // "processing" → növbəti cəhd
+      if (data.status === "fail") {
+        throw new Error(data.msg || "video əlçatmaz");
+      }
+      // "processing" → davam et
     }
 
-    if (!link) throw new Error("MP3 link alınmadı");
+    if (!link) throw new Error("MP3 hazırlanmadı, yenidən cəhd edin");
 
-    const mp3 = await fetch(link, { signal: AbortSignal.timeout(55000) });
-    if (!mp3.ok) throw new Error(`MP3 fetch ${mp3.status}`);
-
-    const safeTitle = title.replace(/[^\w\s\-]/g, "").trim().slice(0, 80) || videoId;
-
-    res.setHeader("Content-Type",        "audio/mpeg");
-    res.setHeader("Content-Disposition", `attachment; filename="${safeTitle}.mp3"`);
-    res.setHeader("Cache-Control",       "no-store");
-    const cl = mp3.headers.get("content-length");
-    if (cl) res.setHeader("Content-Length", cl);
-
-    const reader = mp3.body.getReader();
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      res.write(Buffer.from(value));
-    }
-    res.end();
+    // Linki JSON kimi qaytar — client özü endirir
+    res.status(200).json({ ok: true, link, title });
 
   } catch (err) {
     console.error("[dl] xəta:", err.message);
-    if (!res.headersSent) {
-      res.status(500).json({ error: "Server xətası", detail: err.message });
-    } else {
-      res.end();
-    }
+    res.status(500).json({ error: err.message });
   }
 };
