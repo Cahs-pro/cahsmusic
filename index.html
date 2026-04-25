@@ -15,13 +15,15 @@
 <meta name="description" content="Music Universe - Musiqi Dünyası. Oflayn çalın, yükləyin, playlists yaradın."/>
 
 <!-- Icons -->
-<link rel="icon" type="image/png" sizes="32x32" href="/icon.png"/>
-<link rel="icon" type="image/png" sizes="192x192" href="/icon.png"/>
-<link rel="icon" type="image/png" sizes="512x512" href="/icon.png"/>
+<link rel="icon" href="/icon.png" type="image/png"/>
+<link rel="icon" href="/icon.png" sizes="32x32" type="image/png"/>
+<link rel="icon" href="/icon.png" sizes="192x192" type="image/png"/>
+<link rel="icon" href="/icon.png" sizes="512x512" type="image/png"/>
 <link rel="apple-touch-icon" href="/icon.png"/>
-<link rel="apple-touch-icon" sizes="152x152" href="/icon.png"/>
-<link rel="apple-touch-icon" sizes="167x167" href="/icon.png"/>
-<link rel="apple-touch-icon" sizes="180x180" href="/icon.png"/>
+<link rel="apple-touch-icon" href="/icon.png" sizes="120x120"/>
+<link rel="apple-touch-icon" href="/icon.png" sizes="152x152"/>
+<link rel="apple-touch-icon" href="/icon.png" sizes="167x167"/>
+<link rel="apple-touch-icon" href="/icon.png" sizes="180x180"/>
 <meta name="msapplication-TileImage" content="/icon.png"/>
 <meta name="msapplication-TileColor" content="#080c12"/>
 
@@ -313,6 +315,9 @@ img{display:block}
 .ptrack:hover{height:6px}
 .pfill{height:100%;background:var(--g);border-radius:4px;width:0%;pointer-events:none;transition:width .1s linear}
 .pbuf{position:absolute;inset:0;background:rgba(30,215,96,.13);border-radius:4px;width:0%;pointer-events:none}
+.pacts{display:flex;align-items:center;gap:1px;flex-shrink:0;margin-right:6px}
+.pacts .pbtn{width:30px;height:30px;flex-shrink:0}
+@media(max-width:700px){.pacts{display:none}}
 .pvol{display:flex;align-items:center;gap:7px;flex:0 0 122px;justify-content:flex-end}
 .vico{color:var(--t3);flex-shrink:0;cursor:pointer;transition:color .15s}.vico:hover{color:var(--tx)}
 .vtrack{width:68px;height:4px;background:var(--c4);border-radius:4px;cursor:pointer}
@@ -515,6 +520,11 @@ img{display:block}
       <div class="ptrack" id="ptrack"><div class="pbuf" id="pbuf"></div><div class="pfill" id="pfill"></div></div>
       <span class="ptime r" id="p-dur">0:00</span>
     </div>
+  </div>
+  <div class="pacts">
+    <button class="pbtn" id="b-bar-pl" title="Playlist-ə əlavə et"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <button class="pbtn" id="b-bar-dl" title="Endir"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+    <button class="pbtn" id="b-bar-sh" title="Paylaş"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
   </div>
   <div class="pvol">
     <svg class="vico" id="v-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
@@ -805,31 +815,30 @@ async function playSong(song){
   let idx=S.list.findIndex(s=>s.videoId===song.videoId);
   if(idx<0){S.list.push({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)});idx=S.list.length-1;}
   S.idx=idx;
-
   document.querySelectorAll(".card.now").forEach(c=>c.classList.remove("now"));
   document.querySelector(`.card[data-vid="${song.videoId}"]`)?.classList.add("now");
   updPI(song.title,song.artist,song.thumb||TH(song.videoId));
   setPUI("loading");
 
-  // ① Əvvəlcə IndexedDB-dən yoxla (oflayn + onlayn hər iki halda)
-  const cached=await ldb.offline.where("videoId").equals(song.videoId).first().catch(()=>null)
-             ||await ldb.downloads.where("videoId").equals(song.videoId).first().catch(()=>null);
-  if(cached?.blob){
-    playFromBlob(cached,song);
-    if(FB&&S.user)fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});
+  // ① ƏN ƏVVƏL IndexedDB yoxla — internet olmasa da işləyir
+  const cached = await ldb.downloads.where("videoId").equals(song.videoId).first().catch(()=>null)
+              || await ldb.offline.where("videoId").equals(song.videoId).first().catch(()=>null);
+  if(cached && cached.blob){
+    playFromBlob(cached, song);
+    if(FB&&S.user) fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});
     return;
   }
 
-  // ② İnternet yoxdursa endirilməmiş mahnı çalına bilməz
+  // ② İnternet yoxdur + cache yoxdur
   if(!navigator.onLine){
-    toast("📵 İnternet yoxdur. Yalnız endirilmiş mahnılar çalınır.");
-    setPUI("pause");return;
+    toast("📵 İnternet yoxdur — əvvəlcə endir");
+    setPUI("pause"); return;
   }
 
-  // ③ YouTube player
-  if(!S.ytOk){toast("⏳ Player yüklənir...");setPUI("pause");return;}
+  // ③ YouTube player ilə çal
   toast(`▶ ${song.title}`);
-  if(FB&&S.user)fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});
+  if(FB&&S.user) fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});
+  if(!S.ytOk){toast("⏳ Player yüklənir...");setPUI("pause");return;}
   S.ytp.loadVideoById({videoId:song.videoId,suggestedQuality:"small"});
 }
 
@@ -881,6 +890,31 @@ document.getElementById("ptrack").onclick=e=>{const r=e.currentTarget.getBoundin
 document.getElementById("vtrack").onclick=e=>{const r=e.currentTarget.getBoundingClientRect(),v=Math.round(Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100)));S.vol=v;if(S.ytOk)S.ytp.setVolume(v);if(S.offAudio)S.offAudio.volume=v/100;document.getElementById("vfill").style.width=v+"%";};
 document.getElementById("v-ico").onclick=()=>{if(!S.ytOk)return;S.ytp.isMuted()?(S.ytp.unMute(),document.getElementById("vfill").style.width=S.vol+"%",toast("🔊")):(S.ytp.mute(),document.getElementById("vfill").style.width="0%",toast("🔇"));};
 document.getElementById("vfill").style.width=S.vol+"%";
+
+/* ── Player Bar: playlist + endir + paylaş ── */
+document.getElementById("b-bar-pl").onclick=()=>{
+  const song=S.list[S.idx];
+  if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
+  openAddToPL(song);
+};
+document.getElementById("b-bar-dl").onclick=async()=>{
+  const song=S.list[S.idx];
+  if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
+  if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){toast(`📱 Artıq endirilmişdir`);return;}
+  document.getElementById("b-bar-dl").style.color="var(--g)";
+  await startDownload(song,null,null,
+    ()=>{document.getElementById("b-bar-dl").style.color="";toast("✅ Endirildi!");},
+    ()=>{document.getElementById("b-bar-dl").style.color="";}
+  );
+};
+document.getElementById("b-bar-sh").onclick=async()=>{
+  const song=S.list[S.idx];
+  if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
+  const url=`https://www.youtube.com/watch?v=${song.videoId}`;
+  if(navigator.share){try{await navigator.share({title:song.title,text:`${song.title} — ${song.artist}`,url});return;}catch(_){}}
+  try{await navigator.clipboard.writeText(url);toast("🔗 Link kopyalandı!");}
+  catch(_){toast("Link: "+url);}
+};
 
 /* ═══════════════════════════════════════════════════════════
    ⬇ DOWNLOAD — Vercel Serverless · YouTube InnerTube API
@@ -1024,11 +1058,6 @@ function mkCard(song){
     }
     // Start download (play first if needed, then record)
     sb.disabled=true;sb.textContent="⏳";
-    if(!S.ytOk){toast("⏳ Player yüklənir...");sb.disabled=false;sb.textContent=T("dosave");return;}
-    if(S.idx<0||S.list[S.idx]?.videoId!==song.videoId){
-      playSong(song);
-      await new Promise(r=>setTimeout(r,2500));
-    }
     await startDownload(song,null,null,()=>{
       sb.className="cb cb-save on";sb.textContent=T("saved");sb.disabled=false;
     },()=>{sb.disabled=false;sb.textContent=T("dosave");});
@@ -1046,9 +1075,39 @@ function renderDefault(){
 
 /* ═══ SEARCH ═══ */
 let _st;
+// YouTube URL/ID-dən videoId çıxar
+function extractYTId(str){
+  str=str.trim();
+  // youtu.be/ID
+  let m=str.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+  if(m) return m[1];
+  // youtube.com/watch?v=ID
+  m=str.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+  if(m) return m[1];
+  // youtube.com/embed/ID
+  m=str.match(/\/embed\/([a-zA-Z0-9_-]{11})/);
+  if(m) return m[1];
+  // Təmiz 11 simvol ID
+  m=str.match(/^([a-zA-Z0-9_-]{11})$/);
+  if(m) return m[1];
+  return null;
+}
+
 document.getElementById("sinp").addEventListener("input",e=>{
-  clearTimeout(_st);const q=e.target.value.trim().toLowerCase();
+  clearTimeout(_st);
+  const raw=e.target.value.trim();
+  const q=raw.toLowerCase();
   if(!q){document.getElementById("ssec").style.display="none";return;}
+
+  // YouTube link/ID daxil edilibsə birbaşa çal
+  const ytId=extractYTId(raw);
+  if(ytId){
+    document.getElementById("ssec").style.display="none";
+    playSong({videoId:ytId,title:"YouTube: "+ytId,artist:"YouTube",thumb:TH(ytId)});
+    e.target.value="";
+    return;
+  }
+
   _st=setTimeout(()=>doSearch(q),320);
 });
 function doSearch(q){
@@ -1273,22 +1332,22 @@ document.getElementById("ptab-fr").onclick=()=>{document.getElementById("ptab-fr
 document.getElementById("ptab-rq").onclick=()=>{document.getElementById("ptab-rq").classList.add("on");document.getElementById("ptab-fr").classList.remove("on");document.getElementById("rq-sec").style.display="";document.getElementById("fr-sec").style.display="none";};
 
 /* ═══ DM ═══ */
-// DM üçün ayrı listener (friends/requests listener-ləri silinməsin)
+// DM üçün ayrı ref saxla — clearCL() yalnız DM-ni sıfırlasın
 let _dmRef=null;
-function closeDMListener(){if(_dmRef){_dmRef.off();_dmRef=null;}}
+function closeDMRef(){if(_dmRef){try{_dmRef.off();}catch(e){}}_dmRef=null;}
 
 function openDM(friend){
   if(!FB||!fbD||!S.user){toast("Giriş edin");return;}
   S.chatUid=friend.uid;S.chatTarget=friend;
   document.querySelectorAll(".frrow").forEach(r=>r.classList.remove("on"));
   Array.from(document.querySelectorAll(".frrow")).find(r=>r.querySelector(".frname")?.textContent===friend.name)?.classList.add("on");
-  document.getElementById("ch-title").textContent=friend.name||"?";
+  document.getElementById("ch-title").textContent=friend.name||friend.displayName||"?";
   document.getElementById("ch-sub").textContent=friend.email||"";
   document.getElementById("vpbtn").style.display="flex";
   document.getElementById("sndbtn").disabled=false;
 
-  // Yalnız DM listener-i sıfırla, friends listener qalsın
-  closeDMListener();
+  // Yalnız köhnə DM listener-i bağla, friends listener-lərinə toxunma
+  closeDMRef();
   document.getElementById("msgs").innerHTML="";
 
   const room=[S.user.uid,friend.uid].sort().join("_");
@@ -1313,14 +1372,15 @@ function appendMsg(m,c){
 document.getElementById("sndbtn").onclick=sendMsg;
 document.getElementById("msginput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMsg();}});
 async function sendMsg(){
-  if(!FB||!fbD){toast("❌ Firebase bağlantısı yoxdur");return;}
+  if(!FB||!fbD){toast("❌ Firebase yüklənməyib");return;}
   if(!S.user){toast("Giriş edin");return;}
-  if(!S.chatTarget){toast("Dost seçin");return;}
-  const inp=document.getElementById("msginput"),txt=inp.value.trim();
-  if(!txt)return;
+  if(!S.chatTarget){toast("Sol tərəfdən dost seçin");return;}
+  const inp=document.getElementById("msginput");
+  const txt=inp.value.trim();
+  if(!txt) return;
+  const btn=document.getElementById("sndbtn");
   inp.value="";
-  inp.style.height="auto";
-  document.getElementById("sndbtn").disabled=true;
+  btn.disabled=true;
   const room=[S.user.uid,S.chatTarget.uid].sort().join("_");
   try{
     await fbD.ref(`dms/${room}`).push({
@@ -1331,11 +1391,12 @@ async function sendMsg(){
       ts:firebase.database.ServerValue.TIMESTAMP
     });
   }catch(e){
-    console.error("[DM send]",e);
+    console.error("[DM]",e);
+    inp.value=txt;
     toast("❌ Göndərilmədi: "+e.message);
-    inp.value=txt; // Göndərilməyibsə geri qoy
   }finally{
-    document.getElementById("sndbtn").disabled=false;
+    btn.disabled=false;
+    inp.focus();
   }
 }
 
@@ -1361,22 +1422,33 @@ function clearCL(){S.chatListeners.forEach(fn=>{try{fn();}catch(e){}});S.chatLis
     // Load downloads table (new unified table)
     (await ldb.downloads.toArray()).forEach(s=>{S.downloads.add(s.videoId);S.offline.add(s.videoId);});
   } catch(e){console.warn("IndexedDB:",e);}
-  applyLang();applyTheme();
-
-  // Oflayn rejim: "Endirilmiş" tabını göstər
-  if(!navigator.onLine){
-    document.querySelectorAll('.pill').forEach(b=>b.classList.remove('on'));
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-    const savedPill=document.querySelector('.pill[data-pg="saved"]');
-    const savedPage=document.getElementById('page-saved');
-    if(savedPill) savedPill.classList.add('on');
-    if(savedPage) savedPage.classList.add('on');
-    renderDownloads();
-    toast('📵 Oflayn — endirilmiş mahnılar göstərilir');
-  } else {
-    renderDefault();
-  }
+  applyLang();applyTheme();renderDefault();
   document.getElementById("vfill").style.width=S.vol+"%";
+
+/* ── Player Bar: playlist + endir + paylaş ── */
+document.getElementById("b-bar-pl").onclick=()=>{
+  const song=S.list[S.idx];
+  if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
+  openAddToPL(song);
+};
+document.getElementById("b-bar-dl").onclick=async()=>{
+  const song=S.list[S.idx];
+  if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
+  if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){toast(`📱 Artıq endirilmişdir`);return;}
+  document.getElementById("b-bar-dl").style.color="var(--g)";
+  await startDownload(song,null,null,
+    ()=>{document.getElementById("b-bar-dl").style.color="";toast("✅ Endirildi!");},
+    ()=>{document.getElementById("b-bar-dl").style.color="";}
+  );
+};
+document.getElementById("b-bar-sh").onclick=async()=>{
+  const song=S.list[S.idx];
+  if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
+  const url=`https://www.youtube.com/watch?v=${song.videoId}`;
+  if(navigator.share){try{await navigator.share({title:song.title,text:`${song.title} — ${song.artist}`,url});return;}catch(_){}}
+  try{await navigator.clipboard.writeText(url);toast("🔗 Link kopyalandı!");}
+  catch(_){toast("Link: "+url);}
+};
 })();
 
 /* ═══ SERVICE WORKER + PWA ═══ */
