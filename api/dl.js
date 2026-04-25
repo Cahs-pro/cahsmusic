@@ -1,33 +1,16 @@
 /**
  * api/dl.js — Music Universe · Vercel Serverless Function
- *
  * GET /api/dl?v=VIDEO_ID
  *
- * youtubei.js (LuanRT/YouTube.js) — YouTube-un öz InnerTube API-si
- * Cobalt yoxdur. Proxy yoxdur. Xarici servis yoxdur.
- * Vercel serverinin özündən YouTube-a birbaşa sorğu.
- *
- * Node.js >= 18  |  youtubei.js ^17
+ * Axın: Vercel → RapidAPI youtube-mp36 → MP3 → client
+ * API key Vercel Environment Variable-da saxlanır (RAPIDAPI_KEY)
  */
-
-import { Innertube } from "youtubei.js";
-
-// Instance cache — soyuq startdan sonra yenidən istifadə
-let _yt = null;
-async function getYT() {
-  if (_yt) return _yt;
-  _yt = await Innertube.create({
-    retrieve_player: true,
-    generate_session_locally: true,
-  });
-  return _yt;
-}
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   if (req.method === "OPTIONS") { res.status(200).end(); return; }
-  if (req.method !== "GET") { res.status(405).json({ error: "GET only" }); return; }
+  if (req.method !== "GET")    { res.status(405).json({ error: "GET only" }); return; }
 
   const videoId = (req.query.v || "").trim();
   if (!videoId || !/^[a-zA-Z0-9_-]{6,15}$/.test(videoId)) {
@@ -35,52 +18,60 @@ export default async function handler(req, res) {
     return;
   }
 
+  const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
+  if (!RAPIDAPI_KEY) {
+    res.status(500).json({ error: "RAPIDAPI_KEY təyin edilməyib" });
+    return;
+  }
+
   try {
-    const yt = await getYT();
+    // RapidAPI youtube-mp36 — MP3 link al
+    let link = null;
+    let title = videoId;
 
-    // Video məlumatlarını ANDROID client kimi al (daha az məhdudiyyət)
-    const info = await yt.getBasicInfo(videoId, "ANDROID");
-    const formats = info.streaming_data?.adaptive_formats || [];
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) await new Promise(r => setTimeout(r, 3000));
 
-    // Ən yüksək bitrate-li audio formatı seç
-    const audioFormats = formats
-      .filter(f => f.has_audio && !f.has_video)
-      .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+      const apiRes = await fetch(
+        `https://youtube-mp36.p.rapidapi.com/dl?id=${videoId}`,
+        {
+          headers: {
+            "X-RapidAPI-Key":  RAPIDAPI_KEY,
+            "X-RapidAPI-Host": "youtube-mp36.p.rapidapi.com",
+          },
+          signal: AbortSignal.timeout(25000),
+        }
+      );
 
-    if (!audioFormats.length) {
-      res.status(404).json({ error: "Audio stream tapılmadı" });
-      return;
+      if (!apiRes.ok) throw new Error(`RapidAPI HTTP ${apiRes.status}`);
+
+      const data = await apiRes.json();
+      console.log(`[dl] attempt ${attempt + 1}:`, data.status);
+
+      if (data.status === "ok" && data.link) {
+        link  = data.link;
+        title = data.title || videoId;
+        break;
+      }
+      if (data.status === "fail") throw new Error(data.msg || "RapidAPI fail");
+      // status === "processing" → növbəti cəhdə keç
     }
 
-    const best = audioFormats[0];
-    const audioUrl = best.decipher(yt.session.player);
-    const title = info.basic_info?.title || `audio_${videoId}`;
-    const safeTitle = title.replace(/[^\w\s-]/g, "").trim().slice(0, 80) || videoId;
-    const mime = best.mime_type || "audio/webm";
-    const ext = mime.includes("mp4") ? "m4a" : "webm";
+    if (!link) throw new Error("MP3 link alınmadı (timeout)");
 
-    // YouTube audio stream-i client-ə ötür
-    const upstream = await fetch(audioUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36",
-        "Referer": "https://www.youtube.com/",
-        "Origin": "https://www.youtube.com",
-      },
-      signal: AbortSignal.timeout(55000),
-    });
+    // MP3 URL-dən stream al → client-ə ötür
+    const mp3 = await fetch(link, { signal: AbortSignal.timeout(55000) });
+    if (!mp3.ok) throw new Error(`MP3 fetch ${mp3.status}`);
 
-    if (!upstream.ok) {
-      res.status(502).json({ error: `YouTube stream xətası: ${upstream.status}` });
-      return;
-    }
+    const safeTitle = title.replace(/[^\w\s\-]/g, "").trim().slice(0, 80) || videoId;
 
-    res.setHeader("Content-Type", mime);
-    res.setHeader("Content-Disposition", `attachment; filename="${safeTitle}.${ext}"`);
-    res.setHeader("Cache-Control", "no-store");
-    const cl = upstream.headers.get("content-length");
+    res.setHeader("Content-Type",        "audio/mpeg");
+    res.setHeader("Content-Disposition", `attachment; filename="${safeTitle}.mp3"`);
+    res.setHeader("Cache-Control",       "no-store");
+    const cl = mp3.headers.get("content-length");
     if (cl) res.setHeader("Content-Length", cl);
 
-    const reader = upstream.body.getReader();
+    const reader = mp3.body.getReader();
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -90,7 +81,10 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error("[dl] xəta:", err.message);
-    _yt = null; // sıfırla
-    res.status(500).json({ error: "Server xətası", detail: err.message });
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Server xətası", detail: err.message });
+    } else {
+      res.end();
+    }
   }
 }
