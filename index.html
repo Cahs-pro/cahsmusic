@@ -843,21 +843,32 @@ async function playSong(song){
 }
 
 function playFromBlob(rec,song){
-  const url=URL.createObjectURL(new Blob([rec.blob],{type:rec.mime||"audio/webm"}));
+  const blobMime=rec.mime||"audio/mpeg";
+  const url=URL.createObjectURL(new Blob([rec.blob],{type:blobMime}));
   S.offAudio=new Audio(url);
+  S.offAudio._blobUrl=url;
   S.offAudio.volume=S.vol/100;
   S.offAudio.onplay=()=>{S.playing=true;setPUI("play");};
   S.offAudio.onpause=()=>{S.playing=false;setPUI("pause");};
   S.offAudio.onended=()=>{S.playing=false;stopTimer();S.repeat?(S.offAudio.currentTime=0,S.offAudio.play()):nextSong();};
   S.offAudio.ontimeupdate=()=>{
-    const d=S.offAudio.duration,c=S.offAudio.currentTime;if(!d)return;
+    if(!S.offAudio)return;
+    const d=S.offAudio.duration,c=S.offAudio.currentTime;if(!d||isNaN(d))return;
     document.getElementById("pfill").style.width=(c/d*100)+"%";
     document.getElementById("p-cur").textContent=fmt(c);document.getElementById("p-dur").textContent=fmt(d);
   };
   S.offAudio.play().catch(()=>toast("❌ Oflayn çalma xətası"));
   toast(`📱 ${song.title}`);
 }
-function stopOffAudio(){if(S.offAudio){S.offAudio.pause();S.offAudio.src="";S.offAudio=null;}}
+function stopOffAudio(){
+  if(S.offAudio){
+    const a=S.offAudio;
+    S.offAudio=null;
+    a.ontimeupdate=null;a.onplay=null;a.onpause=null;a.onended=null;a.onerror=null;
+    a.pause();try{a.src='';}catch(_){}
+    try{if(a._blobUrl)URL.revokeObjectURL(a._blobUrl);}catch(_){}
+  }
+}
 
 function updPI(title,artist,src){
   document.getElementById("p-title").textContent=title||"—";
@@ -930,20 +941,32 @@ document.getElementById("b-bar-sh").onclick=async()=>{
 
 /* ── /api/dl-dən blob al → IndexedDB-yə yaz ── */
 async function downloadAndSave(song, setProgress){
-  // 1. Serverless function-a sorğu
-  const r = await fetch(`/api/dl?v=${song.videoId}`, {
+  // 1. Serverless function-dan MP3 linkini al (JSON cavab)
+  const apiRes = await fetch(`/api/dl?v=${song.videoId}`, {
     signal: AbortSignal.timeout(58000),
   });
-  if (!r.ok) {
-    const j = await r.json().catch(() => ({}));
-    throw new Error(`Server ${r.status}: ${j.detail || j.error || "xəta"}`);
+  if (!apiRes.ok) {
+    const j = await apiRes.json().catch(() => ({}));
+    throw new Error(`Server ${apiRes.status}: ${j.detail || j.error || "xəta"}`);
+  }
+  const apiJson = await apiRes.json();
+  if (!apiJson.ok || !apiJson.link) {
+    throw new Error(apiJson.error || "MP3 linki alınmadı");
   }
 
-  const mime = r.headers.get("content-type") || "audio/webm";
+  setProgress(10);
 
-  // 2. Stream oxu + progress göstər
-  const total = parseInt(r.headers.get("content-length") || "0", 10);
-  const reader = r.body.getReader();
+  // 2. Həmin linkdən audio stream-i fetch et
+  const audioRes = await fetch(apiJson.link, {
+    signal: AbortSignal.timeout(120000),
+  });
+  if (!audioRes.ok) throw new Error(`Audio fetch ${audioRes.status}`);
+
+  const mime = audioRes.headers.get("content-type") || "audio/mpeg";
+
+  // 3. Stream oxu + progress göstər
+  const total = parseInt(audioRes.headers.get("content-length") || "0", 10);
+  const reader = audioRes.body.getReader();
   const chunks = [];
   let received = 0, tick = 0;
   while (true) {
@@ -951,11 +974,11 @@ async function downloadAndSave(song, setProgress){
     if (done) break;
     chunks.push(value);
     received += value.byteLength;
-    if (total > 0) setProgress(Math.min(95, Math.round(received / total * 100)));
-    else { tick++; setProgress(Math.min(90, tick * 2)); }
+    if (total > 0) setProgress(Math.min(95, Math.round(10 + received / total * 85)));
+    else { tick++; setProgress(Math.min(90, 10 + tick * 2)); }
   }
 
-  // 3. IndexedDB-yə yaz
+  // 4. IndexedDB-yə yaz
   const blob = new Blob(chunks, { type: mime });
   const data = new Uint8Array(await blob.arrayBuffer());
 
