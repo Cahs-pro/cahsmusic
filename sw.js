@@ -1,7 +1,7 @@
-const CACHE_NAME   = 'mu-shell-v6';
-const THUMB_CACHE  = 'mu-thumbs-v6';
-const FONT_CACHE   = 'mu-fonts-v6';
-const CDN_CACHE    = 'mu-cdn-v6';
+const CACHE_NAME   = 'mu-shell-v7';
+const THUMB_CACHE  = 'mu-thumbs-v7';
+const FONT_CACHE   = 'mu-fonts-v7';
+const CDN_CACHE    = 'mu-cdn-v7';
 
 /* App Shell — bu fayllar həmişə cache-də olur */
 const SHELL_URLS = [
