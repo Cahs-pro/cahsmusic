@@ -313,6 +313,9 @@ img{display:block}
 .vico{color:var(--t3);flex-shrink:0;cursor:pointer;transition:color .15s}.vico:hover{color:var(--tx)}
 .vtrack{width:68px;height:4px;background:var(--c4);border-radius:4px;cursor:pointer}
 .vfill{height:100%;background:var(--g);border-radius:4px;width:72%;pointer-events:none}
+.pacts{display:flex;align-items:center;gap:1px;flex-shrink:0;margin-right:4px}
+.pacts .pbtn{width:30px;height:30px}
+@media(max-width:600px){.pacts{display:none}}
 
 .spin{width:17px;height:17px;border:2.5px solid rgba(0,0,0,.18);border-top-color:#000;border-radius:50%;animation:sp .6s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -511,6 +514,17 @@ img{display:block}
       <div class="ptrack" id="ptrack"><div class="pbuf" id="pbuf"></div><div class="pfill" id="pfill"></div></div>
       <span class="ptime r" id="p-dur">0:00</span>
     </div>
+  </div>
+  <div class="pacts">
+    <button class="pbtn" id="b-bar-pl" title="Playlist-ə əlavə et">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <button class="pbtn" id="b-bar-dl" title="Endir">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </button>
+    <button class="pbtn" id="b-bar-sh" title="Paylaş">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    </button>
   </div>
   <div class="pvol">
     <svg class="vico" id="v-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
@@ -869,6 +883,37 @@ document.getElementById("vtrack").onclick=e=>{const r=e.currentTarget.getBoundin
 document.getElementById("v-ico").onclick=()=>{if(!S.ytOk)return;S.ytp.isMuted()?(S.ytp.unMute(),document.getElementById("vfill").style.width=S.vol+"%",toast("🔊")):(S.ytp.mute(),document.getElementById("vfill").style.width="0%",toast("🔇"));};
 document.getElementById("vfill").style.width=S.vol+"%";
 
+/* ── Player Bar əlavə düymələri ── */
+document.getElementById("b-bar-pl").onclick=()=>{
+  const song=S.list[S.idx];
+  if(!song){toast("⚠ Mahnı seçin");return;}
+  openAddToPL(song);
+};
+document.getElementById("b-bar-dl").onclick=async()=>{
+  const song=S.list[S.idx];
+  if(!song){toast("⚠ Mahnı seçin");return;}
+  if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){
+    toast(`📱 "${song.title}" artıq endirilmişdir`);return;
+  }
+  const btn=document.getElementById("b-bar-dl");
+  btn.style.color="var(--g)";
+  await startDownload(song,null,null,
+    ()=>{btn.style.color="var(--g)";toast("✅ Endirildi!");},
+    ()=>{btn.style.color="";}
+  );
+};
+document.getElementById("b-bar-sh").onclick=async()=>{
+  const song=S.list[S.idx];
+  if(!song){toast("⚠ Mahnı seçin");return;}
+  const url=`https://www.youtube.com/watch?v=${song.videoId}`;
+  const txt=`${song.title} — ${song.artist}`;
+  if(navigator.share){
+    try{await navigator.share({title:txt,text:txt,url});return;}catch(_){}
+  }
+  try{await navigator.clipboard.writeText(url);toast("🔗 Link kopyalandı!");}
+  catch(_){toast("Link: "+url);}
+};
+
 /* ═══════════════════════════════════════════════════════════
    ⬇ DOWNLOAD — Vercel Serverless · YouTube InnerTube API
 
@@ -881,26 +926,22 @@ document.getElementById("vfill").style.width=S.vol+"%";
    ✅ CORS problemi yoxdur — eyni domain
 ═══════════════════════════════════════════════════════════ */
 
-/* ── /api/dl → JSON link alır → fetch → IndexedDB ── */
+/* ── /api/dl-dən blob al → IndexedDB-yə yaz ── */
 async function downloadAndSave(song, setProgress){
-  // 1. Vercel serverless-dən MP3 link al (JSON cavab)
-  setProgress(5);
+  // 1. Serverless function-a sorğu
   const r = await fetch(`/api/dl?v=${song.videoId}`, {
     signal: AbortSignal.timeout(58000),
   });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok || !j.ok || !j.link) {
-    throw new Error(j.error || `Server ${r.status}`);
+  if (!r.ok) {
+    const j = await r.json().catch(() => ({}));
+    throw new Error(`Server ${r.status}: ${j.detail || j.error || "xəta"}`);
   }
 
-  // 2. MP3 linkindən birbaşa yüklə
-  setProgress(15);
-  const mp3 = await fetch(j.link, { signal: AbortSignal.timeout(120000) });
-  if (!mp3.ok) throw new Error(`MP3 yüklənmədi: ${mp3.status}`);
+  const mime = r.headers.get("content-type") || "audio/webm";
 
-  const mime = "audio/mpeg";
-  const total = parseInt(mp3.headers.get("content-length") || "0", 10);
-  const reader = mp3.body.getReader();
+  // 2. Stream oxu + progress göstər
+  const total = parseInt(r.headers.get("content-length") || "0", 10);
+  const reader = r.body.getReader();
   const chunks = [];
   let received = 0, tick = 0;
   while (true) {
@@ -908,8 +949,8 @@ async function downloadAndSave(song, setProgress){
     if (done) break;
     chunks.push(value);
     received += value.byteLength;
-    if (total > 0) setProgress(Math.min(95, Math.round(15 + received / total * 80)));
-    else { tick++; setProgress(Math.min(90, 15 + tick * 2)); }
+    if (total > 0) setProgress(Math.min(95, Math.round(received / total * 100)));
+    else { tick++; setProgress(Math.min(90, tick * 2)); }
   }
 
   // 3. IndexedDB-yə yaz
@@ -1248,13 +1289,62 @@ document.getElementById("fr-add").onclick=async()=>{
   const email=document.getElementById("fr-inp").value.trim().toLowerCase();
   if(!email){toast("⚠ E-mail daxil edin");return;}
   if(email===S.user.email?.toLowerCase()){toast("⚠ Özünüzü əlavə edə bilməzsiniz");return;}
-  const snap=await fbD.ref("users").orderByChild("email").equalTo(email).get();
-  if(!snap.exists()){toast(`❌ ${T("nofnd")}: ${email}`);return;}
-  let tuid=null,td=null;snap.forEach(ch=>{tuid=ch.key;td=ch.val();});
-  const alr=await fbD.ref(`friends/${S.user.uid}/${tuid}`).get();
-  if(alr.exists()){toast(`✓ ${T("alfr")}`);return;}
-  await fbD.ref(`friendRequests/${tuid}/${S.user.uid}`).set({fromUid:S.user.uid,fromName:S.user.displayName,fromEmail:S.user.email,fromPhoto:S.user.photoURL||"",ts:Date.now()});
-  document.getElementById("fr-inp").value="";toast(`✅ ${T("reqsent")} → ${td.name||email}`);
+  if(!fbD){toast("❌ Firebase bağlantısı yoxdur");return;}
+
+  const btn=document.getElementById("fr-add");
+  btn.disabled=true;btn.textContent="⏳";
+
+  try{
+    // Metod 1: orderByChild (Firebase index varsa)
+    let snap=await fbD.ref("users").orderByChild("email").equalTo(email).get().catch(()=>null);
+
+    // Metod 2: Bütün istifadəçiləri yoxla (index yoxdursa)
+    if(!snap||!snap.exists()){
+      const all=await fbD.ref("users").get().catch(()=>null);
+      if(all&&all.exists()){
+        let found=null,foundKey=null;
+        all.forEach(ch=>{
+          const v=ch.val();
+          if((v.email||"").toLowerCase()===email){found=v;foundKey=ch.key;}
+        });
+        if(found){
+          // Manual snap-a bənzər struktur yarat
+          snap={exists:()=>true,forEach:(fn)=>fn({key:foundKey,val:()=>found})};
+        }
+      }
+    }
+
+    if(!snap||!snap.exists()){
+      toast(`❌ ${T("nofnd")}: ${email}`);
+      btn.disabled=false;btn.textContent=T("add");return;
+    }
+
+    let tuid=null,td=null;
+    snap.forEach(ch=>{tuid=ch.key;td=ch.val();});
+
+    if(!tuid){toast(`❌ ${T("nofnd")}`);btn.disabled=false;btn.textContent=T("add");return;}
+
+    const alr=await fbD.ref(`friends/${S.user.uid}/${tuid}`).get();
+    if(alr.exists()){toast(`✓ ${T("alfr")}`);btn.disabled=false;btn.textContent=T("add");return;}
+
+    const pendingReq=await fbD.ref(`friendRequests/${tuid}/${S.user.uid}`).get();
+    if(pendingReq.exists()){toast("⏳ İstək artıq göndərilib");btn.disabled=false;btn.textContent=T("add");return;}
+
+    await fbD.ref(`friendRequests/${tuid}/${S.user.uid}`).set({
+      fromUid:S.user.uid,
+      fromName:S.user.displayName||"",
+      fromEmail:S.user.email||"",
+      fromPhoto:S.user.photoURL||"",
+      ts:Date.now()
+    });
+    document.getElementById("fr-inp").value="";
+    toast(`✅ ${T("reqsent")} → ${td.name||td.displayName||email}`);
+  }catch(err){
+    console.error("[fr-add]",err);
+    toast("❌ Xəta: "+err.message);
+  }finally{
+    btn.disabled=false;btn.textContent=T("add");
+  }
 };
 
 async function acceptFr(req){const uid=S.user.uid,fuid=req.key;await fbD.ref(`friends/${uid}/${fuid}`).set(true);await fbD.ref(`friends/${fuid}/${uid}`).set(true);await fbD.ref(`friendRequests/${uid}/${fuid}`).remove();toast(`✅ ${req.fromName||"Dost"} indi dostdur!`);}
@@ -1328,10 +1418,57 @@ function clearCL(){S.chatListeners.forEach(fn=>{try{fn();}catch(e){}});S.chatLis
   } catch(e){console.warn("IndexedDB:",e);}
   applyLang();applyTheme();renderDefault();
   document.getElementById("vfill").style.width=S.vol+"%";
+
+/* ── Player Bar əlavə düymələri ── */
+document.getElementById("b-bar-pl").onclick=()=>{
+  const song=S.list[S.idx];
+  if(!song){toast("⚠ Mahnı seçin");return;}
+  openAddToPL(song);
+};
+document.getElementById("b-bar-dl").onclick=async()=>{
+  const song=S.list[S.idx];
+  if(!song){toast("⚠ Mahnı seçin");return;}
+  if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){
+    toast(`📱 "${song.title}" artıq endirilmişdir`);return;
+  }
+  const btn=document.getElementById("b-bar-dl");
+  btn.style.color="var(--g)";
+  await startDownload(song,null,null,
+    ()=>{btn.style.color="var(--g)";toast("✅ Endirildi!");},
+    ()=>{btn.style.color="";}
+  );
+};
+document.getElementById("b-bar-sh").onclick=async()=>{
+  const song=S.list[S.idx];
+  if(!song){toast("⚠ Mahnı seçin");return;}
+  const url=`https://www.youtube.com/watch?v=${song.videoId}`;
+  const txt=`${song.title} — ${song.artist}`;
+  if(navigator.share){
+    try{await navigator.share({title:txt,text:txt,url});return;}catch(_){}
+  }
+  try{await navigator.clipboard.writeText(url);toast("🔗 Link kopyalandı!");}
+  catch(_){toast("Link: "+url);}
+};
 })();
 
 /* ═══ SERVICE WORKER + PWA ═══ */
 (async()=>{
+  // PWA oflayn rejim: Firebase/YouTube olmasa belə UI işləsin
+  if(!navigator.onLine){
+    document.querySelectorAll('.pill').forEach(b=>{
+      b.onclick=()=>{
+        document.querySelectorAll('.pill').forEach(x=>x.classList.remove('on'));
+        document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
+        b.classList.add('on');
+        const pg=document.getElementById('page-'+b.dataset.pg);
+        if(pg) pg.classList.add('on');
+        if(b.dataset.pg==='saved') renderDownloads();
+        if(b.dataset.pg==='playlists') renderPlaylists();
+      };
+    });
+    toast('📵 Oflayn rejim — endirilmiş mahnılar mövcuddur');
+  }
+
   if(!('serviceWorker' in navigator)) return;
 
   try {
