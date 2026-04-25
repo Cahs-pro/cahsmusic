@@ -1,12 +1,10 @@
 /**
  * api/dl.js — Music Universe · Vercel Serverless Function
  * GET /api/dl?v=VIDEO_ID
- *
- * Axın: Vercel → RapidAPI youtube-mp36 → MP3 → client
- * API key Vercel Environment Variable-da saxlanır (RAPIDAPI_KEY)
+ * CommonJS format — Vercel Node.js runtime ilə tam uyğun
  */
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   if (req.method === "OPTIONS") { res.status(200).end(); return; }
@@ -25,7 +23,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // RapidAPI youtube-mp36 — MP3 link al
     let link = null;
     let title = videoId;
 
@@ -46,7 +43,7 @@ export default async function handler(req, res) {
       if (!apiRes.ok) throw new Error(`RapidAPI HTTP ${apiRes.status}`);
 
       const data = await apiRes.json();
-      console.log(`[dl] attempt ${attempt + 1}:`, data.status);
+      console.log(`[dl] attempt ${attempt + 1}: status=${data.status}`);
 
       if (data.status === "ok" && data.link) {
         link  = data.link;
@@ -54,12 +51,11 @@ export default async function handler(req, res) {
         break;
       }
       if (data.status === "fail") throw new Error(data.msg || "RapidAPI fail");
-      // status === "processing" → növbəti cəhdə keç
+      // "processing" → növbəti cəhd
     }
 
-    if (!link) throw new Error("MP3 link alınmadı (timeout)");
+    if (!link) throw new Error("MP3 link alınmadı");
 
-    // MP3 URL-dən stream al → client-ə ötür
     const mp3 = await fetch(link, { signal: AbortSignal.timeout(55000) });
     if (!mp3.ok) throw new Error(`MP3 fetch ${mp3.status}`);
 
@@ -87,4 +83,4 @@ export default async function handler(req, res) {
       res.end();
     }
   }
-}
+};
