@@ -870,33 +870,37 @@ document.getElementById("v-ico").onclick=()=>{if(!S.ytOk)return;S.ytp.isMuted()?
 document.getElementById("vfill").style.width=S.vol+"%";
 
 /* ═══════════════════════════════════════════════════════════
-   ⬇ DOWNLOAD — Vercel + RapidAPI (youtube-mp36)
+   ⬇ DOWNLOAD — Vercel Serverless · YouTube InnerTube API
 
    GET /api/dl?v=VIDEO_ID
-   Axın: Brauzer → Vercel (api/dl.js) → RapidAPI → MP3 → Brauzer
+   Server: ANDROID_MUSIC client → adaptiveFormats.url (şifrəsiz)
+           → audio stream birbaşa client-ə ötürülür
 
-   ✅ YouTube IP bloku yoxdur (RapidAPI öz serverindən gedir)
-   ✅ CORS yoxdur — eyni domain
-   ✅ API key gizlidir — yalnız Vercel env-də saxlanır
-   ✅ Heç bir npm package lazım deyil
+   ✅ Heç bir library yoxdur (package.json boşdur)
+   ✅ Cobalt / proxy / xarici servis yoxdur
+   ✅ CORS problemi yoxdur — eyni domain
 ═══════════════════════════════════════════════════════════ */
 
-/* ── /api/dl-dən blob al → IndexedDB-yə yaz ── */
+/* ── /api/dl → JSON link alır → fetch → IndexedDB ── */
 async function downloadAndSave(song, setProgress){
-  // 1. Serverless function-a sorğu
+  // 1. Vercel serverless-dən MP3 link al (JSON cavab)
+  setProgress(5);
   const r = await fetch(`/api/dl?v=${song.videoId}`, {
     signal: AbortSignal.timeout(58000),
   });
-  if (!r.ok) {
-    const j = await r.json().catch(() => ({}));
-    throw new Error(`Server ${r.status}: ${j.detail || j.error || "xəta"}`);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j.ok || !j.link) {
+    throw new Error(j.error || `Server ${r.status}`);
   }
 
-  const mime = r.headers.get("content-type") || "audio/webm";
+  // 2. MP3 linkindən birbaşa yüklə
+  setProgress(15);
+  const mp3 = await fetch(j.link, { signal: AbortSignal.timeout(120000) });
+  if (!mp3.ok) throw new Error(`MP3 yüklənmədi: ${mp3.status}`);
 
-  // 2. Stream oxu + progress göstər
-  const total = parseInt(r.headers.get("content-length") || "0", 10);
-  const reader = r.body.getReader();
+  const mime = "audio/mpeg";
+  const total = parseInt(mp3.headers.get("content-length") || "0", 10);
+  const reader = mp3.body.getReader();
   const chunks = [];
   let received = 0, tick = 0;
   while (true) {
@@ -904,8 +908,8 @@ async function downloadAndSave(song, setProgress){
     if (done) break;
     chunks.push(value);
     received += value.byteLength;
-    if (total > 0) setProgress(Math.min(95, Math.round(received / total * 100)));
-    else { tick++; setProgress(Math.min(90, tick * 2)); }
+    if (total > 0) setProgress(Math.min(95, Math.round(15 + received / total * 80)));
+    else { tick++; setProgress(Math.min(90, 15 + tick * 2)); }
   }
 
   // 3. IndexedDB-yə yaz
@@ -934,7 +938,7 @@ async function downloadAndSave(song, setProgress){
 }
 
 /**
- * startDownload — /api/dl → RapidAPI youtube-mp36 → MP3
+ * startDownload — /api/dl (InnerTube ANDROID_MUSIC client)
  */
 async function startDownload(song, badgeEl, barEl, onDone, onFail){
   if(S.downloads.has(song.videoId) || S.offline.has(song.videoId)){
