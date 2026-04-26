@@ -1344,68 +1344,114 @@ document.getElementById("ptab-fr").onclick=()=>{document.getElementById("ptab-fr
 document.getElementById("ptab-rq").onclick=()=>{document.getElementById("ptab-rq").classList.add("on");document.getElementById("ptab-fr").classList.remove("on");document.getElementById("rq-sec").style.display="";document.getElementById("fr-sec").style.display="none";};
 
 /* ═══ DM ═══ */
-let _dmRef=null;
-function closeDMRef(){if(_dmRef){try{_dmRef.off();}catch(e){}}_dmRef=null;}
+/* ═══ DM ═══ */
+let _dmRef = null;
+let _dmRoom = null;
 
-function openDM(friend){
-  if(!FB||!fbD||!S.user){toast("Giriş edin");return;}
-  S.chatUid=friend.uid;S.chatTarget=friend;
-  document.querySelectorAll(".frrow").forEach(r=>r.classList.remove("on"));
-  Array.from(document.querySelectorAll(".frrow")).find(r=>r.querySelector(".frname")?.textContent===friend.name)?.classList.add("on");
-  document.getElementById("ch-title").textContent=friend.name||friend.displayName||"?";
-  document.getElementById("ch-sub").textContent=friend.email||"";
-  document.getElementById("vpbtn").style.display="flex";
-  document.getElementById("sndbtn").disabled=false;
+function closeDMRef() {
+  if (_dmRef && _dmRoom) {
+    try { firebase.database().ref(`dms/${_dmRoom}`).off(); } catch(e) {}
+  }
+  _dmRef = null;
+  _dmRoom = null;
+}
 
+function openDM(friend) {
+  if (!FB || !fbD || !S.user) { toast("Giriş edin"); return; }
+
+  // Eyni dost seçilibsə yenidən açma
+  if (S.chatUid === friend.uid) return;
+
+  S.chatUid = friend.uid;
+  S.chatTarget = friend;
+
+  document.querySelectorAll(".frrow").forEach(r => r.classList.remove("on"));
+  Array.from(document.querySelectorAll(".frrow"))
+    .find(r => r.querySelector(".frname")?.textContent === (friend.name || friend.displayName || "?"))
+    ?.classList.add("on");
+
+  document.getElementById("ch-title").textContent = friend.name || friend.displayName || "?";
+  document.getElementById("ch-sub").textContent = friend.email || "";
+  document.getElementById("vpbtn").style.display = "flex";
+  document.getElementById("sndbtn").disabled = false;
+
+  // Köhnə listener-i bağla
   closeDMRef();
-  document.getElementById("msgs").innerHTML="";
 
-  const room=[S.user.uid,friend.uid].sort().join("_");
-  _dmRef=fbD.ref(`dms/${room}`).orderByChild("ts").limitToLast(80);
-  _dmRef.on("value",snap=>{
-    const ms=[];snap.forEach(ch=>ms.push({key:ch.key,...ch.val()}));
-    ms.sort((a,b)=>a.ts-b.ts);
-    const cont=document.getElementById("msgs");cont.innerHTML="";
-    ms.forEach(m=>appendMsg(m,cont));
-    cont.scrollTop=cont.scrollHeight;
+  const msgs = document.getElementById("msgs");
+  msgs.innerHTML = "";
+
+  const room = [S.user.uid, friend.uid].sort().join("_");
+  _dmRoom = room;
+  _dmRef = fbD.ref(`dms/${room}`).orderByChild("ts").limitToLast(80);
+
+  _dmRef.on("value", snap => {
+    const ms = [];
+    snap.forEach(ch => ms.push({ key: ch.key, ...ch.val() }));
+    ms.sort((a, b) => a.ts - b.ts);
+
+    const cont = document.getElementById("msgs");
+    const wasAtBottom = cont.scrollHeight - cont.scrollTop - cont.clientHeight < 60;
+    cont.innerHTML = "";
+    ms.forEach(m => appendMsg(m, cont));
+    if (wasAtBottom) cont.scrollTop = cont.scrollHeight;
+  }, err => {
+    console.error("[DM] listener xətası:", err);
+    toast("❌ Mesajlar yüklənmədi: " + err.message);
   });
 }
 
-function appendMsg(m,c){
-  const me=S.user&&m.uid===S.user.uid;
-  const div=document.createElement("div");div.className=`mrow${me?" me":""}`;
-  const tm=m.ts?new Date(m.ts).toLocaleTimeString("az",{hour:"2-digit",minute:"2-digit"}):"—";
-  div.innerHTML=`<img class="mav" src="${m.photo||PHO}" alt="" onerror="this.src='${PHO}'"/><div class="mbody"><div class="mname">${X(m.name||"Anonim")}</div><div class="mbbl">${X(m.text)}</div><div class="mtime">${tm}</div></div>`;
+function appendMsg(m, c) {
+  const me = S.user && m.uid === S.user.uid;
+  const div = document.createElement("div");
+  div.className = `mrow${me ? " me" : ""}`;
+  const tm = m.ts ? new Date(m.ts).toLocaleTimeString("az", { hour: "2-digit", minute: "2-digit" }) : "—";
+  div.innerHTML = `<img class="mav" src="${m.photo || PHO}" alt="" onerror="this.src='${PHO}'"/>
+    <div class="mbody">
+      <div class="mname">${X(m.name || "Anonim")}</div>
+      <div class="mbbl">${X(m.text)}</div>
+      <div class="mtime">${tm}</div>
+    </div>`;
   c.appendChild(div);
 }
 
-document.getElementById("sndbtn").onclick=sendMsg;
-document.getElementById("msginput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMsg();}});
-async function sendMsg(){
-  if(!FB||!fbD){toast("❌ Firebase yüklənməyib");return;}
-  if(!S.user){toast("Giriş edin");return;}
-  if(!S.chatTarget){toast("Sol tərəfdən dost seçin");return;}
-  const inp=document.getElementById("msginput");
-  const txt=inp.value.trim();
-  if(!txt) return;
-  const btn=document.getElementById("sndbtn");
-  inp.value="";
-  btn.disabled=true;
-  const room=[S.user.uid,S.chatTarget.uid].sort().join("_");
-  try{
+document.getElementById("sndbtn").onclick = sendMsg;
+document.getElementById("msginput").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+});
+
+async function sendMsg() {
+  if (!FB || !fbD) { toast("❌ Firebase yüklənməyib"); return; }
+  if (!S.user) { toast("Giriş edin"); return; }
+  if (!S.chatTarget) { toast("Sol tərəfdən dost seçin"); return; }
+
+  const inp = document.getElementById("msginput");
+  const txt = inp.value.trim();
+  if (!txt) return;
+
+  const btn = document.getElementById("sndbtn");
+  inp.value = "";
+  btn.disabled = true;
+
+  const room = [S.user.uid, S.chatTarget.uid].sort().join("_");
+
+  try {
     await fbD.ref(`dms/${room}`).push({
-      uid:S.user.uid,
-      name:S.user.displayName||"Anonim",
-      photo:S.user.photoURL||"",
-      text:txt,
-      ts:firebase.database.ServerValue.TIMESTAMP
+      uid: S.user.uid,
+      name: S.user.displayName || "Anonim",
+      photo: S.user.photoURL || "",
+      text: txt,
+      ts: firebase.database.ServerValue.TIMESTAMP
     });
-  }catch(e){
-    console.error("[DM]",e);
-    inp.value=txt;
-    toast("❌ Göndərilmədi: "+e.message);
-  }finally{
-    btn.disabled=false;
+    // Uğurla göndərildikdən sonra aşağıya scroll et
+    const cont = document.getElementById("msgs");
+    setTimeout(() => { cont.scrollTop = cont.scrollHeight; }, 100);
+  } catch(e) {
+    console.error("[DM sendMsg]", e);
+    inp.value = txt; // Mətnı geri qoy
+    toast("❌ Göndərilmədi: " + e.message);
+  } finally {
+    btn.disabled = false;
     inp.focus();
   }
 }
