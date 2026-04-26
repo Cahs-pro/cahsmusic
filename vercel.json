@@ -1,7 +1,7 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/((?!api/)(?!icon.png)(?!manifest.json)(?!sw.js).*)", "destination": "/index.html" }
   ],
   "functions": {
     "api/dl.js": { "maxDuration": 60 }
@@ -12,6 +12,12 @@
       "headers": [
         { "key": "Cache-Control", "value": "no-cache" },
         { "key": "Service-Worker-Allowed", "value": "/" }
+      ]
+    },
+    {
+      "source": "/icon.png",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400" }
       ]
     },
     {
