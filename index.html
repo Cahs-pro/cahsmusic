@@ -15,16 +15,16 @@
 <meta name="description" content="Music Universe - Musiqi Dünyası. Oflayn çalın, yükləyin, playlists yaradın."/>
 
 <!-- Icons -->
-<link rel="icon" href="/icon.png" type="image/png"/>
-<link rel="icon" href="/icon.png" sizes="32x32" type="image/png"/>
-<link rel="icon" href="/icon.png" sizes="192x192" type="image/png"/>
-<link rel="icon" href="/icon.png" sizes="512x512" type="image/png"/>
-<link rel="apple-touch-icon" href="/icon.png"/>
-<link rel="apple-touch-icon" href="/icon.png" sizes="120x120"/>
-<link rel="apple-touch-icon" href="/icon.png" sizes="152x152"/>
-<link rel="apple-touch-icon" href="/icon.png" sizes="167x167"/>
-<link rel="apple-touch-icon" href="/icon.png" sizes="180x180"/>
-<meta name="msapplication-TileImage" content="/icon.png"/>
+<link rel="icon" href="/icon-192.png" type="image/png"/>
+<link rel="icon" href="/icon-192.png" sizes="32x32" type="image/png"/>
+<link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png"/>
+<link rel="icon" href="/icon-512.png" sizes="512x512" type="image/png"/>
+<link rel="apple-touch-icon" href="/icon-192.png"/>
+<link rel="apple-touch-icon" href="/icon-192.png" sizes="120x120"/>
+<link rel="apple-touch-icon" href="/icon-192.png" sizes="152x152"/>
+<link rel="apple-touch-icon" href="/icon-192.png" sizes="167x167"/>
+<link rel="apple-touch-icon" href="/icon-192.png" sizes="180x180"/>
+<meta name="msapplication-TileImage" content="/icon-192.png"/>
 <meta name="msapplication-TileColor" content="#080c12"/>
 
 <!-- Manifest -->
@@ -79,6 +79,7 @@ img{display:block}
   background:var(--gl);backdrop-filter:blur(24px) saturate(180%);
   border-bottom:1px solid var(--bd);
   display:flex;align-items:center;gap:6px;padding:0 10px;
+  overflow:hidden;
 }
 .logo{display:flex;align-items:center;gap:7px;flex-shrink:0;font-family:var(--fh);font-size:1.1rem;font-weight:800;color:var(--g);letter-spacing:-.3px;white-space:nowrap}
 .logo svg{flex-shrink:0}
@@ -87,7 +88,7 @@ img{display:block}
 @media(min-width:700px){.logo-txt{display:block}}
 
 /* Pills */
-.pills{display:flex;gap:1px;background:var(--c2);border-radius:50px;padding:3px;flex-shrink:0}
+.pills{display:flex;gap:1px;background:var(--c2);border-radius:50px;padding:3px;flex-shrink:1;min-width:0}
 .pill{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:50px;font-size:.74rem;font-weight:600;color:var(--t2);transition:all .18s;white-space:nowrap;line-height:1}
 .pill svg{flex-shrink:0;width:13px;height:13px;opacity:.6;transition:opacity .18s}
 .pill.on{background:var(--g);color:#000}.pill.on svg{opacity:1}
@@ -103,14 +104,14 @@ img{display:block}
 }
 
 /* Search box */
-.sbox{flex:1;min-width:70px;max-width:220px;position:relative}
+.sbox{flex:1 1 70px;min-width:60px;max-width:220px;position:relative}
 .sbox input{width:100%;height:34px;padding:0 10px 0 32px;background:var(--c2);border:1.5px solid var(--bd2);border-radius:50px;color:var(--tx);font-size:.77rem;outline:none;transition:border-color .2s,box-shadow .2s}
 .sbox input:focus{border-color:var(--g);box-shadow:0 0 0 3px var(--gd)}
 .sbox input::placeholder{color:var(--t3);font-size:.72rem}
 .s-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none;width:13px;height:13px}
 
 /* Bar end */
-.bar-end{display:flex;align-items:center;gap:5px;margin-left:auto;flex-shrink:0}
+.bar-end{display:flex;align-items:center;gap:4px;margin-left:auto;flex-shrink:0}
 .lw{position:relative}
 .lbtn{display:flex;align-items:center;gap:3px;padding:5px 9px;background:var(--c2);border:1.5px solid var(--bd2);border-radius:50px;font-size:.7rem;font-weight:700;color:var(--t2);transition:all .18s}
 .lbtn:hover{color:var(--tx)}
@@ -150,7 +151,7 @@ img{display:block}
 .hchip{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;font-weight:600;padding:4px 10px;border-radius:50px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--t2)}
 
 /* ══ GRID ══ */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:11px;margin-bottom:28px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(155px,42vw),1fr));gap:11px;margin-bottom:28px}
 .card{background:var(--c1);border:1.5px solid var(--bd);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s;position:relative}
 .card:hover{transform:translateY(-4px);border-color:var(--g);box-shadow:0 10px 36px rgba(30,215,96,.12)}
 .card.now{border-color:var(--g);box-shadow:0 0 0 2px rgba(30,215,96,.2)}
@@ -392,6 +393,111 @@ img{display:block}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
 #yt-wrap{position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none}
+
+/* ══════════════════════════════════════
+   RESPONSIVE — All Breakpoints
+══════════════════════════════════════ */
+
+/* ── Extra small: <360px ── */
+@media(max-width:360px){
+  :root{ --nav:50px; --pl:60px; }
+  #topbar{ padding:0 6px; gap:4px; }
+  .pills{ gap:0; }
+  .pill{ padding:5px 6px; }
+  .sbox{ max-width:70px; min-width:50px; }
+  .sbox input{ font-size:.65rem; padding:0 7px 0 26px; height:30px; }
+  .authbtn{ padding:5px 7px; }
+  .ibtn{ width:26px; height:26px; }
+  .lbtn{ padding:3px 6px; font-size:.62rem; }
+  .hero{ padding:18px 14px; margin-bottom:16px; }
+  .hero h1{ font-size:1.2rem; }
+  .hchips{ gap:4px; }
+  .hchip{ font-size:.62rem; padding:3px 8px; }
+  #main{ padding-top:calc(var(--nav) + 10px); padding-bottom:calc(var(--pl) + 16px); }
+  .page{ padding:0 10px; }
+  .grid{ grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; }
+}
+
+/* ── Small: 360–480px ── */
+@media(min-width:361px) and (max-width:480px){
+  .grid{ grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:9px; }
+}
+
+/* ── Topbar pills: prevent overflow wrap ── */
+@media(max-width:580px){
+  .pills{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    flex-shrink:1;
+    min-width:0;
+  }
+  .pills::-webkit-scrollbar{ display:none; }
+}
+
+/* ── Tablet portrait: 481–700px ── */
+@media(min-width:481px) and (max-width:700px){
+  .grid{ grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }
+  .pinfo{ width:130px; }
+}
+
+/* ── Modal responsive ── */
+@media(max-width:480px){
+  .mbox{ padding:16px 14px; max-height:85vh; border-radius:16px; }
+  .moverlay{ padding:10px; }
+  .mtit{ font-size:.95rem; }
+}
+
+/* ── Downloads list: mobile ── */
+@media(max-width:480px){
+  .svrow{ padding:8px 10px; gap:8px; border-radius:11px; }
+  .svthumb{ width:40px; height:40px; border-radius:7px; }
+  .svtit{ font-size:.78rem; }
+  .svart{ font-size:.65rem; }
+  .svbadge{ font-size:.6rem; padding:2px 6px; }
+  .act{ width:26px; height:26px; }
+}
+
+/* ── Social panel: mobile ── */
+@media(max-width:480px){
+  .frrow{ padding:8px 9px; gap:7px; border-radius:10px; }
+  .frav, .frav-ph{ width:30px; height:30px; font-size:.78rem; }
+  .frname{ font-size:.77rem; }
+  .frsub, .frnp{ font-size:.64rem; }
+  .chatpanel{ height:calc(100svh - var(--nav) - var(--pl) - 90px); min-height:260px; border-radius:14px; }
+  #msgs{ padding:9px; gap:7px; }
+  .mbbl{ font-size:.78rem; padding:6px 10px; }
+}
+
+/* ── Playlist rows: mobile ── */
+@media(max-width:480px){
+  .plrow{ padding:9px 11px; gap:9px; border-radius:11px; }
+  .plico{ width:36px; height:36px; border-radius:8px; }
+  .plname{ font-size:.8rem; }
+  .plcnt{ font-size:.64rem; }
+}
+
+/* ── Hero responsive ── */
+@media(max-width:540px){
+  .hero{ padding:22px 16px; }
+  .hero h1{ font-size:clamp(1.25rem,6vw,1.75rem); }
+  .hero p{ font-size:.8rem; }
+  .hchips{ gap:5px; }
+}
+
+/* ── Large screens ── */
+@media(min-width:1200px){
+  .grid{ grid-template-columns:repeat(auto-fill,minmax(175px,1fr)); gap:14px; }
+  .page{ padding:0 24px; }
+}
+
+/* ── Landscape mobile ── */
+@media(max-height:500px) and (max-width:900px){
+  .hero{ padding:14px 16px; margin-bottom:12px; }
+  .hero::before{ display:none; }
+  #main{ padding-top:calc(var(--nav) + 8px); }
+  .grid{ grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; }
+}
 </style>
 </head>
 <body>
@@ -612,8 +718,6 @@ img{display:block}
 <script>
 /* ═══════════════════════════════════════
    FIREBASE CONFIG
-   firebase.google.com → Spark (pulsuz, kart yox)
-   Auth → Google | Realtime Database → Test mode
 ═══════════════════════════════════════ */
 const FB_CFG = {
   apiKey: "AIzaSyDBRbEpFepTcNcRvYDMx4oIxO7iFCBQmtk",
@@ -721,7 +825,6 @@ ldb.version(1).stores({
   playlists:"++id, name, createdAt",
   pl_songs: "++id, [playlistId+videoId], playlistId, videoId, title, artist, thumb",
 });
-// v11: downloads replaces both saved+offline (backwards compat: we keep old tables)
 ldb.version(2).stores({
   saved:     "++id, &videoId, title, artist, thumb",
   offline:   "++id, &videoId, title, artist, thumb, mime",
@@ -786,7 +889,6 @@ const S={
   chatUid:null,chatTarget:null,
   friends:{},chatListeners:[],
   offAudio:null,
-  /* download state */
   _downloading: false,
 };
 
@@ -862,7 +964,6 @@ function onYTS(e){
   else if(e.data===P.BUFFERING){setPUI("loading");}
   else if(e.data===P.ENDED){
     S.playing=false;stopTimer();
-    // Avtomatik saxlama: mahnı bitdikdə endirməni dayandır (fetch özü bitər)
     S.repeat?(S.ytp.seekTo(0),S.ytp.playVideo()):nextSong();
   }
 }
@@ -879,7 +980,6 @@ async function playSong(song){
   updPI(song.title,song.artist,song.thumb||TH(song.videoId));
   setPUI("loading");
 
-  // ① ƏN ƏVVƏL IndexedDB yoxla — internet olmasa da işləyir
   const cached = await ldb.downloads.where("videoId").equals(song.videoId).first().catch(()=>null)
               || await ldb.offline.where("videoId").equals(song.videoId).first().catch(()=>null);
   if(cached && cached.blob){
@@ -888,13 +988,11 @@ async function playSong(song){
     return;
   }
 
-  // ② İnternet yoxdur + cache yoxdur
   if(!navigator.onLine){
     toast("📵 İnternet yoxdur — əvvəlcə endir");
     setPUI("pause"); return;
   }
 
-  // ③ YouTube player ilə çal
   toast(`▶ ${song.title}`);
   if(FB&&S.user) fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});
   if(!S.ytOk){toast("⏳ Player yüklənir...");setPUI("pause");return;}
@@ -961,7 +1059,7 @@ document.getElementById("vtrack").onclick=e=>{const r=e.currentTarget.getBoundin
 document.getElementById("v-ico").onclick=()=>{if(!S.ytOk)return;S.ytp.isMuted()?(S.ytp.unMute(),document.getElementById("vfill").style.width=S.vol+"%",toast("🔊")):(S.ytp.mute(),document.getElementById("vfill").style.width="0%",toast("🔇"));};
 document.getElementById("vfill").style.width=S.vol+"%";
 
-/* ── Player Bar: playlist + endir + paylaş ── */
+/* ── Player Bar actions ── */
 document.getElementById("b-bar-pl").onclick=()=>{
   const song=S.list[S.idx];
   if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
@@ -986,21 +1084,8 @@ document.getElementById("b-bar-sh").onclick=async()=>{
   catch(_){toast("Link: "+url);}
 };
 
-/* ═══════════════════════════════════════════════════════════
-   ⬇ DOWNLOAD — Vercel Serverless · YouTube InnerTube API
-
-   GET /api/dl?v=VIDEO_ID
-   Server: ANDROID_MUSIC client → adaptiveFormats.url (şifrəsiz)
-           → audio stream birbaşa client-ə ötürülür
-
-   ✅ Heç bir library yoxdur (package.json boşdur)
-   ✅ Cobalt / proxy / xarici servis yoxdur
-   ✅ CORS problemi yoxdur — eyni domain
-═══════════════════════════════════════════════════════════ */
-
-/* ── /api/dl-dən blob al → IndexedDB-yə yaz ── */
+/* ═══ DOWNLOAD ═══ */
 async function downloadAndSave(song, setProgress){
-  // 1. Serverless function-dan MP3 linkini al (JSON cavab)
   const apiRes = await fetch(`/api/dl?v=${song.videoId}`, {
     signal: AbortSignal.timeout(58000),
   });
@@ -1015,15 +1100,12 @@ async function downloadAndSave(song, setProgress){
 
   setProgress(10);
 
-  // 2. Həmin linkdən audio stream-i fetch et
   const audioRes = await fetch(apiJson.link, {
     signal: AbortSignal.timeout(120000),
   });
   if (!audioRes.ok) throw new Error(`Audio fetch ${audioRes.status}`);
 
   const mime = audioRes.headers.get("content-type") || "audio/mpeg";
-
-  // 3. Stream oxu + progress göstər
   const total = parseInt(audioRes.headers.get("content-length") || "0", 10);
   const reader = audioRes.body.getReader();
   const chunks = [];
@@ -1037,7 +1119,6 @@ async function downloadAndSave(song, setProgress){
     else { tick++; setProgress(Math.min(90, 10 + tick * 2)); }
   }
 
-  // 4. IndexedDB-yə yaz
   const blob = new Blob(chunks, { type: mime });
   const data = new Uint8Array(await blob.arrayBuffer());
 
@@ -1054,7 +1135,6 @@ async function downloadAndSave(song, setProgress){
   S.downloads.add(song.videoId);
   S.offline.add(song.videoId);
 
-  // 4. Kart düyməsini yenilə
   const card = document.querySelector(`.card[data-vid="${song.videoId}"]`);
   if (card) {
     const sb = card.querySelector(".cb-save");
@@ -1062,9 +1142,6 @@ async function downloadAndSave(song, setProgress){
   }
 }
 
-/**
- * startDownload — /api/dl (InnerTube ANDROID_MUSIC client)
- */
 async function startDownload(song, badgeEl, barEl, onDone, onFail){
   if(S.downloads.has(song.videoId) || S.offline.has(song.videoId)){
     toast(`📱 "${song.title}" artıq endirilmişdir`);
@@ -1086,7 +1163,6 @@ async function startDownload(song, badgeEl, barEl, onDone, onFail){
 
   setProgress(5);
   toast(`⬇ "${song.title}" endirilir...`);
-  console.info(`[download] /api/dl?v=${song.videoId}`);
 
   try {
     await downloadAndSave(song, p => setProgress(5 + p * 0.93));
@@ -1133,12 +1209,10 @@ function mkCard(song){
   const sb=d.querySelector(".cb-save");
   sb.onclick=async e=>{
     e.stopPropagation();
-    // Already downloaded
     if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){
       toast(`📱 "${song.title}" artıq endirilmişdir`);
       return;
     }
-    // Start download (play first if needed, then record)
     sb.disabled=true;sb.textContent="⏳";
     await startDownload(song,null,null,()=>{
       sb.className="cb cb-save on";sb.textContent=T("saved");sb.disabled=false;
@@ -1157,19 +1231,14 @@ function renderDefault(){
 
 /* ═══ SEARCH ═══ */
 let _st;
-// YouTube URL/ID-dən videoId çıxar
 function extractYTId(str){
   str=str.trim();
-  // youtu.be/ID
   let m=str.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
   if(m) return m[1];
-  // youtube.com/watch?v=ID
   m=str.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
   if(m) return m[1];
-  // youtube.com/embed/ID
   m=str.match(/\/embed\/([a-zA-Z0-9_-]{11})/);
   if(m) return m[1];
-  // Təmiz 11 simvol ID
   m=str.match(/^([a-zA-Z0-9_-]{11})$/);
   if(m) return m[1];
   return null;
@@ -1180,8 +1249,6 @@ document.getElementById("sinp").addEventListener("input",e=>{
   const raw=e.target.value.trim();
   const q=raw.toLowerCase();
   if(!q){document.getElementById("ssec").style.display="none";return;}
-
-  // YouTube link/ID daxil edilibsə birbaşa çal
   const ytId=extractYTId(raw);
   if(ytId){
     document.getElementById("ssec").style.display="none";
@@ -1189,7 +1256,6 @@ document.getElementById("sinp").addEventListener("input",e=>{
     e.target.value="";
     return;
   }
-
   _st=setTimeout(()=>doSearch(q),320);
 });
 function doSearch(q){
@@ -1208,10 +1274,9 @@ function doSearch(q){
 }
 window.playVID=()=>{const v=document.getElementById("vid-inp")?.value.trim();if(!v){toast("⚠ ID daxil edin");return;}playSong({videoId:v,title:"Video "+v,artist:"YouTube",thumb:TH(v)});};
 
-/* ═══ DOWNLOADS (Endirilmiş Mahnılar) ═══ */
+/* ═══ DOWNLOADS ═══ */
 async function renderDownloads(){
   const list=document.getElementById("svlist"),nodl=document.getElementById("no-sv");
-  // Downloads cədvəlindən al (yeni), yoxdursa offline-dan
   let songs=[];
   try{
     songs=await ldb.downloads.orderBy("addedAt").reverse().toArray();
@@ -1223,7 +1288,6 @@ async function renderDownloads(){
   nodl.style.display="none";
 
   songs.forEach(song=>{
-    const isDl=S.downloads.has(song.videoId)||S.offline.has(song.videoId);
     const row=document.createElement("div");row.className="svrow";
     row.innerHTML=`
 <div class="svthumb"><img src="${song.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div>
@@ -1242,7 +1306,6 @@ async function renderDownloads(){
 </div>`;
 
     row.querySelector(".play-a").onclick=()=>playSong({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb});
-
     row.querySelector(".del-a").onclick=async()=>{
       if(!confirm(`"${song.title}" silinsin?`))return;
       await ldb.downloads.where("videoId").equals(song.videoId).delete().catch(()=>{});
@@ -1254,7 +1317,6 @@ async function renderDownloads(){
   });
 }
 
-// Legacy alias
 function renderSaved(){ renderDownloads(); }
 
 /* ═══ PLAYLISTS ═══ */
@@ -1403,12 +1465,10 @@ document.getElementById("fr-add").onclick=async()=>{
   btn.disabled=true; if(lbl) lbl.textContent="...";
   try{
     let tuid=null,td=null;
-    // ① orderByChild cəhd et (index varsa sürətli)
     try{
       const snap=await fbD.ref("users").orderByChild("email").equalTo(email).get();
       if(snap.exists()) snap.forEach(ch=>{tuid=ch.key;td=ch.val();});
     }catch(idxErr){
-      // ② Index xətası → bütün users-i oxu (Firebase Rules: users/.read = auth!=null lazımdır!)
       console.warn("[FR] index yoxdur, manual scan");
       const all=await fbD.ref("users").get();
       all.forEach(ch=>{
@@ -1433,7 +1493,6 @@ document.getElementById("fr-add").onclick=async()=>{
     toast("✅ "+T("reqsent")+" → "+(td.name||email));
   }catch(e){
     console.error("[FR add]",e);
-    // Permission denied: Firebase Rules-da users/.read = auth!=null olmalıdır
     if(e.message&&e.message.includes("Permission denied")){
       toast("❌ Firebase Rules: users qolunun oxuma icazəsi yoxdur");
     } else {
@@ -1459,29 +1518,20 @@ function openDM(friend){
   if(!FB||!fbD){toast("❌ Firebase yüklənməyib");return;}
   if(!S.user){toast("Giriş edin");return;}
   S.chatUid=friend.uid; S.chatTarget=friend;
-
-  // Friend row highlight
   document.querySelectorAll(".frrow").forEach(r=>r.classList.remove("on"));
   document.querySelectorAll(".frrow").forEach(r=>{if(r.dataset.uid===friend.uid)r.classList.add("on");});
-
   document.getElementById("ch-title").textContent=friend.name||friend.displayName||"?";
   document.getElementById("ch-sub").textContent=friend.email||"";
   document.getElementById("vpbtn").style.display="flex";
   document.getElementById("sndbtn").disabled=false;
-
-  // Mobile: show chat panel
   const sg=document.getElementById("soc-main");
   if(sg) sg.classList.add("chat-open");
-
   closeDMRef();
-
   const cont=document.getElementById("msgs");
   cont.innerHTML='<div class="echint">Yüklənir...</div>';
-
   const room=getDMRoom(S.user.uid,friend.uid);
   const ref=fbD.ref("dms/"+room).orderByChild("ts").limitToLast(80);
   _dmRef=ref;
-
   ref.on("value",snap=>{
     const ms=[];
     snap.forEach(ch=>{
@@ -1583,47 +1633,18 @@ function clearCL(){S.chatListeners.forEach(fn=>{try{fn();}catch(e){}});S.chatLis
   try{
     (await ldb.saved.toArray()).forEach(s=>S.saved.add(s.videoId));
     (await ldb.offline.toArray()).forEach(s=>S.offline.add(s.videoId));
-    // Load downloads table (new unified table)
     (await ldb.downloads.toArray()).forEach(s=>{S.downloads.add(s.videoId);S.offline.add(s.videoId);});
   } catch(e){console.warn("IndexedDB:",e);}
   applyLang();applyTheme();renderDefault();
   document.getElementById("vfill").style.width=S.vol+"%";
-
-/* ── Player Bar: playlist + endir + paylaş ── */
-document.getElementById("b-bar-pl").onclick=()=>{
-  const song=S.list[S.idx];
-  if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
-  openAddToPL(song);
-};
-document.getElementById("b-bar-dl").onclick=async()=>{
-  const song=S.list[S.idx];
-  if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
-  if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){toast(`📱 Artıq endirilmişdir`);return;}
-  document.getElementById("b-bar-dl").style.color="var(--g)";
-  await startDownload(song,null,null,
-    ()=>{document.getElementById("b-bar-dl").style.color="";toast("✅ Endirildi!");},
-    ()=>{document.getElementById("b-bar-dl").style.color="";}
-  );
-};
-document.getElementById("b-bar-sh").onclick=async()=>{
-  const song=S.list[S.idx];
-  if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
-  const url=`https://www.youtube.com/watch?v=${song.videoId}`;
-  if(navigator.share){try{await navigator.share({title:song.title,text:`${song.title} — ${song.artist}`,url});return;}catch(_){}}
-  try{await navigator.clipboard.writeText(url);toast("🔗 Link kopyalandı!");}
-  catch(_){toast("Link: "+url);}
-};
 })();
 
 /* ═══ SERVICE WORKER + PWA ═══ */
 (async()=>{
   if(!('serviceWorker' in navigator)) return;
-
   try {
     const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
     console.log('[SW] Qeydiyyat uğurlu:', reg.scope);
-
-    // Yeni SW gəldikdə xəbər ver
     reg.addEventListener('updatefound', () => {
       const newWorker = reg.installing;
       newWorker.addEventListener('statechange', () => {
@@ -1632,10 +1653,7 @@ document.getElementById("b-bar-sh").onclick=async()=>{
         }
       });
     });
-
-    // SW aktiv olandan sonra kritik resursları cache-ə əlavə et
     navigator.serviceWorker.ready.then(sw => {
-      // Thumbnail-ları cache-ə göndər (arxa planda)
       if (sw.active) {
         const thumbUrls = SONGS.slice(0, 20).map(s => `https://img.youtube.com/vi/${s.v}/mqdefault.jpg`);
         sw.active.postMessage({ type: 'CACHE_URLS', urls: thumbUrls });
@@ -1645,7 +1663,6 @@ document.getElementById("b-bar-sh").onclick=async()=>{
     console.warn('[SW] Xəta:', e);
   }
 
-  // PWA Install prompt
   let deferredPrompt = null;
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
@@ -1665,7 +1682,7 @@ document.getElementById("b-bar-sh").onclick=async()=>{
       animation:slideUp .35s cubic-bezier(.34,1.4,.64,1);
     `;
     banner.innerHTML = `
-      <img src="/icon.png" style="width:36px;height:36px;border-radius:9px;object-fit:cover;flex-shrink:0"/>
+      <img src="/icon-192.png" style="width:36px;height:36px;border-radius:9px;object-fit:cover;flex-shrink:0" onerror="this.style.display='none'"/>
       <div style="flex:1;min-width:0">
         <div style="font-family:var(--fh);font-weight:700;font-size:.83rem;margin-bottom:2px">Music Universe</div>
         <div style="font-size:.71rem;color:var(--t2)">Ana ekrana əlavə et, oflayn işlə</div>
@@ -1684,12 +1701,9 @@ document.getElementById("b-bar-sh").onclick=async()=>{
       if (outcome === 'accepted') toast('✅ Music Universe quraşdırıldı!');
     };
     document.getElementById('pwa-close').onclick = () => banner.remove();
-
-    // 8 saniyə sonra öz-özünə bağlan
     setTimeout(() => banner?.remove(), 8000);
   }
 
-  // iOS üçün manual hint
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
   if (isIOS && !isStandalone) {
