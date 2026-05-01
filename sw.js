@@ -1,9 +1,9 @@
-const CACHE_NAME  = 'mu-v11';
-const THUMB_CACHE = 'mu-thumb-v11';
-const FONT_CACHE  = 'mu-font-v11';
-const CDN_CACHE   = 'mu-cdn-v11';
+const CACHE_NAME  = 'mu-v12';
+const THUMB_CACHE = 'mu-thumb-v12';
+const FONT_CACHE  = 'mu-font-v12';
+const CDN_CACHE   = 'mu-cdn-v12';
 
-const SHELL = ['/', '/index.html', '/icon.png', '/manifest.json'];
+const SHELL = ['/', '/index.html', '/icon.png', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
