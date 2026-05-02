@@ -1464,37 +1464,41 @@ document.getElementById("fr-add").onclick=async()=>{
   const lbl=document.getElementById("add-lbl");
   btn.disabled=true; if(lbl) lbl.textContent="...";
   try{
-    let tuid=null,td=null;
-    try{
-      const snap=await fbD.ref("users").orderByChild("email").equalTo(email).get();
-      if(snap.exists()) snap.forEach(ch=>{tuid=ch.key;td=ch.val();});
-    }catch(idxErr){
-      console.warn("[FR] index yoxdur, manual scan");
-      const all=await fbD.ref("users").get();
-      all.forEach(ch=>{
-        const v=ch.val();
-        if(v&&String(v.email||"").toLowerCase()===email){tuid=ch.key;td=v;}
-      });
-    }
-    if(!tuid){toast("❌ "+T("nofnd")+": "+email);return;}
-    if(tuid===S.user.uid){toast("⚠ Özünüzü əlavə edə bilməzsiniz");return;}
-    const alr=await fbD.ref("friends/"+S.user.uid+"/"+tuid).get();
-    if(alr.exists()){toast("✓ "+T("alfr"));return;}
-    const existReq=await fbD.ref("friendRequests/"+tuid+"/"+S.user.uid).get();
-    if(existReq.exists()){toast("⏳ İstək artıq göndərilmişdir");return;}
-    await fbD.ref("friendRequests/"+tuid+"/"+S.user.uid).set({
-      fromUid:S.user.uid,
-      fromName:S.user.displayName||"Anonim",
+    // Search user by email using index (requires .indexOn: ["email"] in Firebase Rules)
+    let tuid=null, td=null;
+    const snap=await fbD.ref("users").orderByChild("email").equalTo(email).get();
+    if(snap.exists()) snap.forEach(ch=>{tuid=ch.key; td=ch.val();});
+
+    if(!tuid){toast("❌ "+T("nofnd")+": "+email); return;}
+    if(tuid===S.user.uid){toast("⚠ Özünüzü əlavə edə bilməzsiniz"); return;}
+
+    // Check if already friends (we can read our own friends node)
+    const alr=await fbD.ref(`friends/${S.user.uid}/${tuid}`).get();
+    if(alr.exists()){toast("✓ "+T("alfr")); return;}
+
+    // Check if we already sent a request (read OUR OWN sent requests node)
+    const sentReq=await fbD.ref(`friendRequests/${tuid}/${S.user.uid}`).get().catch(()=>null);
+    // Note: reading target's friendRequests may be denied — if so, just proceed and let Firebase
+    // handle duplicate-write gracefully (it's idempotent — same data overwrites same path)
+
+    if(sentReq?.exists()){toast("⏳ İstək artıq göndərilmişdir"); return;}
+
+    // Write to target user's friendRequests — allowed because write rule is "auth != null"
+    await fbD.ref(`friendRequests/${tuid}/${S.user.uid}`).set({
+      fromUid:  S.user.uid,
+      fromName: S.user.displayName||"Anonim",
       fromEmail:S.user.email||"",
       fromPhoto:S.user.photoURL||"",
-      ts:Date.now()
+      ts:       Date.now()
     });
+
     document.getElementById("fr-inp").value="";
-    toast("✅ "+T("reqsent")+" → "+(td.name||email));
+    toast("✅ "+T("reqsent")+" → "+(td?.name||email));
+
   }catch(e){
     console.error("[FR add]",e);
-    if(e.message&&e.message.includes("Permission denied")){
-      toast("❌ Firebase Rules: users qolunun oxuma icazəsi yoxdur");
+    if(e.code==="PERMISSION_DENIED"||e.message?.includes("Permission denied")){
+      toast("❌ İcazə xətası — Firebase Rules-u yoxlayın (users indexOn email)");
     } else {
       toast("❌ Xəta: "+e.message);
     }
