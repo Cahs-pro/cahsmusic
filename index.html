@@ -223,7 +223,7 @@ img{display:block}
 .fradd:hover{background:var(--g2)}
 .frlist,.rqlist{display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto}
 @media(min-width:820px){.frlist,.rqlist{max-height:360px}}
-.frrow{display:flex;align-items:center;gap:9px;background:var(--c1);border:1.5px solid var(--bd);border-radius:12px;padding:9px 11px;cursor:pointer;transition:all .17s}
+.frrow{display:flex;align-items:center;gap:9px;background:var(--c1);border:1.5px solid var(--bd);border-radius:12px;padding:9px 11px;cursor:pointer;transition:all .17px}
 .frrow:hover{border-color:var(--g);background:var(--c2)}.frrow.on{border-color:var(--g);background:var(--gd)}
 .frav{width:35px;height:35px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--c3)}
 .frav-ph{width:35px;height:35px;border-radius:50%;background:var(--gd);display:flex;align-items:center;justify-content:center;color:var(--g);font-family:var(--fh);font-weight:800;font-size:.88rem;flex-shrink:0}
@@ -339,10 +339,12 @@ img{display:block}
 .ptrack:hover{height:6px}
 .pfill{height:100%;background:var(--g);border-radius:4px;width:0%;pointer-events:none;transition:width .1s linear}
 .pbuf{position:absolute;inset:0;background:rgba(30,215,96,.13);border-radius:4px;width:0%;pointer-events:none}
-/* Right side actions */
-.pacts{display:flex;align-items:center;gap:1px;flex-shrink:0}
+
+/* ══ FIX 1: pacts & pvol — hidden by default, only shown at ≥900px ══ */
+.pacts{display:none;align-items:center;gap:1px;flex-shrink:0}
 .pacts .pbtn{width:28px;height:28px}
-.pvol{display:flex;align-items:center;gap:6px;flex:0 0 110px;justify-content:flex-end}
+.pvol{display:none;align-items:center;gap:6px;flex:0 0 110px;justify-content:flex-end}
+
 .vico{color:var(--t3);flex-shrink:0;cursor:pointer;transition:color .15s}.vico:hover{color:var(--tx)}
 .vtrack{width:62px;height:4px;background:var(--c4);border-radius:4px;cursor:pointer}
 .vfill{height:100%;background:var(--g);border-radius:4px;width:72%;pointer-events:none}
@@ -367,6 +369,7 @@ img{display:block}
   .logo-txt{ display:block }
   .pills{ display:flex }
   .sbox{ display:block }
+  /* FIX 1: restore pacts + pvol on desktop */
   .pvol{ display:flex }
   .pacts{ display:flex }
   .pinfo{ width:160px }
@@ -384,11 +387,12 @@ img{display:block}
 
 /* ════════════════════
    TABLET  600–899px
-   Logo+text, pills (icon-only), search, no vol/acts
-   Player: thumb + info + controls + progress bar
+   FIX 2: hide logo-txt to free topbar space
+   Pills icon-only, search visible, no vol/acts
 ════════════════════ */
 @media(min-width:600px) and (max-width:899px){
-  .logo-txt{ display:block }
+  /* FIX 2: hide logo text — saves ~70px, prevents topbar overflow */
+  .logo-txt{ display:none }
   .pills{ display:flex }
   /* Show only icons in pills, no text */
   .pill span{ display:none }
@@ -444,7 +448,7 @@ img{display:block}
   .authbtn{ padding:5px 10px;font-size:.71rem;height:30px }
   .authbtn .auth-txt{ display:none }
 
-  /* ── Player: compact, NO progress bar ── */
+  /* ── Player: compact, NO progress bar, NO pacts/pvol ── */
   #player{ padding:0 11px;gap:8px;height:var(--pl) }
   .pthumb{ width:44px;height:44px;border-radius:8px }
   /* Info takes available space */
@@ -458,7 +462,7 @@ img{display:block}
   .pbtn{ width:36px;height:36px }
   .pbtn.main{ width:44px;height:44px }
   #b-shuf,#b-rep{ display:none }
-  /* Hide vol+acts */
+  /* Ensure pacts + pvol stay hidden on mobile */
   .pvol{ display:none }
   .pacts{ display:none }
 
@@ -1507,7 +1511,6 @@ document.getElementById("fr-add").onclick=async()=>{
   const lbl=document.getElementById("add-lbl");
   btn.disabled=true; if(lbl) lbl.textContent="...";
   try{
-    // Search user by email using index (requires .indexOn: ["email"] in Firebase Rules)
     let tuid=null, td=null;
     const snap=await fbD.ref("users").orderByChild("email").equalTo(email).get();
     if(snap.exists()) snap.forEach(ch=>{tuid=ch.key; td=ch.val();});
@@ -1515,18 +1518,13 @@ document.getElementById("fr-add").onclick=async()=>{
     if(!tuid){toast("❌ "+T("nofnd")+": "+email); return;}
     if(tuid===S.user.uid){toast("⚠ Özünüzü əlavə edə bilməzsiniz"); return;}
 
-    // Check if already friends (we can read our own friends node)
     const alr=await fbD.ref(`friends/${S.user.uid}/${tuid}`).get();
     if(alr.exists()){toast("✓ "+T("alfr")); return;}
 
-    // Check if we already sent a request (read OUR OWN sent requests node)
     const sentReq=await fbD.ref(`friendRequests/${tuid}/${S.user.uid}`).get().catch(()=>null);
-    // Note: reading target's friendRequests may be denied — if so, just proceed and let Firebase
-    // handle duplicate-write gracefully (it's idempotent — same data overwrites same path)
 
     if(sentReq?.exists()){toast("⏳ İstək artıq göndərilmişdir"); return;}
 
-    // Write to target user's friendRequests — allowed because write rule is "auth != null"
     await fbD.ref(`friendRequests/${tuid}/${S.user.uid}`).set({
       fromUid:  S.user.uid,
       fromName: S.user.displayName||"Anonim",
