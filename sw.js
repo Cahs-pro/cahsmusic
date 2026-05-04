@@ -1,7 +1,7 @@
-const CACHE_NAME  = 'mu-v14';
-const THUMB_CACHE = 'mu-thumb-v14';
-const FONT_CACHE  = 'mu-font-v14';
-const CDN_CACHE   = 'mu-cdn-v14';
+const CACHE_NAME  = 'mu-v15';
+const THUMB_CACHE = 'mu-thumb-v15';
+const FONT_CACHE  = 'mu-font-v15';
+const CDN_CACHE   = 'mu-cdn-v15';
 
 const SHELL = ['/', '/index.html', '/icon.png', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
