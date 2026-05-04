@@ -16,29 +16,16 @@
 
 <!-- Icons -->
 <link rel="icon" href="/icon-192.png" type="image/png"/>
-<link rel="icon" href="/icon-192.png" sizes="32x32" type="image/png"/>
-<link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png"/>
-<link rel="icon" href="/icon-512.png" sizes="512x512" type="image/png"/>
 <link rel="apple-touch-icon" href="/icon-192.png"/>
-<link rel="apple-touch-icon" href="/icon-192.png" sizes="120x120"/>
-<link rel="apple-touch-icon" href="/icon-192.png" sizes="152x152"/>
-<link rel="apple-touch-icon" href="/icon-192.png" sizes="167x167"/>
-<link rel="apple-touch-icon" href="/icon-192.png" sizes="180x180"/>
-<meta name="msapplication-TileImage" content="/icon-192.png"/>
-<meta name="msapplication-TileColor" content="#080c12"/>
-
-<!-- Manifest -->
 <link rel="manifest" href="/manifest.json"/>
 
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-<!-- YouTube IFrame API — async ki, əsas render bloklanmasın -->
 <script src="https://www.youtube.com/iframe_api" async></script>
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-
 
 <style>
 /* ══ TOKENS ══ */
@@ -63,7 +50,7 @@
   --sh:0 8px 40px rgba(0,0,0,.09);--gl:rgba(240,244,252,.94);--sc:#dde5ff;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;overflow-x:hidden}
 body{background:var(--bg);color:var(--tx);font-family:var(--fb);font-size:15px;line-height:1.55;min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
 button{cursor:pointer;border:none;background:none;font-family:var(--fb);font-size:inherit;color:inherit}
 input,textarea{font-family:var(--fb);font-size:inherit;color:var(--tx)}
@@ -73,18 +60,21 @@ img{display:block}
 ::-webkit-scrollbar-thumb{background:var(--sc);border-radius:4px}
 ::-webkit-scrollbar-thumb:hover{background:var(--g)}
 
-/* ══ TOPBAR ══ */
+/* ══════════════════════════════
+   TOPBAR
+══════════════════════════════ */
 #topbar{
   position:fixed;top:0;left:0;right:0;height:var(--nav);z-index:900;
   background:var(--gl);backdrop-filter:blur(24px) saturate(180%);
   border-bottom:1px solid var(--bd);
   display:flex;align-items:center;gap:6px;padding:0 12px;
+  min-width:0;
 }
 .logo{display:flex;align-items:center;gap:7px;flex-shrink:0;font-family:var(--fh);font-size:1.05rem;font-weight:800;color:var(--g);letter-spacing:-.3px;white-space:nowrap}
 .logo svg{flex-shrink:0}
 .logo-txt{display:none}
 
-/* Pills */
+/* Pills - desktop nav */
 .pills{display:flex;gap:1px;background:var(--c2);border-radius:50px;padding:3px;flex-shrink:0}
 .pill{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:50px;font-size:.74rem;font-weight:600;color:var(--t2);transition:all .18s;white-space:nowrap;line-height:1;cursor:pointer}
 .pill svg{flex-shrink:0;width:13px;height:13px;opacity:.6;transition:opacity .18s}
@@ -92,7 +82,7 @@ img{display:block}
 .pill:hover:not(.on){color:var(--tx);background:var(--c4)}
 
 /* Search box */
-.sbox{flex:1;min-width:0;max-width:240px;position:relative}
+.sbox{flex:1;min-width:0;max-width:240px;position:relative;display:none}
 .sbox input{width:100%;height:34px;padding:0 10px 0 32px;background:var(--c2);border:1.5px solid var(--bd2);border-radius:50px;color:var(--tx);font-size:.77rem;outline:none;transition:border-color .2s,box-shadow .2s}
 .sbox input:focus{border-color:var(--g);box-shadow:0 0 0 3px var(--gd)}
 .sbox input::placeholder{color:var(--t3);font-size:.72rem}
@@ -114,8 +104,122 @@ img{display:block}
 .authbtn{display:flex;align-items:center;gap:5px;padding:6px 13px;border-radius:50px;background:var(--g);color:#000;font-size:.74rem;font-weight:700;white-space:nowrap;transition:all .18s;flex-shrink:0;height:32px}
 .authbtn:hover{background:var(--g2)}
 
+/* ══════════════════════════════
+   HAMBURGER MENU (mobile)
+══════════════════════════════ */
+.hmbtn{
+  width:36px;height:36px;border-radius:10px;
+  display:none;flex-shrink:0;
+  align-items:center;justify-content:center;
+  background:var(--c2);border:1.5px solid var(--bd2);
+  color:var(--t2);transition:all .18s;cursor:pointer;
+}
+.hmbtn:hover{color:var(--tx);background:var(--c3)}
+.hmbtn.active{color:var(--g);border-color:var(--g)}
+.hmbtn svg{pointer-events:none}
+
+/* Mobile search icon (opens search bar) */
+.search-icon-btn{
+  width:34px;height:34px;border-radius:50%;
+  display:none;flex-shrink:0;
+  align-items:center;justify-content:center;
+  background:var(--c2);border:1.5px solid var(--bd2);
+  color:var(--t2);transition:all .18s;cursor:pointer;
+}
+.search-icon-btn:hover{color:var(--g);border-color:var(--g)}
+
+/* Mobile search bar (below topbar) */
+#mobile-search-bar{
+  position:fixed;top:var(--nav);left:0;right:0;z-index:890;
+  background:var(--gl);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--bd);
+  padding:8px 12px;
+  display:none;
+}
+#mobile-search-bar.open{display:flex;align-items:center;gap:8px}
+#mobile-search-bar .msbox{flex:1;position:relative}
+#mobile-search-bar .msbox input{
+  width:100%;height:36px;padding:0 10px 0 34px;
+  background:var(--c2);border:1.5px solid var(--bd2);
+  border-radius:50px;color:var(--tx);font-size:.82rem;outline:none;
+  transition:border-color .2s;
+}
+#mobile-search-bar .msbox input:focus{border-color:var(--g)}
+#mobile-search-bar .msbox input::placeholder{color:var(--t3)}
+#mobile-search-bar .msbox .s-ico{left:12px}
+#mobile-search-bar .close-search{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--c3);color:var(--t2);transition:all .17s;
+}
+#mobile-search-bar .close-search:hover{color:var(--tx);background:var(--c4)}
+
+/* Hamburger dropdown menu */
+#ham-menu{
+  position:fixed;top:var(--nav);left:0;right:0;z-index:880;
+  background:var(--c1);border-bottom:1.5px solid var(--bd2);
+  box-shadow:0 12px 40px rgba(0,0,0,.35);
+  display:none;flex-direction:column;gap:0;
+  transform:translateY(-10px);opacity:0;
+  transition:transform .22s var(--ease),opacity .22s var(--ease);
+  max-height:calc(100vh - var(--nav) - var(--pl));
+  overflow-y:auto;
+}
+#ham-menu.open{
+  display:flex;transform:translateY(0);opacity:1;
+}
+.ham-section{padding:8px 12px;display:flex;flex-direction:column;gap:3px}
+.ham-section + .ham-section{border-top:1px solid var(--bd)}
+.ham-label{font-size:.64rem;font-weight:700;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;padding:4px 10px 2px}
+.ham-item{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 12px;border-radius:11px;
+  font-size:.84rem;font-weight:600;color:var(--t2);
+  cursor:pointer;transition:all .16s;
+}
+.ham-item:hover{background:var(--c2);color:var(--tx)}
+.ham-item.active{background:var(--gd);color:var(--g)}
+.ham-item.active svg{color:var(--g)}
+.ham-item svg{width:17px;height:17px;flex-shrink:0;opacity:.7}
+.ham-item.active svg{opacity:1}
+.ham-row{display:flex;gap:8px;padding:8px 12px}
+.ham-lang-btn{
+  flex:1;padding:9px 8px;border-radius:9px;text-align:center;
+  font-size:.78rem;font-weight:700;color:var(--t2);
+  background:var(--c2);border:1.5px solid var(--bd);
+  transition:all .16s;
+}
+.ham-lang-btn.on{background:var(--gd);color:var(--g);border-color:rgba(30,215,96,.3)}
+.ham-auth-btn{
+  margin:8px 12px 12px;padding:11px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:.84rem;font-weight:700;transition:all .18s;
+}
+.ham-auth-btn.signin{background:var(--g);color:#000}
+.ham-auth-btn.signout{background:var(--c3);color:var(--t2);border:1.5px solid var(--bd2)}
+.ham-auth-btn:hover{filter:brightness(1.05);transform:scale(1.01)}
+
+/* Theme toggle in ham menu */
+.ham-theme-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;gap:10px}
+.ham-theme-lbl{font-size:.82rem;font-weight:600;color:var(--t2)}
+.theme-toggle{
+  width:46px;height:26px;border-radius:50px;
+  background:var(--c4);border:1.5px solid var(--bd2);
+  position:relative;cursor:pointer;transition:background .2s;
+  flex-shrink:0;
+}
+.theme-toggle.light{background:var(--g)}
+.theme-toggle::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--t2);transition:transform .2s,background .2s;
+}
+.theme-toggle.light::after{transform:translateX(20px);background:#000}
+
 /* ══ LAYOUT ══ */
 #main{padding-top:calc(var(--nav) + 16px);padding-bottom:calc(var(--pl) + 24px)}
+/* When mobile search bar is open, shift content down */
+body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
 .page{display:none;padding:0 14px}.page.on{display:block}
 .sh{font-family:var(--fh);font-size:1.05rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:9px;letter-spacing:-.15px}
 .sh .dot{width:8px;height:8px;border-radius:50%;background:var(--g);flex-shrink:0;box-shadow:0 0 10px var(--g)}
@@ -207,7 +311,6 @@ img{display:block}
 .newpl:hover{background:rgba(30,215,96,.18);border-color:var(--g)}
 
 /* ══ SOCIAL ══ */
-/* Desktop: yan-yana; Mobile: üst-üstə (toggle) */
 .socgrid{display:flex;flex-direction:column;gap:14px}
 @media(min-width:820px){
   .socgrid{display:grid;grid-template-columns:270px 1fr;gap:18px;align-items:start}
@@ -223,7 +326,7 @@ img{display:block}
 .fradd:hover{background:var(--g2)}
 .frlist,.rqlist{display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto}
 @media(min-width:820px){.frlist,.rqlist{max-height:360px}}
-.frrow{display:flex;align-items:center;gap:9px;background:var(--c1);border:1.5px solid var(--bd);border-radius:12px;padding:9px 11px;cursor:pointer;transition:all .17px}
+.frrow{display:flex;align-items:center;gap:9px;background:var(--c1);border:1.5px solid var(--bd);border-radius:12px;padding:9px 11px;cursor:pointer;transition:all .17s}
 .frrow:hover{border-color:var(--g);background:var(--c2)}.frrow.on{border-color:var(--g);background:var(--gd)}
 .frav{width:35px;height:35px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--c3)}
 .frav-ph{width:35px;height:35px;border-radius:50%;background:var(--gd);display:flex;align-items:center;justify-content:center;color:var(--g);font-family:var(--fh);font-weight:800;font-size:.88rem;flex-shrink:0}
@@ -312,21 +415,22 @@ img{display:block}
 .dmbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;border-radius:10px;background:var(--g);color:#000;font-weight:700;font-size:.85rem;margin-top:14px;cursor:pointer;border:none;font-family:var(--fb);transition:background .17s}
 .dmbtn:hover{background:var(--g2)}
 
-/* ══ PLAYER BAR ══ */
+/* ══════════════════════════════
+   PLAYER BAR
+══════════════════════════════ */
 #player{
   position:fixed;bottom:0;left:0;right:0;height:var(--pl);z-index:800;
   background:var(--gl);backdrop-filter:blur(26px) saturate(180%);
   border-top:1px solid var(--bd2);
   display:flex;align-items:center;
   padding:0 14px;gap:10px;
+  min-width:0;overflow:hidden;
 }
 .pthumb{width:48px;height:48px;border-radius:9px;overflow:hidden;flex-shrink:0;background:var(--c2);border:1.5px solid var(--bd2);display:flex;align-items:center;justify-content:center}
 .pthumb img{width:100%;height:100%;object-fit:cover;display:none}
-/* Song info: fixed width on desktop, flex on mobile */
 .pinfo{min-width:0;flex:0 0 auto;width:160px}
 .ptitle{font-family:var(--fh);font-weight:800;font-size:.83rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .partist{font-size:.7rem;color:var(--t2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* Controls: center column (buttons row + progress row) */
 .pctrl{display:flex;align-items:center;gap:6px;flex:1;justify-content:center;flex-direction:column;max-width:440px;min-width:0}
 .crow{display:flex;align-items:center;gap:7px}
 .pbtn{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--t2);transition:all .17s;flex-shrink:0;cursor:pointer}
@@ -339,15 +443,39 @@ img{display:block}
 .ptrack:hover{height:6px}
 .pfill{height:100%;background:var(--g);border-radius:4px;width:0%;pointer-events:none;transition:width .1s linear}
 .pbuf{position:absolute;inset:0;background:rgba(30,215,96,.13);border-radius:4px;width:0%;pointer-events:none}
-
-/* ══ FIX 1: pacts & pvol — hidden by default, only shown at ≥900px ══ */
 .pacts{display:none;align-items:center;gap:1px;flex-shrink:0}
 .pacts .pbtn{width:28px;height:28px}
 .pvol{display:none;align-items:center;gap:6px;flex:0 0 110px;justify-content:flex-end}
-
 .vico{color:var(--t3);flex-shrink:0;cursor:pointer;transition:color .15s}.vico:hover{color:var(--tx)}
 .vtrack{width:62px;height:4px;background:var(--c4);border-radius:4px;cursor:pointer}
 .vfill{height:100%;background:var(--g);border-radius:4px;width:72%;pointer-events:none}
+
+/* Player meatball menu (mobile) */
+.p-meatball{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:none;align-items:center;justify-content:center;
+  color:var(--t2);transition:all .17s;cursor:pointer;
+}
+.p-meatball:hover{color:var(--tx)}
+
+/* Player extra menu popup */
+#p-extra-menu{
+  position:fixed;bottom:calc(var(--pl) + 8px);right:12px;
+  background:var(--c1);border:1.5px solid var(--bd2);
+  border-radius:14px;min-width:170px;padding:5px;
+  z-index:850;box-shadow:var(--sh);
+  display:none;flex-direction:column;gap:2px;
+  animation:mop .18s var(--ease);
+}
+#p-extra-menu.open{display:flex}
+.pem-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;border-radius:9px;
+  font-size:.8rem;font-weight:600;color:var(--t2);
+  cursor:pointer;transition:all .15s;
+}
+.pem-item:hover{background:var(--c2);color:var(--tx)}
+.pem-item svg{flex-shrink:0;width:14px;height:14px}
 
 .spin{width:16px;height:16px;border:2.5px solid rgba(0,0,0,.18);border-top-color:#000;border-radius:50%;animation:sp .6s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -357,19 +485,15 @@ img{display:block}
 
 #yt-wrap{position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none}
 
-/* ══════════════════════════════════════
-   RESPONSIVE — Topbar + Player + Layout
-══════════════════════════════════════ */
+/* ══════════════════════════════
+   RESPONSIVE BREAKPOINTS
+══════════════════════════════ */
 
-/* ════════════════════
-   DESKTOP  ≥ 900px
-   Full layout: logo+text, pills, search, vol, acts
-════════════════════ */
+/* ════ DESKTOP ≥ 900px ════ */
 @media(min-width:900px){
   .logo-txt{ display:block }
   .pills{ display:flex }
   .sbox{ display:block }
-  /* FIX 1: restore pacts + pvol on desktop */
   .pvol{ display:flex }
   .pacts{ display:flex }
   .pinfo{ width:160px }
@@ -383,24 +507,22 @@ img{display:block}
   .pthumb{ width:48px;height:48px }
   .page{ padding:0 20px }
   .grid{ grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px }
+  /* Hide hamburger on desktop */
+  .hmbtn{ display:none }
+  .search-icon-btn{ display:none }
 }
 
-/* ════════════════════
-   TABLET  600–899px
-   FIX 2: hide logo-txt to free topbar space
-   Pills icon-only, search visible, no vol/acts
-════════════════════ */
+/* ════ TABLET 600–899px ════ */
 @media(min-width:600px) and (max-width:899px){
-  /* FIX 2: hide logo text — saves ~70px, prevents topbar overflow */
   .logo-txt{ display:none }
   .pills{ display:flex }
-  /* Show only icons in pills, no text */
   .pill span{ display:none }
   .pill{ padding:7px 9px;gap:0 }
   .pill svg{ width:15px;height:15px;opacity:.75 }
   .pill.on svg{ opacity:1 }
   .sbox{ display:block;max-width:180px }
-  /* Player: show progress bar, hide vol+acts */
+  .hmbtn{ display:none }
+  .search-icon-btn{ display:none }
   #player{ height:var(--pl);padding:0 14px;gap:10px }
   .pthumb{ width:46px;height:46px }
   .pinfo{ width:130px }
@@ -412,59 +534,49 @@ img{display:block}
   .pbtn.main{ width:40px;height:40px }
   .pvol{ display:none }
   .pacts{ display:none }
+  .p-meatball{ display:flex }
   .grid{ grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px }
   .page{ padding:0 16px }
+  /* Language button: text hidden */
+  #llbl-txt{ display:none }
 }
 
-/* ════════════════════
-   MOBILE  < 600px
-   Compact topbar: logo only + icon pills + search icon + auth
-   Player: thumb + title/artist + prev/play/next (NO progress bar)
-════════════════════ */
+/* ════ MOBILE < 600px ════ */
 @media(max-width:599px){
   :root{ --nav:52px; --pl:64px; }
 
-  /* ── Topbar: tight ── */
-  #topbar{ padding:0 10px;gap:5px }
+  /* Topbar: logo + hamburger + search icon + avatar/auth */
+  #topbar{ padding:0 10px;gap:6px }
   .logo-txt{ display:none }
+  .pills{ display:none } /* hidden, replaced by hamburger */
+  .sbox{ display:none }  /* hidden, replaced by search icon */
+  .lw{ display:none }    /* lang in hamburger menu */
+  .ibtn.theme-ibtn{ display:none } /* theme in hamburger menu */
 
-  /* Pills: icon-only, no background pill container on very small */
-  .pills{ background:transparent;padding:0;gap:2px }
-  .pill{ padding:8px 9px;gap:0;border-radius:10px }
-  .pill span{ display:none }
-  .pill svg{ width:16px;height:16px;opacity:.65 }
-  .pill.on{ background:var(--g);color:#000 }
-  .pill.on svg{ opacity:1 }
-  .pill:hover:not(.on){ background:var(--c3) }
+  /* Show hamburger and search icon */
+  .hmbtn{ display:flex }
+  .search-icon-btn{ display:flex }
 
-  /* Search box: compact */
-  .sbox{ max-width:130px;min-width:90px }
-  .sbox input{ height:32px;font-size:.74rem }
-
-  /* Bar-end: tighter */
-  .bar-end{ gap:4px }
-  .lbtn{ padding:4px 8px;font-size:.66rem;height:30px }
-  .ibtn{ width:30px;height:30px }
-  .authbtn{ padding:5px 10px;font-size:.71rem;height:30px }
+  /* Auth button: icon only */
+  .authbtn{ padding:5px 8px;font-size:.7rem;height:30px }
   .authbtn .auth-txt{ display:none }
+  .authbtn.has-user{ display:none } /* when logged in, just show avatar */
 
-  /* ── Player: compact, NO progress bar, NO pacts/pvol ── */
-  #player{ padding:0 11px;gap:8px;height:var(--pl) }
-  .pthumb{ width:44px;height:44px;border-radius:8px }
-  /* Info takes available space */
+  /* Player: compact */
+  #player{ padding:0 10px;gap:6px;height:var(--pl) }
+  .pthumb{ width:42px;height:42px;border-radius:8px }
   .pinfo{ flex:1;min-width:0;width:auto }
-  .ptitle{ font-size:.81rem }
-  .partist{ font-size:.68rem }
-  /* Controls: row of buttons, no progress */
+  .ptitle{ font-size:.8rem }
+  .partist{ font-size:.67rem }
   .pctrl{ flex-direction:row;flex:0 0 auto;gap:0;min-width:0 }
   .pbar{ display:none }
-  .crow{ gap:3px }
-  .pbtn{ width:36px;height:36px }
-  .pbtn.main{ width:44px;height:44px }
+  .crow{ gap:2px }
+  .pbtn{ width:34px;height:34px }
+  .pbtn.main{ width:42px;height:42px }
   #b-shuf,#b-rep{ display:none }
-  /* Ensure pacts + pvol stay hidden on mobile */
   .pvol{ display:none }
   .pacts{ display:none }
+  .p-meatball{ display:flex }
 
   /* Layout */
   #main{ padding-top:calc(var(--nav) + 12px);padding-bottom:calc(var(--pl) + 16px) }
@@ -477,35 +589,26 @@ img{display:block}
   .hchips{ gap:5px }
 }
 
-/* ════════════════════
-   VERY SMALL  < 380px
-════════════════════ */
+/* ════ VERY SMALL < 380px ════ */
 @media(max-width:379px){
   :root{ --nav:50px; --pl:60px }
-  .sbox{ max-width:100px;min-width:70px }
-  .pill{ padding:7px 7px }
-  .pill svg{ width:15px;height:15px }
-  .authbtn{ padding:5px 8px }
-  .pbtn{ width:33px;height:33px }
-  .pbtn.main{ width:41px;height:41px }
-  .pthumb{ width:40px;height:40px }
+  .pbtn{ width:31px;height:31px }
+  .pbtn.main{ width:39px;height:39px }
+  .pthumb{ width:38px;height:38px }
   .grid{ gap:8px }
   .page{ padding:0 10px }
   .hero{ padding:16px 12px }
+  .ptitle{ font-size:.76rem }
 }
 
-/* ════════════════════
-   MODAL responsive
-════════════════════ */
+/* ════ MODAL responsive ════ */
 @media(max-width:599px){
   .mbox{ padding:18px 16px;max-height:88vh;border-radius:18px }
   .moverlay{ padding:8px }
   .mtit{ font-size:.97rem }
 }
 
-/* ════════════════════
-   List items: mobile
-════════════════════ */
+/* ════ List items mobile ════ */
 @media(max-width:599px){
   .svrow{ padding:9px 11px;gap:9px;border-radius:12px }
   .svthumb{ width:42px;height:42px;border-radius:8px }
@@ -526,24 +629,22 @@ img{display:block}
   .mbbl{ font-size:.8rem;padding:7px 11px }
 }
 
-/* ════════════════════
-   Large screens  ≥ 1280px
-════════════════════ */
+/* ════ Large screens ≥ 1280px ════ */
 @media(min-width:1280px){
   .grid{ grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:16px }
   .page{ padding:0 28px }
   .sbox{ max-width:300px }
 }
 
-/* ════════════════════
-   Landscape mobile
-════════════════════ */
+/* ════ Landscape mobile ════ */
 @media(max-height:500px) and (max-width:900px){
   .hero{ padding:12px 16px;margin-bottom:10px }
   .hero::before{ display:none }
   .hchips{ display:none }
   #main{ padding-top:calc(var(--nav) + 6px) }
   .grid{ grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px }
+  /* Hamburger menu max-height for landscape */
+  #ham-menu{ max-height:60vh }
 }
 </style>
 </head>
@@ -561,6 +662,7 @@ img{display:block}
     <span class="logo-txt">Music Universe</span>
   </div>
 
+  <!-- Desktop nav pills -->
   <div class="pills">
     <button class="pill on" data-pg="discover">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -580,13 +682,33 @@ img{display:block}
     </button>
   </div>
 
+  <!-- Desktop search -->
   <div class="sbox">
     <svg class="s-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42C1 8.14 1 11.71 1 11.71s0 3.57.46 5.29a2.78 2.78 0 0 0 1.95 1.95C5.12 19.42 12 19.42 12 19.42s6.88 0 8.59-.47a2.78 2.78 0 0 0 1.95-1.95C23 15.28 23 11.71 23 11.71s0-3.57-.46-5.29z"/><polygon points="9.75 15.02 15.5 11.71 9.75 8.4 9.75 15.02" fill="currentColor" stroke="none"/></svg>
     <input id="sinp" type="text" autocomplete="off" placeholder="YouTube linki yapıştır..."/>
   </div>
 
+  <!-- Mobile: hamburger button -->
+  <button class="hmbtn" id="hmbtn" aria-label="Menyu" aria-expanded="false">
+    <svg id="ham-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+    <svg id="close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="display:none">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+
+  <!-- Mobile: search icon -->
+  <button class="search-icon-btn" id="search-icon-btn" aria-label="Axtar">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+  </button>
+
   <div class="bar-end">
-    <div class="lw">
+    <!-- Desktop language picker -->
+    <div class="lw" id="lw-desktop">
       <button class="lbtn" id="lbtn"><span id="llbl">AZ</span><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
       <div class="ldrop" id="ldrop">
         <button class="lopt on" data-l="az">🇦🇿 Azərbaycan</button>
@@ -594,7 +716,8 @@ img{display:block}
         <button class="lopt" data-l="ru">🇷🇺 Русский</button>
       </div>
     </div>
-    <button class="ibtn" id="thbtn">
+    <!-- Desktop theme toggle -->
+    <button class="ibtn theme-ibtn" id="thbtn">
       <svg id="ico-m" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       <svg id="ico-s" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
     </button>
@@ -605,6 +728,62 @@ img{display:block}
     </button>
   </div>
 </nav>
+
+<!-- MOBILE SEARCH BAR (slides below topbar) -->
+<div id="mobile-search-bar">
+  <div class="msbox">
+    <svg class="s-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="sinp-mobile" type="text" autocomplete="off" placeholder="YouTube linki yapıştır..."/>
+  </div>
+  <button class="close-search" id="close-search-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+</div>
+
+<!-- HAMBURGER DROPDOWN MENU -->
+<div id="ham-menu" role="navigation" aria-label="Əsas Menyu">
+  <div class="ham-section">
+    <div class="ham-label">Səhifələr</div>
+    <div class="ham-item active" data-pg="discover">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span id="hm-disc">Kəşfet</span>
+    </div>
+    <div class="ham-item" data-pg="saved">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span id="hm-save">Endirilmiş</span>
+    </div>
+    <div class="ham-item" data-pg="playlists">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg>
+      <span id="hm-pl">Playlistlər</span>
+    </div>
+    <div class="ham-item" data-pg="social">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span id="hm-soc">Sosial</span>
+    </div>
+  </div>
+
+  <div class="ham-section">
+    <div class="ham-label">Görünüş</div>
+    <div class="ham-theme-row">
+      <span class="ham-theme-lbl" id="hm-theme-lbl">Qaranlıq rejim</span>
+      <div class="theme-toggle" id="ham-theme-toggle"></div>
+    </div>
+  </div>
+
+  <div class="ham-section">
+    <div class="ham-label">Dil / Language</div>
+    <div class="ham-row">
+      <button class="ham-lang-btn on" data-l="az">🇦🇿 AZ</button>
+      <button class="ham-lang-btn" data-l="en">🇬🇧 EN</button>
+      <button class="ham-lang-btn" data-l="ru">🇷🇺 RU</button>
+    </div>
+  </div>
+
+  <button class="ham-auth-btn signin" id="ham-auth-btn">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg>
+    <span id="ham-auth-lbl">Google ilə daxil ol</span>
+  </button>
+</div>
 
 <!-- PAGES -->
 <main id="main">
@@ -732,14 +911,44 @@ img{display:block}
       <span class="ptime r" id="p-dur">0:00</span>
     </div>
   </div>
+  <!-- Desktop player actions -->
   <div class="pacts">
     <button class="pbtn" id="b-bar-pl" title="Playlist-ə əlavə et"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
     <button class="pbtn" id="b-bar-dl" title="Endir"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
     <button class="pbtn" id="b-bar-sh" title="Paylaş"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
   </div>
+  <!-- Volume (desktop) -->
   <div class="pvol">
     <svg class="vico" id="v-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
     <div class="vtrack" id="vtrack"><div class="vfill" id="vfill"></div></div>
+  </div>
+  <!-- Mobile/tablet meatball menu -->
+  <button class="p-meatball" id="p-meatball" aria-label="Əlavə seçimlər">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+  </button>
+</div>
+
+<!-- Player extra menu (mobile/tablet) -->
+<div id="p-extra-menu">
+  <div class="pem-item" id="pem-pl">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span id="pem-pl-lbl">Playlist-ə əlavə et</span>
+  </div>
+  <div class="pem-item" id="pem-dl">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <span id="pem-dl-lbl">Endir</span>
+  </div>
+  <div class="pem-item" id="pem-sh">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    <span id="pem-sh-lbl">Paylaş</span>
+  </div>
+  <div class="pem-item" id="pem-shuf">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+    <span id="pem-shuf-lbl">Qarışdırma</span>
+  </div>
+  <div class="pem-item" id="pem-rep">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+    <span id="pem-rep-lbl">Təkrar</span>
   </div>
 </div>
 
@@ -763,9 +972,7 @@ img{display:block}
 </div></div>
 
 <script>
-/* ═══════════════════════════════════════
-   FIREBASE CONFIG
-═══════════════════════════════════════ */
+/* ══ FIREBASE CONFIG ══ */
 const FB_CFG = {
   apiKey: "AIzaSyDBRbEpFepTcNcRvYDMx4oIxO7iFCBQmtk",
   authDomain: "lifecanvas12.firebaseapp.com",
@@ -781,7 +988,7 @@ if (FB) firebase.initializeApp(FB_CFG);
 const fbA = FB ? firebase.auth()     : null;
 const fbD = FB ? firebase.database() : null;
 
-/* ═══ I18N ═══ */
+/* ══ I18N ══ */
 const TX = {
   az:{disc:"Kəşfet",save:"Endirilmiş",pls:"Playlistlər",soc:"Sosial",
     hh:"Musiqinin <em>Kainatı</em>nı<br>Kəşf Elə",hp:"YouTube-un bütün musiqisi — tamamilə pulsuz.",
@@ -803,10 +1010,8 @@ const TX = {
     dmbtn:"💬 Mesaj göndər",nowpl:"İndi çalınır",online:"onlayn",
     selfr:"Dost seçin",selhint:"Sol tərəfdən dost seçin.",
     typemsg:"Mesaj yaz...",selsong:"Mahnı seçin",resfor:"Nəticələr",
-    rec_tip:"Mahnını çal, sonra ⬇ Endir düyməsinə bas — audio cihazında saxlanılır.",
-    dl_hint:"Mahnı endirilir, bir az gözləyin...",
-    dl_done:"Endirildi — oflayn dinləyə bilərsən!",
-    dl_fail:"Endirmə mümkün olmadı. Mahnını çalın, sonra yenidən cəhd edin.",
+    themeDark:"Qaranlıq rejim",themeLight:"İşıqlı rejim",
+    addTopl:"Playlist-ə əlavə et",share:"Paylaş",shuffle:"Qarışdırma",repeat:"Təkrar",
   },
   en:{disc:"Discover",save:"Downloads",pls:"Playlists",soc:"Social",
     hh:"Discover the <em>Universe</em><br>of Music",hp:"All YouTube music — completely free.",
@@ -828,10 +1033,8 @@ const TX = {
     dmbtn:"💬 Send message",nowpl:"Now playing",online:"online",
     selfr:"Select friend",selhint:"Select a friend from the left.",
     typemsg:"Type a message...",selsong:"Select a song",resfor:"Results",
-    rec_tip:"Play the song, then press ⬇ Download — audio is saved to your device storage.",
-    dl_hint:"Downloading, please wait...",
-    dl_done:"Downloaded — available offline!",
-    dl_fail:"Download failed. Play the song first, then try again.",
+    themeDark:"Dark mode",themeLight:"Light mode",
+    addTopl:"Add to Playlist",share:"Share",shuffle:"Shuffle",repeat:"Repeat",
   },
   ru:{disc:"Открыть",save:"Загрузки",pls:"Плейлисты",soc:"Социальное",
     hh:"Исследуй <em>Вселенную</em><br>Музыки",hp:"Вся музыка YouTube — совершенно бесплатно.",
@@ -853,10 +1056,8 @@ const TX = {
     dmbtn:"💬 Написать",nowpl:"Сейчас играет",online:"онлайн",
     selfr:"Выберите друга",selhint:"Выберите друга слева.",
     typemsg:"Написать...",selsong:"Выберите песню",resfor:"Результаты",
-    rec_tip:"Воспроизведи песню, затем нажми ⬇ Скачать — аудио сохранится в браузере.",
-    dl_hint:"Загрузка, подождите...",
-    dl_done:"Загружено — доступно офлайн!",
-    dl_fail:"Не удалось загрузить. Сначала воспроизведи песню.",
+    themeDark:"Тёмный режим",themeLight:"Светлый режим",
+    addTopl:"В плейлист",share:"Поделиться",shuffle:"Перемешать",repeat:"Повтор",
   }
 };
 
@@ -864,7 +1065,7 @@ let LANG  = localStorage.getItem("mu_lang")  || "az";
 let THEME = localStorage.getItem("mu_theme") || "dark";
 const T = k => TX[LANG]?.[k] ?? TX.az[k] ?? k;
 
-/* ═══ DEXIE ═══ */
+/* ══ DEXIE ══ */
 const ldb = new Dexie("MUv10");
 ldb.version(1).stores({
   saved:    "++id, &videoId, title, artist, thumb",
@@ -880,7 +1081,7 @@ ldb.version(2).stores({
   pl_songs:  "++id, [playlistId+videoId], playlistId, videoId, title, artist, thumb",
 });
 
-/* ═══ CATALOG ═══ */
+/* ══ CATALOG ══ */
 const SONGS=[
   {v:"3JZ4pnNtyxQ",t:"Shape of You",        a:"Ed Sheeran",       k:"ed sheeran"},
   {v:"kffacxfA7G4",t:"Baby",                 a:"Justin Bieber",    k:"justin bieber"},
@@ -926,7 +1127,7 @@ const SONGS=[
 const TH  = v=>`https://img.youtube.com/vi/${v}/mqdefault.jpg`;
 const PHO = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%230e1521'/%3E%3Ctext x='100' y='118' font-size='72' text-anchor='middle' fill='%23283858'%3E%E2%99%AA%3C/text%3E%3C/svg%3E`;
 
-/* ═══ STATE ═══ */
+/* ══ STATE ══ */
 const S={
   ytOk:false,ytp:null,
   list:SONGS.map(s=>({videoId:s.v,title:s.t,artist:s.a,thumb:TH(s.v),kw:s.k})),
@@ -939,7 +1140,7 @@ const S={
   _downloading: false,
 };
 
-/* ═══ UTILS ═══ */
+/* ══ UTILS ══ */
 const X=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const fmt=s=>(isFinite(s)&&s>=0)?`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`:"0:00";
 let _tt;
@@ -949,54 +1150,246 @@ const closeM=id=>document.getElementById(id).classList.remove("open");
 window.closeM=closeM;
 document.querySelectorAll(".moverlay").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)o.classList.remove("open");}));
 
-/* ═══ THEME ═══ */
+/* ══ HAMBURGER MENU ══ */
+let hamOpen = false;
+
+function openHam(){
+  hamOpen = true;
+  document.getElementById("ham-menu").classList.add("open");
+  document.getElementById("ham-icon").style.display = "none";
+  document.getElementById("close-icon").style.display = "";
+  document.getElementById("hmbtn").classList.add("active");
+  document.getElementById("hmbtn").setAttribute("aria-expanded","true");
+}
+function closeHam(){
+  hamOpen = false;
+  document.getElementById("ham-menu").classList.remove("open");
+  document.getElementById("ham-icon").style.display = "";
+  document.getElementById("close-icon").style.display = "none";
+  document.getElementById("hmbtn").classList.remove("active");
+  document.getElementById("hmbtn").setAttribute("aria-expanded","false");
+}
+function toggleHam(){ hamOpen ? closeHam() : openHam(); }
+
+document.getElementById("hmbtn").addEventListener("click", e => { e.stopPropagation(); toggleHam(); });
+
+// Ham menu nav items
+document.querySelectorAll("#ham-menu .ham-item[data-pg]").forEach(item => {
+  item.addEventListener("click", () => {
+    const pg = item.dataset.pg;
+    switchPage(pg);
+    closeHam();
+  });
+});
+
+// Sync ham menu active state
+function syncHamActive(pg){
+  document.querySelectorAll("#ham-menu .ham-item[data-pg]").forEach(item => {
+    item.classList.toggle("active", item.dataset.pg === pg);
+  });
+}
+
+// Ham theme toggle
+const hamThemeToggle = document.getElementById("ham-theme-toggle");
+function updateHamTheme(){
+  hamThemeToggle.classList.toggle("light", THEME === "light");
+  document.getElementById("hm-theme-lbl").textContent = THEME === "dark" ? T("themeDark") : T("themeLight");
+}
+hamThemeToggle.addEventListener("click", () => {
+  THEME = THEME === "dark" ? "light" : "dark";
+  applyTheme();
+  updateHamTheme();
+  toast(THEME === "dark" ? "🌙 Dark" : "☀️ Light");
+});
+
+// Ham lang buttons
+document.querySelectorAll(".ham-lang-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    LANG = btn.dataset.l;
+    localStorage.setItem("mu_lang", LANG);
+    document.querySelectorAll(".ham-lang-btn").forEach(b => b.classList.toggle("on", b.dataset.l === LANG));
+    applyLang();
+    renderDefault();
+    closeHam();
+  });
+});
+
+// Ham auth button
+document.getElementById("ham-auth-btn").addEventListener("click", () => {
+  authToggle();
+  closeHam();
+});
+
+// Close ham on outside click
+document.addEventListener("click", e => {
+  if(hamOpen && !e.target.closest("#ham-menu") && !e.target.closest("#hmbtn")){
+    closeHam();
+  }
+});
+
+/* ══ MOBILE SEARCH ══ */
+function openMobileSearch(){
+  document.getElementById("mobile-search-bar").classList.add("open");
+  document.body.classList.add("search-open");
+  setTimeout(() => document.getElementById("sinp-mobile")?.focus(), 80);
+}
+function closeMobileSearch(){
+  document.getElementById("mobile-search-bar").classList.remove("open");
+  document.body.classList.remove("search-open");
+  document.getElementById("sinp-mobile").value = "";
+  document.getElementById("ssec").style.display = "none";
+}
+document.getElementById("search-icon-btn").addEventListener("click", e => {
+  e.stopPropagation();
+  closeHam();
+  openMobileSearch();
+});
+document.getElementById("close-search-btn").addEventListener("click", closeMobileSearch);
+
+// Mobile search input
+document.getElementById("sinp-mobile").addEventListener("input", e => {
+  const raw = e.target.value.trim();
+  const q = raw.toLowerCase();
+  if(!q){ document.getElementById("ssec").style.display = "none"; return; }
+  const ytId = extractYTId(raw);
+  if(ytId){
+    document.getElementById("ssec").style.display = "none";
+    playSong({videoId:ytId,title:"YouTube: "+ytId,artist:"YouTube",thumb:TH(ytId)});
+    e.target.value = "";
+    closeMobileSearch();
+    return;
+  }
+  clearTimeout(_st);
+  _st = setTimeout(() => doSearch(q), 320);
+});
+
+/* ══ PLAYER MEATBALL MENU ══ */
+const pMeatball = document.getElementById("p-meatball");
+const pExtraMenu = document.getElementById("p-extra-menu");
+let meatballOpen = false;
+
+function toggleMeatball(e){
+  e.stopPropagation();
+  meatballOpen = !meatballOpen;
+  pExtraMenu.classList.toggle("open", meatballOpen);
+}
+function closeMeatball(){
+  meatballOpen = false;
+  pExtraMenu.classList.remove("open");
+}
+pMeatball.addEventListener("click", toggleMeatball);
+
+document.getElementById("pem-pl").addEventListener("click", () => {
+  closeMeatball();
+  const song = S.list[S.idx];
+  if(!song){ toast("⚠ Əvvəlcə mahnı seçin"); return; }
+  openAddToPL(song);
+});
+document.getElementById("pem-dl").addEventListener("click", async () => {
+  closeMeatball();
+  const song = S.list[S.idx];
+  if(!song){ toast("⚠ Əvvəlcə mahnı seçin"); return; }
+  if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){ toast("📱 Artıq endirilmişdir"); return; }
+  await startDownload(song, null, null,
+    () => toast("✅ Endirildi!"),
+    () => {}
+  );
+});
+document.getElementById("pem-sh").addEventListener("click", async () => {
+  closeMeatball();
+  const song = S.list[S.idx];
+  if(!song){ toast("⚠ Əvvəlcə mahnı seçin"); return; }
+  const url = `https://www.youtube.com/watch?v=${song.videoId}`;
+  if(navigator.share){ try{ await navigator.share({title:song.title,text:`${song.title} — ${song.artist}`,url}); return; }catch(_){} }
+  try{ await navigator.clipboard.writeText(url); toast("🔗 Link kopyalandı!"); }catch(_){ toast("Link: "+url); }
+});
+document.getElementById("pem-shuf").addEventListener("click", () => {
+  closeMeatball();
+  S.shuffle = !S.shuffle;
+  document.getElementById("b-shuf").classList.toggle("on", S.shuffle);
+  document.getElementById("pem-shuf").style.color = S.shuffle ? "var(--g)" : "";
+  toast(S.shuffle ? "🔀 Qarışdırma" : "Qapalı");
+});
+document.getElementById("pem-rep").addEventListener("click", () => {
+  closeMeatball();
+  S.repeat = !S.repeat;
+  document.getElementById("b-rep").classList.toggle("on", S.repeat);
+  document.getElementById("pem-rep").style.color = S.repeat ? "var(--g)" : "";
+  toast(S.repeat ? "🔁 Təkrar" : "Qapalı");
+});
+
+// Close meatball on outside click
+document.addEventListener("click", e => {
+  if(meatballOpen && !e.target.closest("#p-extra-menu") && !e.target.closest("#p-meatball")){
+    closeMeatball();
+  }
+});
+
+/* ══ THEME ══ */
 function applyTheme(){
-  document.documentElement.setAttribute("data-theme",THEME);
-  document.getElementById("ico-m").style.display=THEME==="dark"?"":"none";
-  document.getElementById("ico-s").style.display=THEME==="light"?"":"none";
-  localStorage.setItem("mu_theme",THEME);
+  document.documentElement.setAttribute("data-theme", THEME);
+  document.getElementById("ico-m").style.display = THEME==="dark" ? "" : "none";
+  document.getElementById("ico-s").style.display = THEME==="light" ? "" : "none";
+  localStorage.setItem("mu_theme", THEME);
+  updateHamTheme();
 }
 applyTheme();
-document.getElementById("thbtn").onclick=()=>{THEME=THEME==="dark"?"light":"dark";applyTheme();toast(THEME==="dark"?"🌙 Dark":"☀️ Light");};
-
-/* ═══ LANGUAGE ═══ */
-function applyLang(){
-  document.documentElement.lang=LANG;
-  document.getElementById("llbl").textContent=LANG.toUpperCase();
-  const s=(id,k,html=false)=>{const e=document.getElementById(id);if(!e)return;html?e.innerHTML=T(k):e.textContent=T(k);};
-  s("n-disc","disc");s("n-save","save");s("n-pl","pls");s("n-soc","soc");
-  s("hero-h","hh",true);s("hero-p","hp");s("c1","c1");s("c2","c2");s("c3","c3");s("c4","c4");
-  s("pop-lbl","pop");s("sv-h","svh");s("no-sv-p","nosv",true);
-  s("pl-h","plh");s("newpl-lbl","newpl");
-  s("wall-h","wallh");s("wall-p","wallp");s("gsign-lbl","gsign");
-  s("tl-fr","fr");s("tl-rq","rq");s("add-lbl","add");
-  s("auth-lbl",S.user?"signout":"signin");
-  s("echint","selhint");
-  const fi=document.getElementById("fr-inp");if(fi)fi.placeholder=T("frph");
-  const si=document.getElementById("sinp");if(si)si.placeholder=T("sph");
-  const mi=document.getElementById("msginput");if(mi)mi.placeholder=T("typemsg");
-  document.querySelectorAll(".lopt").forEach(o=>o.classList.toggle("on",o.dataset.l===LANG));
-}
-document.getElementById("lbtn").onclick=()=>document.getElementById("ldrop").classList.toggle("open");
-document.querySelectorAll(".lopt").forEach(o=>o.onclick=()=>{
-  LANG=o.dataset.l;localStorage.setItem("mu_lang",LANG);
-  document.getElementById("ldrop").classList.remove("open");
-  applyLang();renderDefault();
+document.getElementById("thbtn").addEventListener("click", () => {
+  THEME = THEME==="dark" ? "light" : "dark";
+  applyTheme();
+  toast(THEME==="dark" ? "🌙 Dark" : "☀️ Light");
 });
-document.addEventListener("click",e=>{if(!e.target.closest(".lw"))document.getElementById("ldrop").classList.remove("open");});
 
-/* ═══ NAV ═══ */
-document.querySelectorAll(".pill").forEach(b=>b.addEventListener("click",()=>{
-  document.querySelectorAll(".pill").forEach(x=>x.classList.remove("on"));
-  document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
-  b.classList.add("on");
-  document.getElementById(`page-${b.dataset.pg}`).classList.add("on");
-  if(b.dataset.pg==="saved")renderDownloads();
-  if(b.dataset.pg==="playlists")renderPlaylists();
-  if(b.dataset.pg!=="social"){const sg=document.getElementById("soc-main");if(sg)sg.classList.remove("chat-open");}
+/* ══ LANGUAGE ══ */
+function applyLang(){
+  document.documentElement.lang = LANG;
+  document.getElementById("llbl").textContent = LANG.toUpperCase();
+  const s=(id,k,html=false)=>{ const e=document.getElementById(id); if(!e) return; html ? e.innerHTML=T(k) : e.textContent=T(k); };
+  s("n-disc","disc"); s("n-save","save"); s("n-pl","pls"); s("n-soc","soc");
+  s("hm-disc","disc"); s("hm-save","save"); s("hm-pl","pls"); s("hm-soc","soc");
+  s("hero-h","hh",true); s("hero-p","hp"); s("c1","c1"); s("c2","c2"); s("c3","c3"); s("c4","c4");
+  s("pop-lbl","pop"); s("sv-h","svh"); s("no-sv-p","nosv",true);
+  s("pl-h","plh"); s("newpl-lbl","newpl");
+  s("wall-h","wallh"); s("wall-p","wallp"); s("gsign-lbl","gsign");
+  s("tl-fr","fr"); s("tl-rq","rq"); s("add-lbl","add");
+  s("auth-lbl", S.user ? "signout" : "signin");
+  s("ham-auth-lbl", S.user ? "signout" : "gsign");
+  s("echint","selhint");
+  s("pem-pl-lbl","addTopl"); s("pem-dl-lbl","dosave");
+  s("pem-sh-lbl","share"); s("pem-shuf-lbl","shuffle"); s("pem-rep-lbl","repeat");
+  updateHamTheme();
+  const fi = document.getElementById("fr-inp"); if(fi) fi.placeholder = T("frph");
+  const si = document.getElementById("sinp"); if(si) si.placeholder = T("sph");
+  const sim = document.getElementById("sinp-mobile"); if(sim) sim.placeholder = T("sph");
+  const mi = document.getElementById("msginput"); if(mi) mi.placeholder = T("typemsg");
+  document.querySelectorAll(".lopt").forEach(o => o.classList.toggle("on", o.dataset.l===LANG));
+  document.querySelectorAll(".ham-lang-btn").forEach(o => o.classList.toggle("on", o.dataset.l===LANG));
+}
+
+document.getElementById("lbtn").addEventListener("click", () => document.getElementById("ldrop").classList.toggle("open"));
+document.querySelectorAll(".lopt").forEach(o => o.addEventListener("click", () => {
+  LANG = o.dataset.l; localStorage.setItem("mu_lang", LANG);
+  document.getElementById("ldrop").classList.remove("open");
+  applyLang(); renderDefault();
 }));
+document.addEventListener("click", e => {
+  if(!e.target.closest(".lw")) document.getElementById("ldrop").classList.remove("open");
+});
 
-/* ═══ YOUTUBE API ═══ */
+/* ══ PAGE SWITCHING ══ */
+function switchPage(pg){
+  document.querySelectorAll(".pill").forEach(x => x.classList.toggle("on", x.dataset.pg===pg));
+  document.querySelectorAll(".page").forEach(x => x.classList.remove("on"));
+  document.getElementById(`page-${pg}`).classList.add("on");
+  syncHamActive(pg);
+  if(pg==="saved") renderDownloads();
+  if(pg==="playlists") renderPlaylists();
+  if(pg!=="social"){ const sg=document.getElementById("soc-main"); if(sg) sg.classList.remove("chat-open"); }
+}
+
+document.querySelectorAll(".pill").forEach(b => b.addEventListener("click", () => switchPage(b.dataset.pg)));
+
+/* ══ YOUTUBE API ══ */
 window.onYouTubeIframeAPIReady=()=>{
   S.ytp=new YT.Player("yt-player",{
     height:"1",width:"1",
@@ -1009,14 +1402,11 @@ function onYTS(e){
   if(e.data===P.PLAYING){S.playing=true;setPUI("play");startTimer();const d=S.ytp.getVideoData?.();if(d?.title)updPI(d.title,d.author||"",null);}
   else if(e.data===P.PAUSED){S.playing=false;setPUI("pause");stopTimer();}
   else if(e.data===P.BUFFERING){setPUI("loading");}
-  else if(e.data===P.ENDED){
-    S.playing=false;stopTimer();
-    S.repeat?(S.ytp.seekTo(0),S.ytp.playVideo()):nextSong();
-  }
+  else if(e.data===P.ENDED){S.playing=false;stopTimer();S.repeat?(S.ytp.seekTo(0),S.ytp.playVideo()):nextSong();}
 }
 function onYTE(e){const m={2:"Yanlış ID",5:"HTML5 xəta",100:"Tapılmadı",101:"Embed qadağandır",150:"Embed qadağandır"};toast(`⚠ ${m[e.data]||"Xəta"}`);setTimeout(()=>nextSong(),1800);}
 
-/* ═══ PLAY ═══ */
+/* ══ PLAY ══ */
 async function playSong(song){
   stopOffAudio();
   let idx=S.list.findIndex(s=>s.videoId===song.videoId);
@@ -1026,20 +1416,13 @@ async function playSong(song){
   document.querySelector(`.card[data-vid="${song.videoId}"]`)?.classList.add("now");
   updPI(song.title,song.artist,song.thumb||TH(song.videoId));
   setPUI("loading");
-
   const cached = await ldb.downloads.where("videoId").equals(song.videoId).first().catch(()=>null)
               || await ldb.offline.where("videoId").equals(song.videoId).first().catch(()=>null);
-  if(cached && cached.blob){
-    playFromBlob(cached, song);
+  if(cached&&cached.blob){ playFromBlob(cached,song);
     if(FB&&S.user) fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});
     return;
   }
-
-  if(!navigator.onLine){
-    toast("📵 İnternet yoxdur — əvvəlcə endir");
-    setPUI("pause"); return;
-  }
-
+  if(!navigator.onLine){toast("📵 İnternet yoxdur — əvvəlcə endir");setPUI("pause");return;}
   toast(`▶ ${song.title}`);
   if(FB&&S.user) fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});
   if(!S.ytOk){toast("⏳ Player yüklənir...");setPUI("pause");return;}
@@ -1049,29 +1432,17 @@ async function playSong(song){
 function playFromBlob(rec,song){
   const blobMime=rec.mime||"audio/mpeg";
   const url=URL.createObjectURL(new Blob([rec.blob],{type:blobMime}));
-  S.offAudio=new Audio(url);
-  S.offAudio._blobUrl=url;
+  S.offAudio=new Audio(url); S.offAudio._blobUrl=url;
   S.offAudio.volume=S.vol/100;
   S.offAudio.onplay=()=>{S.playing=true;setPUI("play");};
   S.offAudio.onpause=()=>{S.playing=false;setPUI("pause");};
   S.offAudio.onended=()=>{S.playing=false;stopTimer();S.repeat?(S.offAudio.currentTime=0,S.offAudio.play()):nextSong();};
-  S.offAudio.ontimeupdate=()=>{
-    if(!S.offAudio)return;
-    const d=S.offAudio.duration,c=S.offAudio.currentTime;if(!d||isNaN(d))return;
-    document.getElementById("pfill").style.width=(c/d*100)+"%";
-    document.getElementById("p-cur").textContent=fmt(c);document.getElementById("p-dur").textContent=fmt(d);
-  };
+  S.offAudio.ontimeupdate=()=>{if(!S.offAudio)return;const d=S.offAudio.duration,c=S.offAudio.currentTime;if(!d||isNaN(d))return;document.getElementById("pfill").style.width=(c/d*100)+"%";document.getElementById("p-cur").textContent=fmt(c);document.getElementById("p-dur").textContent=fmt(d);};
   S.offAudio.play().catch(()=>toast("❌ Oflayn çalma xətası"));
   toast(`📱 ${song.title}`);
 }
 function stopOffAudio(){
-  if(S.offAudio){
-    const a=S.offAudio;
-    S.offAudio=null;
-    a.ontimeupdate=null;a.onplay=null;a.onpause=null;a.onended=null;a.onerror=null;
-    a.pause();try{a.src='';}catch(_){}
-    try{if(a._blobUrl)URL.revokeObjectURL(a._blobUrl);}catch(_){}
-  }
+  if(S.offAudio){const a=S.offAudio;S.offAudio=null;a.ontimeupdate=null;a.onplay=null;a.onpause=null;a.onended=null;a.onerror=null;a.pause();try{a.src='';}catch(_){}try{if(a._blobUrl)URL.revokeObjectURL(a._blobUrl);}catch(_){}}
 }
 
 function updPI(title,artist,src){
@@ -1086,153 +1457,87 @@ function setPUI(s){
   document.getElementById("p-spin").style.display=s==="loading"?"flex":"none";
 }
 
-/* ═══ CONTROLS ═══ */
-document.getElementById("b-play").onclick=()=>{
+/* ══ CONTROLS ══ */
+document.getElementById("b-play").addEventListener("click", () => {
   if(S.offAudio){S.offAudio.paused?S.offAudio.play():S.offAudio.pause();return;}
   if(!S.ytOk)return;if(S.idx<0){playSong(S.list[0]);return;}
   S.playing?S.ytp.pauseVideo():S.ytp.playVideo();
-};
-document.getElementById("b-prev").onclick=()=>{stopOffAudio();const i=S.idx>0?S.idx-1:S.list.length-1;if(S.list[i])playSong(S.list[i]);};
-document.getElementById("b-next").onclick=()=>nextSong();
+});
+document.getElementById("b-prev").addEventListener("click", ()=>{stopOffAudio();const i=S.idx>0?S.idx-1:S.list.length-1;if(S.list[i])playSong(S.list[i]);});
+document.getElementById("b-next").addEventListener("click", ()=>nextSong());
 function nextSong(){stopOffAudio();if(S.shuffle){playSong(S.list[Math.floor(Math.random()*S.list.length)]);return;}const n=S.idx<S.list.length-1?S.idx+1:0;if(S.list[n])playSong(S.list[n]);}
-document.getElementById("b-rep").onclick=()=>{S.repeat=!S.repeat;document.getElementById("b-rep").classList.toggle("on",S.repeat);toast(S.repeat?"🔁 Təkrar":"Qapalı");};
-document.getElementById("b-shuf").onclick=()=>{S.shuffle=!S.shuffle;document.getElementById("b-shuf").classList.toggle("on",S.shuffle);toast(S.shuffle?"🔀 Qarışdırma":"Qapalı");};
+document.getElementById("b-rep").addEventListener("click", ()=>{S.repeat=!S.repeat;document.getElementById("b-rep").classList.toggle("on",S.repeat);toast(S.repeat?"🔁 Təkrar":"Qapalı");});
+document.getElementById("b-shuf").addEventListener("click", ()=>{S.shuffle=!S.shuffle;document.getElementById("b-shuf").classList.toggle("on",S.shuffle);toast(S.shuffle?"🔀 Qarışdırma":"Qapalı");});
 
 function startTimer(){stopTimer();S.timer=setInterval(()=>{if(!S.ytOk||!S.ytp||S.offAudio)return;const c=S.ytp.getCurrentTime()||0,d=S.ytp.getDuration()||0,b=S.ytp.getVideoLoadedFraction()||0;if(d>0){document.getElementById("pfill").style.width=(c/d*100)+"%";document.getElementById("pbuf").style.width=(b*100)+"%";document.getElementById("p-cur").textContent=fmt(c);document.getElementById("p-dur").textContent=fmt(d);}},500);}
 function stopTimer(){clearInterval(S.timer);S.timer=null;}
 
-document.getElementById("ptrack").onclick=e=>{const r=e.currentTarget.getBoundingClientRect(),p=(e.clientX-r.left)/r.width;if(S.offAudio&&S.offAudio.duration){S.offAudio.currentTime=p*S.offAudio.duration;return;}if(!S.ytOk)return;const d=S.ytp.getDuration()||0;if(!d)return;S.ytp.seekTo(p*d,true);};
-document.getElementById("vtrack").onclick=e=>{const r=e.currentTarget.getBoundingClientRect(),v=Math.round(Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100)));S.vol=v;if(S.ytOk)S.ytp.setVolume(v);if(S.offAudio)S.offAudio.volume=v/100;document.getElementById("vfill").style.width=v+"%";};
-document.getElementById("v-ico").onclick=()=>{if(!S.ytOk)return;S.ytp.isMuted()?(S.ytp.unMute(),document.getElementById("vfill").style.width=S.vol+"%",toast("🔊")):(S.ytp.mute(),document.getElementById("vfill").style.width="0%",toast("🔇"));};
+document.getElementById("ptrack").addEventListener("click", e=>{const r=e.currentTarget.getBoundingClientRect(),p=(e.clientX-r.left)/r.width;if(S.offAudio&&S.offAudio.duration){S.offAudio.currentTime=p*S.offAudio.duration;return;}if(!S.ytOk)return;const d=S.ytp.getDuration()||0;if(!d)return;S.ytp.seekTo(p*d,true);});
+document.getElementById("vtrack").addEventListener("click", e=>{const r=e.currentTarget.getBoundingClientRect(),v=Math.round(Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100)));S.vol=v;if(S.ytOk)S.ytp.setVolume(v);if(S.offAudio)S.offAudio.volume=v/100;document.getElementById("vfill").style.width=v+"%";});
+document.getElementById("v-ico").addEventListener("click", ()=>{if(!S.ytOk)return;S.ytp.isMuted()?(S.ytp.unMute(),document.getElementById("vfill").style.width=S.vol+"%",toast("🔊")):(S.ytp.mute(),document.getElementById("vfill").style.width="0%",toast("🔇"));});
 document.getElementById("vfill").style.width=S.vol+"%";
 
-/* ── Player Bar actions ── */
-document.getElementById("b-bar-pl").onclick=()=>{
-  const song=S.list[S.idx];
-  if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
-  openAddToPL(song);
-};
-document.getElementById("b-bar-dl").onclick=async()=>{
-  const song=S.list[S.idx];
-  if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
-  if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){toast(`📱 Artıq endirilmişdir`);return;}
+/* Desktop player action buttons */
+document.getElementById("b-bar-pl").addEventListener("click", ()=>{
+  const song=S.list[S.idx]; if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;} openAddToPL(song);
+});
+document.getElementById("b-bar-dl").addEventListener("click", async()=>{
+  const song=S.list[S.idx]; if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
+  if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){toast("📱 Artıq endirilmişdir");return;}
   document.getElementById("b-bar-dl").style.color="var(--g)";
-  await startDownload(song,null,null,
-    ()=>{document.getElementById("b-bar-dl").style.color="";toast("✅ Endirildi!");},
-    ()=>{document.getElementById("b-bar-dl").style.color="";}
-  );
-};
-document.getElementById("b-bar-sh").onclick=async()=>{
-  const song=S.list[S.idx];
-  if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
+  await startDownload(song,null,null,()=>{document.getElementById("b-bar-dl").style.color="";toast("✅ Endirildi!");},()=>{document.getElementById("b-bar-dl").style.color="";});
+});
+document.getElementById("b-bar-sh").addEventListener("click", async()=>{
+  const song=S.list[S.idx]; if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
   const url=`https://www.youtube.com/watch?v=${song.videoId}`;
   if(navigator.share){try{await navigator.share({title:song.title,text:`${song.title} — ${song.artist}`,url});return;}catch(_){}}
-  try{await navigator.clipboard.writeText(url);toast("🔗 Link kopyalandı!");}
-  catch(_){toast("Link: "+url);}
-};
+  try{await navigator.clipboard.writeText(url);toast("🔗 Link kopyalandı!");}catch(_){toast("Link: "+url);}
+});
 
-/* ═══ DOWNLOAD ═══ */
-async function downloadAndSave(song, setProgress){
-  const apiRes = await fetch(`/api/dl?v=${song.videoId}`, {
-    signal: AbortSignal.timeout(58000),
-  });
-  if (!apiRes.ok) {
-    const j = await apiRes.json().catch(() => ({}));
-    throw new Error(`Server ${apiRes.status}: ${j.detail || j.error || "xəta"}`);
-  }
-  const apiJson = await apiRes.json();
-  if (!apiJson.ok || !apiJson.link) {
-    throw new Error(apiJson.error || "MP3 linki alınmadı");
-  }
-
+/* ══ DOWNLOAD ══ */
+async function downloadAndSave(song,setProgress){
+  const apiRes=await fetch(`/api/dl?v=${song.videoId}`,{signal:AbortSignal.timeout(58000)});
+  if(!apiRes.ok){const j=await apiRes.json().catch(()=>({}));throw new Error(`Server ${apiRes.status}: ${j.detail||j.error||"xəta"}`);}
+  const apiJson=await apiRes.json();
+  if(!apiJson.ok||!apiJson.link){throw new Error(apiJson.error||"MP3 linki alınmadı");}
   setProgress(10);
-
-  const audioRes = await fetch(apiJson.link, {
-    signal: AbortSignal.timeout(120000),
-  });
-  if (!audioRes.ok) throw new Error(`Audio fetch ${audioRes.status}`);
-
-  const mime = audioRes.headers.get("content-type") || "audio/mpeg";
-  const total = parseInt(audioRes.headers.get("content-length") || "0", 10);
-  const reader = audioRes.body.getReader();
-  const chunks = [];
-  let received = 0, tick = 0;
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    chunks.push(value);
-    received += value.byteLength;
-    if (total > 0) setProgress(Math.min(95, Math.round(10 + received / total * 85)));
-    else { tick++; setProgress(Math.min(90, 10 + tick * 2)); }
-  }
-
-  const blob = new Blob(chunks, { type: mime });
-  const data = new Uint8Array(await blob.arrayBuffer());
-
-  await ldb.downloads.put({
-    videoId: song.videoId, title: song.title, artist: song.artist,
-    thumb: song.thumb || TH(song.videoId), mime,
-    blob: data, addedAt: Date.now(),
-  });
-  await ldb.offline.put({
-    videoId: song.videoId, title: song.title, artist: song.artist,
-    thumb: song.thumb || TH(song.videoId), mime, blob: data,
-  });
-
-  S.downloads.add(song.videoId);
-  S.offline.add(song.videoId);
-
-  const card = document.querySelector(`.card[data-vid="${song.videoId}"]`);
-  if (card) {
-    const sb = card.querySelector(".cb-save");
-    if (sb) { sb.className = "cb cb-save on"; sb.textContent = T("saved"); sb.disabled = false; }
-  }
+  const audioRes=await fetch(apiJson.link,{signal:AbortSignal.timeout(120000)});
+  if(!audioRes.ok)throw new Error(`Audio fetch ${audioRes.status}`);
+  const mime=audioRes.headers.get("content-type")||"audio/mpeg";
+  const total=parseInt(audioRes.headers.get("content-length")||"0",10);
+  const reader=audioRes.body.getReader();
+  const chunks=[];let received=0,tick=0;
+  while(true){const{done,value}=await reader.read();if(done)break;chunks.push(value);received+=value.byteLength;if(total>0)setProgress(Math.min(95,Math.round(10+received/total*85)));else{tick++;setProgress(Math.min(90,10+tick*2));}}
+  const blob=new Blob(chunks,{type:mime});
+  const data=new Uint8Array(await blob.arrayBuffer());
+  await ldb.downloads.put({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId),mime,blob:data,addedAt:Date.now()});
+  await ldb.offline.put({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId),mime,blob:data});
+  S.downloads.add(song.videoId); S.offline.add(song.videoId);
+  const card=document.querySelector(`.card[data-vid="${song.videoId}"]`);
+  if(card){const sb=card.querySelector(".cb-save");if(sb){sb.className="cb cb-save on";sb.textContent=T("saved");sb.disabled=false;}}
 }
 
-async function startDownload(song, badgeEl, barEl, onDone, onFail){
-  if(S.downloads.has(song.videoId) || S.offline.has(song.videoId)){
-    toast(`📱 "${song.title}" artıq endirilmişdir`);
-    onDone && onDone(); return;
-  }
-  if(S._downloading){
-    toast("⏳ Başqa bir mahnı endirilir, gözləyin...");
-    onFail && onFail(); return;
-  }
-
-  S._downloading = true;
-  if(badgeEl){ badgeEl.className = "svbadge rec"; badgeEl.textContent = T("rec_ing"); }
-  if(barEl) barEl.classList.add("show");
-
-  const setProgress = pct => {
-    const fill = barEl?.querySelector(".recbar-fill");
-    if(fill) fill.style.width = pct + "%";
-  };
-
-  setProgress(5);
-  toast(`⬇ "${song.title}" endirilir...`);
-
-  try {
-    await downloadAndSave(song, p => setProgress(5 + p * 0.93));
+async function startDownload(song,badgeEl,barEl,onDone,onFail){
+  if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){toast(`📱 "${song.title}" artıq endirilmişdir`);onDone&&onDone();return;}
+  if(S._downloading){toast("⏳ Başqa bir mahnı endirilir, gözləyin...");onFail&&onFail();return;}
+  S._downloading=true;
+  if(badgeEl){badgeEl.className="svbadge rec";badgeEl.textContent=T("rec_ing");}
+  if(barEl)barEl.classList.add("show");
+  const setProgress=pct=>{const fill=barEl?.querySelector(".recbar-fill");if(fill)fill.style.width=pct+"%";};
+  setProgress(5); toast(`⬇ "${song.title}" endirilir...`);
+  try{
+    await downloadAndSave(song,p=>setProgress(5+p*0.93));
     setProgress(100);
-    setTimeout(() => {
-      if(barEl) barEl.classList.remove("show");
-      if(badgeEl){ badgeEl.className = "svbadge offline"; badgeEl.textContent = T("rec_ok"); }
-      toast(`✅ "${song.title}" endirildi — oflayn dinləyə bilərsən!`);
-      renderDownloads();
-      onDone && onDone();
-    }, 400);
-  } catch(err) {
-    if(barEl) barEl.classList.remove("show");
-    if(badgeEl){ badgeEl.className = "svbadge"; badgeEl.textContent = "⬇"; }
+    setTimeout(()=>{if(barEl)barEl.classList.remove("show");if(badgeEl){badgeEl.className="svbadge offline";badgeEl.textContent=T("rec_ok");}toast(`✅ "${song.title}" endirildi — oflayn dinləyə bilərsən!`);renderDownloads();onDone&&onDone();},400);
+  }catch(err){
+    if(barEl)barEl.classList.remove("show");
+    if(badgeEl){badgeEl.className="svbadge";badgeEl.textContent="⬇";}
     toast("❌ Endirmə uğursuz — bir az sonra yenidən cəhd edin.");
-    console.error("[download] xəta:", err.message);
-    onFail && onFail();
-  } finally {
-    S._downloading = false;
-  }
+    console.error("[download] xəta:",err.message); onFail&&onFail();
+  }finally{S._downloading=false;}
 }
 
-/* ═══ CARD ═══ */
+/* ══ CARD ══ */
 function mkCard(song){
   const d=document.createElement("div");d.className="card";d.dataset.vid=song.videoId;
   const dl=S.downloads.has(song.videoId)||S.offline.has(song.videoId);
@@ -1251,65 +1556,48 @@ function mkCard(song){
   d.querySelector(".cb-play").textContent=T("play");
   d.querySelector(".cb-save").textContent=dl?T("saved"):T("dosave");
   d.querySelector(".cb-pl").textContent=T("addpl");
-  d.querySelector(".covl").onclick=()=>playSong(song);
-  d.querySelector(".cb-play").onclick=e=>{e.stopPropagation();playSong(song);};
+  d.querySelector(".covl").addEventListener("click", ()=>playSong(song));
+  d.querySelector(".cb-play").addEventListener("click", e=>{e.stopPropagation();playSong(song);});
   const sb=d.querySelector(".cb-save");
-  sb.onclick=async e=>{
+  sb.addEventListener("click", async e=>{
     e.stopPropagation();
-    if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){
-      toast(`📱 "${song.title}" artıq endirilmişdir`);
-      return;
-    }
+    if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){toast(`📱 "${song.title}" artıq endirilmişdir`);return;}
     sb.disabled=true;sb.textContent="⏳";
-    await startDownload(song,null,null,()=>{
-      sb.className="cb cb-save on";sb.textContent=T("saved");sb.disabled=false;
-    },()=>{sb.disabled=false;sb.textContent=T("dosave");});
-  };
-  d.querySelector(".cb-pl").onclick=e=>{e.stopPropagation();openAddToPL(song);};
+    await startDownload(song,null,null,()=>{sb.className="cb cb-save on";sb.textContent=T("saved");sb.disabled=false;},()=>{sb.disabled=false;sb.textContent=T("dosave");});
+  });
+  d.querySelector(".cb-pl").addEventListener("click", e=>{e.stopPropagation();openAddToPL(song);});
   return d;
 }
 
-/* ═══ DEFAULT GRID ═══ */
+/* ══ DEFAULT GRID ══ */
 function renderDefault(){
   const g=document.getElementById("mgrid");g.innerHTML="";
   for(let i=0;i<12;i++){const sk=document.createElement("div");sk.className="skel";sk.innerHTML=`<div class="skel-i"></div><div class="skel-l"></div><div class="skel-l s"></div>`;g.appendChild(sk);}
   setTimeout(()=>{g.innerHTML="";S.list.slice(0,12).forEach(s=>g.appendChild(mkCard(s)));},400);
 }
 
-/* ═══ SEARCH ═══ */
+/* ══ SEARCH ══ */
 let _st;
 function extractYTId(str){
   str=str.trim();
-  let m=str.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
-  if(m) return m[1];
-  m=str.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
-  if(m) return m[1];
-  m=str.match(/\/embed\/([a-zA-Z0-9_-]{11})/);
-  if(m) return m[1];
-  m=str.match(/^([a-zA-Z0-9_-]{11})$/);
-  if(m) return m[1];
+  let m=str.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/); if(m)return m[1];
+  m=str.match(/[?&]v=([a-zA-Z0-9_-]{11})/); if(m)return m[1];
+  m=str.match(/\/embed\/([a-zA-Z0-9_-]{11})/); if(m)return m[1];
+  m=str.match(/^([a-zA-Z0-9_-]{11})$/); if(m)return m[1];
   return null;
 }
 
-document.getElementById("sinp").addEventListener("input",e=>{
+document.getElementById("sinp").addEventListener("input", e=>{
   clearTimeout(_st);
-  const raw=e.target.value.trim();
-  const q=raw.toLowerCase();
+  const raw=e.target.value.trim(); const q=raw.toLowerCase();
   if(!q){document.getElementById("ssec").style.display="none";return;}
   const ytId=extractYTId(raw);
-  if(ytId){
-    document.getElementById("ssec").style.display="none";
-    playSong({videoId:ytId,title:"YouTube: "+ytId,artist:"YouTube",thumb:TH(ytId)});
-    e.target.value="";
-    return;
-  }
+  if(ytId){document.getElementById("ssec").style.display="none";playSong({videoId:ytId,title:"YouTube: "+ytId,artist:"YouTube",thumb:TH(ytId)});e.target.value="";return;}
   _st=setTimeout(()=>doSearch(q),320);
 });
+
 function doSearch(q){
-  document.querySelectorAll(".pill").forEach(x=>x.classList.remove("on"));
-  document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
-  document.querySelector('.pill[data-pg="discover"]').classList.add("on");
-  document.getElementById("page-discover").classList.add("on");
+  switchPage("discover");
   const ss=document.getElementById("ssec"),gr=document.getElementById("sgrid"),lb=document.getElementById("slbl");
   ss.style.display="block";lb.textContent=`${T("resfor")}: "${q}"`;gr.innerHTML="";
   const res=S.list.filter(s=>s.title.toLowerCase().includes(q)||s.artist.toLowerCase().includes(q)||(s.kw||"").toLowerCase().includes(q)).slice(0,12);
@@ -1321,52 +1609,39 @@ function doSearch(q){
 }
 window.playVID=()=>{const v=document.getElementById("vid-inp")?.value.trim();if(!v){toast("⚠ ID daxil edin");return;}playSong({videoId:v,title:"Video "+v,artist:"YouTube",thumb:TH(v)});};
 
-/* ═══ DOWNLOADS ═══ */
+/* ══ DOWNLOADS ══ */
 async function renderDownloads(){
   const list=document.getElementById("svlist"),nodl=document.getElementById("no-sv");
   let songs=[];
-  try{
-    songs=await ldb.downloads.orderBy("addedAt").reverse().toArray();
-    if(!songs.length) songs=await ldb.offline.toArray();
-  } catch(e){ songs=[]; }
-
+  try{songs=await ldb.downloads.orderBy("addedAt").reverse().toArray();if(!songs.length)songs=await ldb.offline.toArray();}catch(e){songs=[];}
   list.querySelectorAll(".svrow").forEach(x=>x.remove());
   if(!songs.length){nodl.style.display="block";return;}
   nodl.style.display="none";
-
   songs.forEach(song=>{
     const row=document.createElement("div");row.className="svrow";
     row.innerHTML=`
 <div class="svthumb"><img src="${song.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div>
-<div class="svinfo">
-  <div class="svtit">${X(song.title)}</div><div class="svart">${X(song.artist)}</div>
-  <div class="recbar" id="rb-${song.videoId}"><div class="recbar-fill"></div><div class="recbar-pulse"></div></div>
-</div>
+<div class="svinfo"><div class="svtit">${X(song.title)}</div><div class="svart">${X(song.artist)}</div>
+<div class="recbar" id="rb-${song.videoId}"><div class="recbar-fill"></div><div class="recbar-pulse"></div></div></div>
 <span class="svbadge offline" id="bd-${song.videoId}">✓ Endirildi</span>
 <div class="svacts">
-  <button class="act play-a" title="${T("play")}">
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-  </button>
-  <button class="act danger del-a" title="${T("del")}">
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-  </button>
+  <button class="act play-a" title="${T("play")}"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+  <button class="act danger del-a" title="${T("del")}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button>
 </div>`;
-
-    row.querySelector(".play-a").onclick=()=>playSong({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb});
-    row.querySelector(".del-a").onclick=async()=>{
+    row.querySelector(".play-a").addEventListener("click", ()=>playSong({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb}));
+    row.querySelector(".del-a").addEventListener("click", async()=>{
       if(!confirm(`"${song.title}" silinsin?`))return;
       await ldb.downloads.where("videoId").equals(song.videoId).delete().catch(()=>{});
       await ldb.offline.where("videoId").equals(song.videoId).delete().catch(()=>{});
       S.downloads.delete(song.videoId);S.offline.delete(song.videoId);
       toast(`🗑 "${song.title}" silindi`);renderDownloads();
-    };
+    });
     list.appendChild(row);
   });
 }
-
 function renderSaved(){ renderDownloads(); }
 
-/* ═══ PLAYLISTS ═══ */
+/* ══ PLAYLISTS ══ */
 async function renderPlaylists(){
   const c=document.getElementById("pl-list");c.innerHTML="";
   const pls=await ldb.playlists.toArray().catch(()=>[]);
@@ -1381,9 +1656,10 @@ async function renderPlaylists(){
   <button class="act opl"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></button>
   <button class="act danger dpl"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button>
 </div>`;
-    row.querySelector(".opl").onclick=e=>{e.stopPropagation();openPL(pl);};
-    row.querySelector(".dpl").onclick=async e=>{e.stopPropagation();if(!confirm(`"${pl.name}" silinsin?`))return;await ldb.pl_songs.where("playlistId").equals(pl.id).delete().catch(()=>{});await ldb.playlists.delete(pl.id).catch(()=>{});toast(`🗑 "${pl.name}"`);renderPlaylists();};
-    row.onclick=()=>openPL(pl);c.appendChild(row);
+    row.querySelector(".opl").addEventListener("click", e=>{e.stopPropagation();openPL(pl);});
+    row.querySelector(".dpl").addEventListener("click", async e=>{e.stopPropagation();if(!confirm(`"${pl.name}" silinsin?`))return;await ldb.pl_songs.where("playlistId").equals(pl.id).delete().catch(()=>{});await ldb.playlists.delete(pl.id).catch(()=>{});toast(`🗑 "${pl.name}"`);renderPlaylists();});
+    row.addEventListener("click", ()=>openPL(pl));
+    c.appendChild(row);
   }
 }
 
@@ -1395,8 +1671,8 @@ async function openPL(pl){
   songs.forEach(s=>{
     const row=document.createElement("div");row.className="svrow";
     row.innerHTML=`<div class="svthumb"><img src="${s.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="svinfo"><div class="svtit">${X(s.title)}</div><div class="svart">${X(s.artist)}</div></div><div class="svacts"><button class="act"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button><button class="act danger"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div>`;
-    row.querySelectorAll(".act")[0].onclick=()=>playSong({videoId:s.videoId,title:s.title,artist:s.artist,thumb:s.thumb});
-    row.querySelectorAll(".act")[1].onclick=async()=>{await ldb.pl_songs.delete(s.id).catch(()=>{});toast("🗑");openPL(pl);};
+    row.querySelectorAll(".act")[0].addEventListener("click", ()=>playSong({videoId:s.videoId,title:s.title,artist:s.artist,thumb:s.thumb}));
+    row.querySelectorAll(".act")[1].addEventListener("click", async()=>{await ldb.pl_songs.delete(s.id).catch(()=>{});toast("🗑");openPL(pl);});
     sc.appendChild(row);
   });
   openM("m-gen");
@@ -1404,10 +1680,10 @@ async function openPL(pl){
 
 window.playAllPL=async plId=>{const songs=await ldb.pl_songs.where("playlistId").equals(plId).toArray().catch(()=>[]);if(!songs.length){toast(T("plem"));return;}songs.forEach(s=>{if(!S.list.find(p=>p.videoId===s.videoId))S.list.push(s);});playSong(songs[0]);closeM("m-gen");};
 
-document.getElementById("newpl-btn").onclick=()=>{
+document.getElementById("newpl-btn").addEventListener("click", ()=>{
   document.getElementById("m-gen-b").innerHTML=`<div class="mtit">${T("newpl")}</div><input class="mfi" id="pl-ni" type="text" placeholder="${T("plph")}"/><button class="mbg" onclick="createPL()">${T("create")}</button><button class="mbm" onclick="closeM('m-gen')">${T("cancel")}</button>`;
   openM("m-gen");setTimeout(()=>document.getElementById("pl-ni")?.focus(),100);
-};
+});
 window.createPL=async()=>{const name=document.getElementById("pl-ni")?.value.trim();if(!name){toast("⚠ Ad daxil edin");return;}await ldb.playlists.put({name,createdAt:Date.now()}).catch(()=>{});toast(`✅ "${name}"`);closeM("m-gen");document.querySelector('.pill[data-pg="playlists"]').click();renderPlaylists();};
 
 async function openAddToPL(song){
@@ -1420,15 +1696,28 @@ async function openAddToPL(song){
 }
 window.addToP=async(plId,videoId,title,artist,thumb)=>{try{const ex=await ldb.pl_songs.where({playlistId:plId,videoId}).first();if(ex){toast("Artıq playlistdədir");closeM("m-addpl");return;}await ldb.pl_songs.put({playlistId:plId,videoId,title,artist,thumb,addedAt:Date.now()});toast(`✅ "${title}" əlavə edildi`);}catch(e){toast("❌ "+e.message);}closeM("m-addpl");};
 
-/* ═══ AUTH ═══ */
+/* ══ AUTH ══ */
+function updateHamAuthBtn(){
+  const btn = document.getElementById("ham-auth-btn");
+  const lbl = document.getElementById("ham-auth-lbl");
+  if(S.user){
+    btn.className = "ham-auth-btn signout";
+    lbl.textContent = T("signout");
+  } else {
+    btn.className = "ham-auth-btn signin";
+    lbl.textContent = T("gsign");
+  }
+}
+
 async function authToggle(){
-  if(!FB){toast("⚠ FB_CFG doldurun — firebase.google.com (pulsuz)");return;}
+  if(!FB){toast("⚠ FB_CFG doldurun");return;}
   if(S.user){await fbA.signOut();toast(T("signout"));return;}
   try{await fbA.signInWithPopup(new firebase.auth.GoogleAuthProvider());}
   catch(e){if(e.code==="auth/popup-blocked")await fbA.signInWithRedirect(new firebase.auth.GoogleAuthProvider());else toast("❌ "+e.message);}
 }
-document.getElementById("authbtn").onclick=authToggle;
-document.getElementById("wall-sign").onclick=authToggle;
+document.getElementById("authbtn").addEventListener("click", authToggle);
+document.getElementById("wall-sign").addEventListener("click", authToggle);
+
 if(FB){
   fbA.getRedirectResult().catch(()=>{});
   fbA.onAuthStateChanged(user=>{
@@ -1449,10 +1738,11 @@ if(FB){
       document.getElementById("login-wall").style.display="block";
       document.getElementById("soc-main").style.display="none";
     }
+    updateHamAuthBtn();
   });
 }
 
-/* ═══ FRIENDS ═══ */
+/* ══ FRIENDS ══ */
 function initFriends(){
   if(!FB||!fbD||!S.user)return;
   const uid=S.user.uid;clearCL();
@@ -1486,7 +1776,8 @@ function renderFrList(){
     const row=document.createElement("div");row.className="frrow"+(S.chatUid===f.uid?" on":"");row.dataset.uid=f.uid;
     const np=f.nowPlaying;
     row.innerHTML=`${f.photo?`<img class="frav" src="${f.photo}" onerror="this.src='${PHO}'" alt=""/>`:`<div class="frav-ph">${(f.name||"?")[0].toUpperCase()}</div>`}<div class="frinf"><div class="frname">${X(f.name||"Anonim")}</div>${np?`<div class="frnp">🎵 ${X(np.title||"")}</div>`:`<div class="frsub" style="color:${f.online?"var(--g)":"var(--t3)"}">${f.online?T("online"):"offline"}</div>`}</div>${f.online?`<div class="ondot"></div>`:""}`;
-    row.onclick=()=>openDM(f);list.appendChild(row);
+    row.addEventListener("click", ()=>openDM(f));
+    list.appendChild(row);
   });
 }
 
@@ -1496,65 +1787,46 @@ function renderReqs(reqs){
   reqs.forEach(req=>{
     const row=document.createElement("div");row.className="rqrow";
     row.innerHTML=`${req.fromPhoto?`<img class="frav" src="${req.fromPhoto}" onerror="this.src='${PHO}'" alt=""/>`:`<div class="frav-ph">${(req.fromName||"?")[0].toUpperCase()}</div>`}<div class="frinf"><div class="frname">${X(req.fromName||"Anonim")}</div><div class="frsub">${X(req.fromEmail||"")}</div></div><div class="rqbtns"><button class="rqacc">${T("acc")}</button><button class="rqrej">${T("rej")}</button></div>`;
-    row.querySelector(".rqacc").onclick=()=>acceptFr(req);
-    row.querySelector(".rqrej").onclick=()=>rejectFr(req.key);
+    row.querySelector(".rqacc").addEventListener("click", ()=>acceptFr(req));
+    row.querySelector(".rqrej").addEventListener("click", ()=>rejectFr(req.key));
     list.appendChild(row);
   });
 }
 
-document.getElementById("fr-add").onclick=async()=>{
+document.getElementById("fr-add").addEventListener("click", async()=>{
   if(!S.user){toast(T("signin"));return;}
   const email=document.getElementById("fr-inp").value.trim().toLowerCase();
   if(!email){toast("⚠ E-mail daxil edin");return;}
   if(email===S.user.email?.toLowerCase()){toast("⚠ Özünüzü əlavə edə bilməzsiniz");return;}
-  const btn=document.getElementById("fr-add");
-  const lbl=document.getElementById("add-lbl");
-  btn.disabled=true; if(lbl) lbl.textContent="...";
+  const btn=document.getElementById("fr-add"),lbl=document.getElementById("add-lbl");
+  btn.disabled=true;if(lbl)lbl.textContent="...";
   try{
-    let tuid=null, td=null;
+    let tuid=null,td=null;
     const snap=await fbD.ref("users").orderByChild("email").equalTo(email).get();
-    if(snap.exists()) snap.forEach(ch=>{tuid=ch.key; td=ch.val();});
-
-    if(!tuid){toast("❌ "+T("nofnd")+": "+email); return;}
-    if(tuid===S.user.uid){toast("⚠ Özünüzü əlavə edə bilməzsiniz"); return;}
-
+    if(snap.exists())snap.forEach(ch=>{tuid=ch.key;td=ch.val();});
+    if(!tuid){toast("❌ "+T("nofnd")+": "+email);return;}
+    if(tuid===S.user.uid){toast("⚠ Özünüzü əlavə edə bilməzsiniz");return;}
     const alr=await fbD.ref(`friends/${S.user.uid}/${tuid}`).get();
-    if(alr.exists()){toast("✓ "+T("alfr")); return;}
-
+    if(alr.exists()){toast("✓ "+T("alfr"));return;}
     const sentReq=await fbD.ref(`friendRequests/${tuid}/${S.user.uid}`).get().catch(()=>null);
-
-    if(sentReq?.exists()){toast("⏳ İstək artıq göndərilmişdir"); return;}
-
-    await fbD.ref(`friendRequests/${tuid}/${S.user.uid}`).set({
-      fromUid:  S.user.uid,
-      fromName: S.user.displayName||"Anonim",
-      fromEmail:S.user.email||"",
-      fromPhoto:S.user.photoURL||"",
-      ts:       Date.now()
-    });
-
+    if(sentReq?.exists()){toast("⏳ İstək artıq göndərilmişdir");return;}
+    await fbD.ref(`friendRequests/${tuid}/${S.user.uid}`).set({fromUid:S.user.uid,fromName:S.user.displayName||"Anonim",fromEmail:S.user.email||"",fromPhoto:S.user.photoURL||"",ts:Date.now()});
     document.getElementById("fr-inp").value="";
     toast("✅ "+T("reqsent")+" → "+(td?.name||email));
-
   }catch(e){
     console.error("[FR add]",e);
-    if(e.code==="PERMISSION_DENIED"||e.message?.includes("Permission denied")){
-      toast("❌ İcazə xətası — Firebase Rules-u yoxlayın (users indexOn email)");
-    } else {
-      toast("❌ Xəta: "+e.message);
-    }
-  }finally{
-    btn.disabled=false; if(lbl) lbl.textContent=T("add")||"Əlavə et";
-  }
-};
+    if(e.code==="PERMISSION_DENIED"||e.message?.includes("Permission denied")){toast("❌ İcazə xətası — Firebase Rules yoxlayın");}
+    else{toast("❌ Xəta: "+e.message);}
+  }finally{btn.disabled=false;if(lbl)lbl.textContent=T("add")||"Əlavə et";}
+});
 
 async function acceptFr(req){const uid=S.user.uid,fuid=req.key;await fbD.ref(`friends/${uid}/${fuid}`).set(true);await fbD.ref(`friends/${fuid}/${uid}`).set(true);await fbD.ref(`friendRequests/${uid}/${fuid}`).remove();toast(`✅ ${req.fromName||"Dost"} indi dostdur!`);}
 async function rejectFr(fuid){await fbD.ref(`friendRequests/${S.user.uid}/${fuid}`).remove();toast("Rədd edildi.");}
 
-document.getElementById("ptab-fr").onclick=()=>{document.getElementById("ptab-fr").classList.add("on");document.getElementById("ptab-rq").classList.remove("on");document.getElementById("fr-sec").style.display="";document.getElementById("rq-sec").style.display="none";};
-document.getElementById("ptab-rq").onclick=()=>{document.getElementById("ptab-rq").classList.add("on");document.getElementById("ptab-fr").classList.remove("on");document.getElementById("rq-sec").style.display="";document.getElementById("fr-sec").style.display="none";};
+document.getElementById("ptab-fr").addEventListener("click", ()=>{document.getElementById("ptab-fr").classList.add("on");document.getElementById("ptab-rq").classList.remove("on");document.getElementById("fr-sec").style.display="";document.getElementById("rq-sec").style.display="none";});
+document.getElementById("ptab-rq").addEventListener("click", ()=>{document.getElementById("ptab-rq").classList.add("on");document.getElementById("ptab-fr").classList.remove("on");document.getElementById("rq-sec").style.display="";document.getElementById("fr-sec").style.display="none";});
 
-/* ═══ DM ═══ */
+/* ══ DM ══ */
 let _dmRef=null;
 function closeDMRef(){if(_dmRef){try{_dmRef.off();}catch(e){}}_dmRef=null;}
 function getDMRoom(a,b){return [a,b].sort().join("_");}
@@ -1562,48 +1834,31 @@ function getDMRoom(a,b){return [a,b].sort().join("_");}
 function openDM(friend){
   if(!FB||!fbD){toast("❌ Firebase yüklənməyib");return;}
   if(!S.user){toast("Giriş edin");return;}
-  S.chatUid=friend.uid; S.chatTarget=friend;
-  document.querySelectorAll(".frrow").forEach(r=>r.classList.remove("on"));
-  document.querySelectorAll(".frrow").forEach(r=>{if(r.dataset.uid===friend.uid)r.classList.add("on");});
+  S.chatUid=friend.uid;S.chatTarget=friend;
+  document.querySelectorAll(".frrow").forEach(r=>r.classList.toggle("on",r.dataset.uid===friend.uid));
   document.getElementById("ch-title").textContent=friend.name||friend.displayName||"?";
   document.getElementById("ch-sub").textContent=friend.email||"";
   document.getElementById("vpbtn").style.display="flex";
   document.getElementById("sndbtn").disabled=false;
-  const sg=document.getElementById("soc-main");
-  if(sg) sg.classList.add("chat-open");
+  document.getElementById("soc-main").classList.add("chat-open");
   closeDMRef();
-  const cont=document.getElementById("msgs");
-  cont.innerHTML='<div class="echint">Yüklənir...</div>';
+  const cont=document.getElementById("msgs");cont.innerHTML='<div class="echint">Yüklənir...</div>';
   const room=getDMRoom(S.user.uid,friend.uid);
   const ref=fbD.ref("dms/"+room).orderByChild("ts").limitToLast(80);
   _dmRef=ref;
   ref.on("value",snap=>{
-    const ms=[];
-    snap.forEach(ch=>{
-      const v=ch.val()||{};
-      ms.push({uid:v.uid||"",name:v.name||"Anonim",photo:v.photo||"",text:v.text||"",ts:v.ts||0});
-    });
+    const ms=[];snap.forEach(ch=>{const v=ch.val()||{};ms.push({uid:v.uid||"",name:v.name||"Anonim",photo:v.photo||"",text:v.text||"",ts:v.ts||0});});
     ms.sort((a,b)=>a.ts-b.ts);
-    const c=document.getElementById("msgs");
-    c.innerHTML="";
-    if(!ms.length){
-      c.innerHTML='<div class="echint">Hələ mesaj yoxdur 👋<br><small style="color:var(--t3)">Mərhabalaş!</small></div>';
-      return;
-    }
+    const c=document.getElementById("msgs");c.innerHTML="";
+    if(!ms.length){c.innerHTML='<div class="echint">Hələ mesaj yoxdur 👋<br><small style="color:var(--t3)">Mərhabalaş!</small></div>';return;}
     ms.forEach(m=>appendMsg(m,c));
     requestAnimationFrame(()=>{c.scrollTop=c.scrollHeight;});
-  }, err=>{
-    console.error("[DM]",err.code, err.message);
-    const c=document.getElementById("msgs");
-    c.innerHTML='<div class="echint" style="color:var(--red)">❌ '+err.message+'<br><small>Firebase Rules yoxlayın</small></div>';
-  });
+  },err=>{document.getElementById("msgs").innerHTML='<div class="echint" style="color:var(--red)">❌ '+err.message+'<br><small>Firebase Rules yoxlayın</small></div>';});
 }
 
 function closeMobileChat(){
-  const sg=document.getElementById("soc-main");
-  if(sg) sg.classList.remove("chat-open");
-  closeDMRef();
-  S.chatUid=null; S.chatTarget=null;
+  document.getElementById("soc-main").classList.remove("chat-open");
+  closeDMRef();S.chatUid=null;S.chatTarget=null;
   document.getElementById("sndbtn").disabled=true;
   document.getElementById("vpbtn").style.display="none";
   document.getElementById("ch-title").textContent="—";
@@ -1611,55 +1866,35 @@ function closeMobileChat(){
   document.getElementById("msgs").innerHTML='<div class="echint" id="echint"></div>';
   document.querySelectorAll(".frrow").forEach(r=>r.classList.remove("on"));
 }
+window.closeMobileChat=closeMobileChat;
 
 function appendMsg(m,c){
   const me=S.user&&m.uid===S.user.uid;
-  const d=document.createElement("div");
-  d.className="mrow"+(me?" me":"");
+  const d=document.createElement("div");d.className="mrow"+(me?" me":"");
   const tm=m.ts?new Date(m.ts).toLocaleTimeString("az",{hour:"2-digit",minute:"2-digit"}):"";
-  d.innerHTML=
-    '<img class="mav" src="'+( m.photo||PHO)+'" alt="" onerror="this.src=\''+(PHO)+'\'"/>'+
-    '<div class="mbody">'+
-    (me?"":'<div class="mname">'+X(m.name)+'</div>')+
-    '<div class="mbbl">'+X(m.text)+'</div>'+
-    '<div class="mtime">'+tm+'</div></div>';
+  d.innerHTML='<img class="mav" src="'+(m.photo||PHO)+'" alt="" onerror="this.src=\''+(PHO)+'\'"/><div class="mbody">'+(me?"":'<div class="mname">'+X(m.name)+'</div>')+'<div class="mbbl">'+X(m.text)+'</div><div class="mtime">'+tm+'</div></div>';
   c.appendChild(d);
 }
 
-document.getElementById("sndbtn").onclick=sendMsg;
-document.getElementById("msginput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMsg();}});
+document.getElementById("sndbtn").addEventListener("click", sendMsg);
+document.getElementById("msginput").addEventListener("keydown", e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMsg();}});
 
 async function sendMsg(){
   if(!FB||!fbD){toast("❌ Firebase yüklənməyib");return;}
   if(!S.user){toast("Giriş edin");return;}
   if(!S.chatTarget){toast("Dost seçin");return;}
   const inp=document.getElementById("msginput");
-  const txt=inp.value.trim();
-  if(!txt) return;
-  const btn=document.getElementById("sndbtn");
-  inp.value="";
-  btn.disabled=true;
+  const txt=inp.value.trim();if(!txt)return;
+  const btn=document.getElementById("sndbtn");inp.value="";btn.disabled=true;
   const room=getDMRoom(S.user.uid,S.chatTarget.uid);
   try{
-    await fbD.ref("dms/"+room).push({
-      uid:  S.user.uid,
-      name: S.user.displayName||"Anonim",
-      photo:S.user.photoURL||"",
-      text: txt,
-      ts:   firebase.database.ServerValue.TIMESTAMP
-    });
+    await fbD.ref("dms/"+room).push({uid:S.user.uid,name:S.user.displayName||"Anonim",photo:S.user.photoURL||"",text:txt,ts:firebase.database.ServerValue.TIMESTAMP});
     requestAnimationFrame(()=>{const c=document.getElementById("msgs");c.scrollTop=c.scrollHeight;});
-  }catch(e){
-    console.error("[DM send]",e);
-    inp.value=txt;
-    toast("❌ Göndərilmədi: "+e.message);
-  }finally{
-    btn.disabled=false;
-    inp.focus();
-  }
+  }catch(e){inp.value=txt;toast("❌ Göndərilmədi: "+e.message);}
+  finally{btn.disabled=false;inp.focus();}
 }
 
-document.getElementById("vpbtn").onclick=()=>{if(S.chatTarget)showProfile(S.chatTarget);};
+document.getElementById("vpbtn").addEventListener("click", ()=>{if(S.chatTarget)showProfile(S.chatTarget);});
 function showMyProfile(){if(S.user)showProfile({uid:S.user.uid,name:S.user.displayName,email:S.user.email,photo:S.user.photoURL});}
 
 async function showProfile(u){
@@ -1673,27 +1908,30 @@ async function showProfile(u){
 function addCL(fn){S.chatListeners.push(fn);}
 function clearCL(){S.chatListeners.forEach(fn=>{try{fn();}catch(e){}});S.chatListeners=[];}
 
-/* ═══ INIT ═══ */
+/* ══ INIT ══ */
 (async()=>{
   try{
     (await ldb.saved.toArray()).forEach(s=>S.saved.add(s.videoId));
     (await ldb.offline.toArray()).forEach(s=>S.offline.add(s.videoId));
     (await ldb.downloads.toArray()).forEach(s=>{S.downloads.add(s.videoId);S.offline.add(s.videoId);});
-  } catch(e){console.warn("IndexedDB:",e);}
+  }catch(e){console.warn("IndexedDB:",e);}
   applyLang();applyTheme();renderDefault();
   document.getElementById("vfill").style.width=S.vol+"%";
+  syncHamActive("discover");
+  updateHamTheme();
+  updateHamAuthBtn();
 })();
 
-/* ═══ SERVICE WORKER + PWA ═══ */
+/* ══ SERVICE WORKER + PWA ══ */
 (async()=>{
   if(!('serviceWorker' in navigator)) return;
   try {
     const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
     console.log('[SW] Qeydiyyat uğurlu:', reg.scope);
     reg.addEventListener('updatefound', () => {
-      const newWorker = reg.installing;
-      newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+      const nw = reg.installing;
+      nw.addEventListener('statechange', () => {
+        if (nw.state === 'installed' && navigator.serviceWorker.controller) {
           toast('🔄 Yeniləmə hazırdır — səhifəni yeniləyin');
         }
       });
@@ -1704,15 +1942,11 @@ function clearCL(){S.chatListeners.forEach(fn=>{try{fn();}catch(e){}});S.chatLis
         sw.active.postMessage({ type: 'CACHE_URLS', urls: thumbUrls });
       }
     });
-  } catch(e) {
-    console.warn('[SW] Xəta:', e);
-  }
+  } catch(e) { console.warn('[SW] Xəta:', e); }
 
   let deferredPrompt = null;
   window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault();
-    deferredPrompt = e;
-    showInstallBanner();
+    e.preventDefault(); deferredPrompt = e; showInstallBanner();
   });
 
   function showInstallBanner() {
@@ -1736,25 +1970,21 @@ function clearCL(){S.chatListeners.forEach(fn=>{try{fn();}catch(e){}});S.chatLis
       <button id="pwa-close" style="width:26px;height:26px;border-radius:50%;background:var(--c3);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:var(--t2)">✕</button>
     `;
     document.body.appendChild(banner);
-
-    document.getElementById('pwa-install').onclick = async () => {
+    document.getElementById('pwa-install').addEventListener('click', async () => {
       if (!deferredPrompt) return;
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      banner.remove();
+      deferredPrompt = null; banner.remove();
       if (outcome === 'accepted') toast('✅ Music Universe quraşdırıldı!');
-    };
-    document.getElementById('pwa-close').onclick = () => banner.remove();
+    });
+    document.getElementById('pwa-close').addEventListener('click', () => banner.remove());
     setTimeout(() => banner?.remove(), 8000);
   }
 
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
   if (isIOS && !isStandalone) {
-    setTimeout(() => {
-      toast('📲 Safari → Paylaş → Ana ekrana əlavə et');
-    }, 3500);
+    setTimeout(() => { toast('📲 Safari → Paylaş → Ana ekrana əlavə et'); }, 3500);
   }
 })();
 </script>
