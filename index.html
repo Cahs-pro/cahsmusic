@@ -1,8 +1,11 @@
+<!DOCTYPE html>
 <html lang="az" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <title>Music Universe</title>
+
+<!-- PWA Meta -->
 <meta name="theme-color" content="#080c12"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -10,9 +13,12 @@
 <meta name="apple-mobile-web-app-title" content="Music Universe"/>
 <meta name="application-name" content="Music Universe"/>
 <meta name="description" content="Music Universe - Musiqi Dünyası. Oflayn çalın, yükləyin, playlists yaradın."/>
+
+<!-- Icons -->
 <link rel="icon" href="/icon-192.png" type="image/png"/>
 <link rel="apple-touch-icon" href="/icon-192.png"/>
 <link rel="manifest" href="/manifest.json"/>
+
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://www.youtube.com/iframe_api" async></script>
@@ -20,12 +26,14 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
 <style>
+/* ══ TOKENS ══ */
 :root{
   --ease:.22s cubic-bezier(.4,0,.2,1);
   --spring:.3s cubic-bezier(.34,1.4,.64,1);
   --g:#1ed760;--g2:#14a845;--gd:rgba(30,215,96,.11);
-  --red:#f03050;--blue:#3b82f6;--amber:#f59e0b;
+  --red:#f03050;--blue:#3b82f6;
   --fh:'Syne',sans-serif;--fb:'Plus Jakarta Sans',sans-serif;
   --nav:56px;--pl:72px;--r:14px;--r2:20px;
 }
@@ -52,54 +60,35 @@ img{display:block}
 ::-webkit-scrollbar-thumb{background:var(--sc);border-radius:4px}
 ::-webkit-scrollbar-thumb:hover{background:var(--g)}
 
-/* ══ VIEW TRANSITIONS API ══ */
-@media(prefers-reduced-motion:no-preference){
-  ::view-transition-old(page-content){
-    animation:vt-out .25s cubic-bezier(.4,0,.2,1) both;
-  }
-  ::view-transition-new(page-content){
-    animation:vt-in .25s cubic-bezier(.4,0,.2,1) both;
-  }
-  @keyframes vt-out{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-16px)}}
-  @keyframes vt-in{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
-
-  ::view-transition-old(player-thumb){
-    animation:pt-out .3s var(--spring) both;
-  }
-  ::view-transition-new(player-thumb){
-    animation:pt-in .3s var(--spring) both;
-  }
-  @keyframes pt-out{from{opacity:1;transform:scale(1) rotate(0deg)}to{opacity:0;transform:scale(.65) rotate(-8deg)}}
-  @keyframes pt-in{from{opacity:0;transform:scale(.65) rotate(8deg)}to{opacity:1;transform:scale(1) rotate(0deg)}}
-
-  ::view-transition-old(player-title){animation:ptit-out .2s ease both}
-  ::view-transition-new(player-title){animation:ptit-in .2s ease .06s both}
-  @keyframes ptit-out{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-5px)}}
-  @keyframes ptit-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-
-  ::view-transition-old(player-artist){animation:ptit-out .2s ease .04s both}
-  ::view-transition-new(player-artist){animation:ptit-in .2s ease .1s both}
+/* ══════════════════════════════
+   TOPBAR
+══════════════════════════════ */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:var(--nav);z-index:900;
+  background:var(--gl);backdrop-filter:blur(24px) saturate(180%);
+  border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;gap:6px;padding:0 12px;
+  min-width:0;
 }
-#main{view-transition-name:page-content}
-#p-img{view-transition-name:player-thumb}
-#p-title{view-transition-name:player-title}
-#p-artist{view-transition-name:player-artist}
-
-/* ══ TOPBAR ══ */
-#topbar{position:fixed;top:0;left:0;right:0;height:var(--nav);z-index:900;background:var(--gl);backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:6px;padding:0 12px;min-width:0}
 .logo{display:flex;align-items:center;gap:7px;flex-shrink:0;font-family:var(--fh);font-size:1.05rem;font-weight:800;color:var(--g);letter-spacing:-.3px;white-space:nowrap}
 .logo svg{flex-shrink:0}
 .logo-txt{display:none}
+
+/* Pills - desktop nav */
 .pills{display:flex;gap:1px;background:var(--c2);border-radius:50px;padding:3px;flex-shrink:0}
 .pill{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:50px;font-size:.74rem;font-weight:600;color:var(--t2);transition:all .18s;white-space:nowrap;line-height:1;cursor:pointer}
 .pill svg{flex-shrink:0;width:13px;height:13px;opacity:.6;transition:opacity .18s}
 .pill.on{background:var(--g);color:#000}.pill.on svg{opacity:1}
 .pill:hover:not(.on){color:var(--tx);background:var(--c4)}
+
+/* Search box */
 .sbox{flex:1;min-width:0;max-width:240px;position:relative;display:none}
 .sbox input{width:100%;height:34px;padding:0 10px 0 32px;background:var(--c2);border:1.5px solid var(--bd2);border-radius:50px;color:var(--tx);font-size:.77rem;outline:none;transition:border-color .2s,box-shadow .2s}
 .sbox input:focus{border-color:var(--g);box-shadow:0 0 0 3px var(--gd)}
 .sbox input::placeholder{color:var(--t3);font-size:.72rem}
 .s-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none;width:13px;height:13px}
+
+/* Bar end */
 .bar-end{display:flex;align-items:center;gap:5px;margin-left:auto;flex-shrink:0}
 .lw{position:relative}
 .lbtn{display:flex;align-items:center;gap:3px;padding:5px 9px;background:var(--c2);border:1.5px solid var(--bd2);border-radius:50px;font-size:.7rem;font-weight:700;color:var(--t2);transition:all .18s;height:32px}
@@ -115,68 +104,121 @@ img{display:block}
 .authbtn{display:flex;align-items:center;gap:5px;padding:6px 13px;border-radius:50px;background:var(--g);color:#000;font-size:.74rem;font-weight:700;white-space:nowrap;transition:all .18s;flex-shrink:0;height:32px}
 .authbtn:hover{background:var(--g2)}
 
-/* ══ HAMBURGER ══ */
-.hmbtn{width:36px;height:36px;border-radius:10px;display:none;flex-shrink:0;align-items:center;justify-content:center;background:var(--c2);border:1.5px solid var(--bd2);color:var(--t2);transition:all .18s;cursor:pointer}
+/* ══════════════════════════════
+   HAMBURGER MENU (mobile)
+══════════════════════════════ */
+.hmbtn{
+  width:36px;height:36px;border-radius:10px;
+  display:none;flex-shrink:0;
+  align-items:center;justify-content:center;
+  background:var(--c2);border:1.5px solid var(--bd2);
+  color:var(--t2);transition:all .18s;cursor:pointer;
+}
 .hmbtn:hover{color:var(--tx);background:var(--c3)}
 .hmbtn.active{color:var(--g);border-color:var(--g)}
 .hmbtn svg{pointer-events:none}
-.search-icon-btn{width:34px;height:34px;border-radius:50%;display:none;flex-shrink:0;align-items:center;justify-content:center;background:var(--c2);border:1.5px solid var(--bd2);color:var(--t2);transition:all .18s;cursor:pointer}
+
+/* Mobile search icon (opens search bar) */
+.search-icon-btn{
+  width:34px;height:34px;border-radius:50%;
+  display:none;flex-shrink:0;
+  align-items:center;justify-content:center;
+  background:var(--c2);border:1.5px solid var(--bd2);
+  color:var(--t2);transition:all .18s;cursor:pointer;
+}
 .search-icon-btn:hover{color:var(--g);border-color:var(--g)}
-#mobile-search-bar{position:fixed;top:var(--nav);left:0;right:0;z-index:890;background:var(--gl);backdrop-filter:blur(24px);border-bottom:1px solid var(--bd);padding:8px 12px;display:none}
+
+/* Mobile search bar (below topbar) */
+#mobile-search-bar{
+  position:fixed;top:var(--nav);left:0;right:0;z-index:890;
+  background:var(--gl);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--bd);
+  padding:8px 12px;
+  display:none;
+}
 #mobile-search-bar.open{display:flex;align-items:center;gap:8px}
 #mobile-search-bar .msbox{flex:1;position:relative}
-#mobile-search-bar .msbox input{width:100%;height:36px;padding:0 10px 0 34px;background:var(--c2);border:1.5px solid var(--bd2);border-radius:50px;color:var(--tx);font-size:.82rem;outline:none;transition:border-color .2s}
+#mobile-search-bar .msbox input{
+  width:100%;height:36px;padding:0 10px 0 34px;
+  background:var(--c2);border:1.5px solid var(--bd2);
+  border-radius:50px;color:var(--tx);font-size:.82rem;outline:none;
+  transition:border-color .2s;
+}
 #mobile-search-bar .msbox input:focus{border-color:var(--g)}
 #mobile-search-bar .msbox input::placeholder{color:var(--t3)}
 #mobile-search-bar .msbox .s-ico{left:12px}
-#mobile-search-bar .close-search{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--c3);color:var(--t2);transition:all .17s}
+#mobile-search-bar .close-search{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--c3);color:var(--t2);transition:all .17s;
+}
 #mobile-search-bar .close-search:hover{color:var(--tx);background:var(--c4)}
-#ham-menu{position:fixed;top:var(--nav);left:0;right:0;z-index:880;background:var(--c1);border-bottom:1.5px solid var(--bd2);box-shadow:0 12px 40px rgba(0,0,0,.35);display:none;flex-direction:column;transform:translateY(-10px);opacity:0;transition:transform .22s var(--ease),opacity .22s var(--ease);max-height:calc(100vh - var(--nav) - var(--pl));overflow-y:auto}
-#ham-menu.open{display:flex;transform:translateY(0);opacity:1}
+
+/* Hamburger dropdown menu */
+#ham-menu{
+  position:fixed;top:var(--nav);left:0;right:0;z-index:880;
+  background:var(--c1);border-bottom:1.5px solid var(--bd2);
+  box-shadow:0 12px 40px rgba(0,0,0,.35);
+  display:none;flex-direction:column;gap:0;
+  transform:translateY(-10px);opacity:0;
+  transition:transform .22s var(--ease),opacity .22s var(--ease);
+  max-height:calc(100vh - var(--nav) - var(--pl));
+  overflow-y:auto;
+}
+#ham-menu.open{
+  display:flex;transform:translateY(0);opacity:1;
+}
 .ham-section{padding:8px 12px;display:flex;flex-direction:column;gap:3px}
-.ham-section+.ham-section{border-top:1px solid var(--bd)}
+.ham-section + .ham-section{border-top:1px solid var(--bd)}
 .ham-label{font-size:.64rem;font-weight:700;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;padding:4px 10px 2px}
-.ham-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:11px;font-size:.84rem;font-weight:600;color:var(--t2);cursor:pointer;transition:all .16s}
+.ham-item{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 12px;border-radius:11px;
+  font-size:.84rem;font-weight:600;color:var(--t2);
+  cursor:pointer;transition:all .16s;
+}
 .ham-item:hover{background:var(--c2);color:var(--tx)}
 .ham-item.active{background:var(--gd);color:var(--g)}
+.ham-item.active svg{color:var(--g)}
 .ham-item svg{width:17px;height:17px;flex-shrink:0;opacity:.7}
-.ham-item.active svg{opacity:1;color:var(--g)}
+.ham-item.active svg{opacity:1}
 .ham-row{display:flex;gap:8px;padding:8px 12px}
-.ham-lang-btn{flex:1;padding:9px 8px;border-radius:9px;text-align:center;font-size:.78rem;font-weight:700;color:var(--t2);background:var(--c2);border:1.5px solid var(--bd);transition:all .16s}
+.ham-lang-btn{
+  flex:1;padding:9px 8px;border-radius:9px;text-align:center;
+  font-size:.78rem;font-weight:700;color:var(--t2);
+  background:var(--c2);border:1.5px solid var(--bd);
+  transition:all .16s;
+}
 .ham-lang-btn.on{background:var(--gd);color:var(--g);border-color:rgba(30,215,96,.3)}
-.ham-auth-btn{margin:8px 12px 12px;padding:11px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:.84rem;font-weight:700;transition:all .18s}
+.ham-auth-btn{
+  margin:8px 12px 12px;padding:11px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:.84rem;font-weight:700;transition:all .18s;
+}
 .ham-auth-btn.signin{background:var(--g);color:#000}
 .ham-auth-btn.signout{background:var(--c3);color:var(--t2);border:1.5px solid var(--bd2)}
 .ham-auth-btn:hover{filter:brightness(1.05);transform:scale(1.01)}
+
+/* Theme toggle in ham menu */
 .ham-theme-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;gap:10px}
 .ham-theme-lbl{font-size:.82rem;font-weight:600;color:var(--t2)}
-.theme-toggle{width:46px;height:26px;border-radius:50px;background:var(--c4);border:1.5px solid var(--bd2);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.theme-toggle{
+  width:46px;height:26px;border-radius:50px;
+  background:var(--c4);border:1.5px solid var(--bd2);
+  position:relative;cursor:pointer;transition:background .2s;
+  flex-shrink:0;
+}
 .theme-toggle.light{background:var(--g)}
-.theme-toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--t2);transition:transform .2s,background .2s}
+.theme-toggle::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--t2);transition:transform .2s,background .2s;
+}
 .theme-toggle.light::after{transform:translateX(20px);background:#000}
-
-/* Sleep row in ham */
-.ham-sleep-row{display:flex;align-items:center;justify-content:space-between;padding:11px 12px;border-radius:11px;cursor:pointer;transition:background .16s}
-.ham-sleep-row:hover{background:var(--c2)}
-.ham-sleep-lbl{display:flex;align-items:center;gap:9px;font-size:.84rem;font-weight:600;color:var(--t2)}
-.ham-sleep-lbl svg{width:17px;height:17px;flex-shrink:0;opacity:.7}
-#ham-sleep-cd{font-size:.74rem;font-weight:700;color:var(--amber);background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);padding:3px 9px;border-radius:20px;display:none}
-
-/* ══ SHARE TARGET BANNER ══ */
-#stb{position:fixed;top:calc(var(--nav) + 10px);left:50%;transform:translateX(-50%) translateY(-12px);background:var(--c1);border:1.5px solid var(--g);border-radius:16px;padding:12px 16px;display:none;align-items:center;gap:12px;z-index:950;box-shadow:0 14px 56px rgba(30,215,96,.22);max-width:380px;width:calc(100% - 24px);opacity:0;transition:transform .3s var(--spring),opacity .3s ease}
-#stb.show{display:flex;transform:translateX(-50%) translateY(0);opacity:1}
-.stb-ico{width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--c3);border:1.5px solid var(--bd2)}
-.stb-ico img{width:100%;height:100%;object-fit:cover}
-.stb-info{flex:1;min-width:0}
-.stb-title{font-family:var(--fh);font-weight:700;font-size:.82rem;color:var(--g);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stb-sub{font-size:.69rem;color:var(--t2)}
-.stb-play{padding:7px 14px;border-radius:9px;background:var(--g);color:#000;font-size:.73rem;font-weight:700;transition:background .17s;flex-shrink:0}
-.stb-play:hover{background:var(--g2)}
-.stb-x{width:26px;height:26px;border-radius:50%;background:var(--c3);color:var(--t2);display:flex;align-items:center;justify-content:center;transition:all .17s;flex-shrink:0}
-.stb-x:hover{color:var(--tx);background:var(--c4)}
 
 /* ══ LAYOUT ══ */
 #main{padding-top:calc(var(--nav) + 16px);padding-bottom:calc(var(--pl) + 24px)}
+/* When mobile search bar is open, shift content down */
 body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
 .page{display:none;padding:0 14px}.page.on{display:block}
 .sh{font-family:var(--fh);font-size:1.05rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:9px;letter-spacing:-.15px}
@@ -212,6 +254,7 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
 .eqbar span:nth-child(3){height:7px;animation:eq .8s ease-in-out .26s infinite alternate}
 .eqbar span:nth-child(4){height:12px;animation:eq .8s ease-in-out .07s infinite alternate}
 @keyframes eq{0%{transform:scaleY(.3)}100%{transform:scaleY(1)}}
+@keyframes slideUp{0%{transform:translateX(-50%) translateY(20px);opacity:0}100%{transform:translateX(-50%) translateY(0);opacity:1}}
 .cinfo{padding:10px 11px 4px}
 .ctit{font-family:var(--fh);font-weight:700;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
 .cart{font-size:.7rem;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
@@ -220,6 +263,7 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
 .cb-play{background:var(--g);color:#000}.cb-play:hover{background:var(--g2)}
 .cb-save{background:var(--c3);color:var(--t2);border:1.5px solid var(--bd2)}.cb-save:hover{border-color:var(--g);color:var(--g)}.cb-save.on{color:var(--g);border-color:var(--g);background:var(--gd)}
 .cb-pl{background:var(--c3);color:var(--t2);border:1.5px solid var(--bd2)}.cb-pl:hover{border-color:var(--blue);color:var(--blue)}
+
 .skel{background:var(--c1);border:1.5px solid var(--bd);border-radius:var(--r);overflow:hidden}
 .skel-i{aspect-ratio:1;animation:skm 1.6s ease infinite}
 .skel-l{height:11px;margin:11px 12px 5px;border-radius:4px;animation:skm 1.6s ease .1s infinite}
@@ -249,6 +293,7 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
 .act{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--c3);border:1.5px solid var(--bd2);color:var(--t2);transition:all .17s;flex-shrink:0}
 .act:hover{border-color:var(--g);color:var(--g)}
 .act.danger:hover{border-color:var(--red);color:var(--red)}
+.act.done{border-color:var(--blue);color:var(--blue);background:rgba(59,130,246,.08)}
 #no-sv{text-align:center;padding:50px 20px;color:var(--t3)}
 #no-sv svg{margin:0 auto 14px;opacity:.28}
 #no-sv p{font-size:.86rem;line-height:1.7}
@@ -267,7 +312,9 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
 
 /* ══ SOCIAL ══ */
 .socgrid{display:flex;flex-direction:column;gap:14px}
-@media(min-width:820px){.socgrid{display:grid;grid-template-columns:270px 1fr;gap:18px;align-items:start}}
+@media(min-width:820px){
+  .socgrid{display:grid;grid-template-columns:270px 1fr;gap:18px;align-items:start}
+}
 .frpanel{display:flex;flex-direction:column;gap:9px}
 .ptabs{display:flex;gap:2px;background:var(--c2);border-radius:50px;padding:3px}
 .ptab{flex:1;padding:7px 8px;border-radius:50px;text-align:center;font-size:.73rem;font-weight:700;color:var(--t2);transition:all .17s}
@@ -293,6 +340,8 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
 .rqbtns{display:flex;gap:5px;margin-left:auto;flex-shrink:0}
 .rqacc{padding:5px 11px;border-radius:8px;background:var(--g);color:#000;font-size:.71rem;font-weight:700}.rqacc:hover{background:var(--g2)}
 .rqrej{padding:5px 11px;border-radius:8px;background:var(--c4);color:var(--t2);font-size:.71rem;font-weight:600}.rqrej:hover{background:var(--c5)}
+
+/* Mobile chat toggle */
 .mob-back{display:none;align-items:center;gap:7px;padding:8px 12px;border-radius:10px;background:var(--c2);font-size:.79rem;font-weight:700;color:var(--t2);margin-bottom:8px;border:1.5px solid var(--bd2);width:auto}
 .mob-back:hover{border-color:var(--g);color:var(--g)}
 @media(max-width:819px){
@@ -301,7 +350,11 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
   .chatpanel-wrap{display:none}
   .socgrid.chat-open .chatpanel-wrap{display:flex;flex-direction:column}
 }
-@media(min-width:820px){.chatpanel-wrap{display:flex;flex-direction:column;min-width:0}}
+@media(min-width:820px){
+  .chatpanel-wrap{display:flex;flex-direction:column;min-width:0}
+}
+
+/* Chat panel */
 .chatpanel{background:var(--c1);border:1.5px solid var(--bd);border-radius:var(--r2);overflow:hidden;display:flex;flex-direction:column}
 @media(min-width:820px){.chatpanel{height:460px}}
 @media(max-width:819px){.chatpanel{height:calc(100svh - var(--nav) - var(--pl) - 100px);min-height:280px}}
@@ -362,32 +415,17 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
 .dmbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;border-radius:10px;background:var(--g);color:#000;font-weight:700;font-size:.85rem;margin-top:14px;cursor:pointer;border:none;font-family:var(--fb);transition:background .17s}
 .dmbtn:hover{background:var(--g2)}
 
-/* ══ SLEEP TIMER MODAL ══ */
-#m-sleep .mbox{max-width:360px}
-.sleep-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px}
-.sleep-opt{padding:12px 6px;border-radius:11px;background:var(--c2);border:1.5px solid var(--bd2);font-family:var(--fh);font-size:.9rem;font-weight:700;color:var(--t2);text-align:center;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1.2}
-.sleep-opt small{font-size:.56rem;font-weight:500;color:var(--t3);font-family:var(--fb)}
-.sleep-opt:hover{border-color:var(--g);color:var(--g);background:var(--gd);transform:scale(1.03)}
-.sleep-opt.active{border-color:var(--g);color:var(--g);background:var(--gd);box-shadow:0 0 0 2px rgba(30,215,96,.15)}
-.sleep-opt.active small{color:var(--g)}
-.sleep-custom-row{display:flex;gap:8px;margin-bottom:14px}
-.sleep-custom-row input{flex:1;height:38px;background:var(--c2);border:1.5px solid var(--bd2);border-radius:10px;padding:0 13px;color:var(--tx);font-size:.83rem;outline:none;transition:border-color .2s;font-family:var(--fb)}
-.sleep-custom-row input:focus{border-color:var(--g)}
-.sleep-custom-row input::placeholder{color:var(--t3)}
-.sleep-set-btn{padding:0 16px;height:38px;border-radius:10px;background:var(--g);color:#000;font-size:.8rem;font-weight:700;cursor:pointer;border:none;font-family:var(--fb);white-space:nowrap;transition:background .17s;flex-shrink:0}
-.sleep-set-btn:hover{background:var(--g2)}
-.sleep-active-box{background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(245,158,11,.04));border:1.5px solid rgba(245,158,11,.28);border-radius:14px;padding:16px;margin-bottom:14px;display:none;flex-direction:column;align-items:center;gap:8px}
-.sleep-active-box.show{display:flex}
-.sleep-cd-digits{font-family:var(--fh);font-size:2.4rem;font-weight:800;color:var(--amber);letter-spacing:-.04em;line-height:1}
-.sleep-cd-sub{font-size:.72rem;color:var(--t2);text-align:center}
-.sleep-cd-track{width:100%;height:5px;background:var(--c4);border-radius:5px;overflow:hidden}
-.sleep-cd-fill{height:100%;background:linear-gradient(90deg,var(--amber),#fbbf24);border-radius:5px;width:100%;transition:width 1s linear}
-.sleep-cancel-btn{width:100%;padding:10px;border-radius:10px;background:rgba(240,48,80,.1);color:var(--red);font-weight:700;font-size:.85rem;border:1.5px solid rgba(240,48,80,.2);cursor:pointer;font-family:var(--fb);transition:all .17s;display:none}
-.sleep-cancel-btn:hover{background:rgba(240,48,80,.2)}
-.sleep-cancel-btn.show{display:block}
-
-/* ══ PLAYER BAR ══ */
-#player{position:fixed;bottom:0;left:0;right:0;height:var(--pl);z-index:800;background:var(--gl);backdrop-filter:blur(26px) saturate(180%);border-top:1px solid var(--bd2);display:flex;align-items:center;padding:0 14px;gap:10px;min-width:0;overflow:hidden}
+/* ══════════════════════════════
+   PLAYER BAR
+══════════════════════════════ */
+#player{
+  position:fixed;bottom:0;left:0;right:0;height:var(--pl);z-index:800;
+  background:var(--gl);backdrop-filter:blur(26px) saturate(180%);
+  border-top:1px solid var(--bd2);
+  display:flex;align-items:center;
+  padding:0 14px;gap:10px;
+  min-width:0;overflow:hidden;
+}
 .pthumb{width:48px;height:48px;border-radius:9px;overflow:hidden;flex-shrink:0;background:var(--c2);border:1.5px solid var(--bd2);display:flex;align-items:center;justify-content:center}
 .pthumb img{width:100%;height:100%;object-fit:cover;display:none}
 .pinfo{min-width:0;flex:0 0 auto;width:160px}
@@ -412,111 +450,205 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
 .vtrack{width:62px;height:4px;background:var(--c4);border-radius:4px;cursor:pointer}
 .vfill{height:100%;background:var(--g);border-radius:4px;width:72%;pointer-events:none}
 
-/* Sleep pill in player */
-#p-sleep-pill{display:none;align-items:center;gap:4px;font-size:.62rem;font-weight:700;color:var(--amber);background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);border-radius:20px;padding:3px 8px;flex-shrink:0;cursor:pointer;white-space:nowrap}
-#p-sleep-pill:hover{background:rgba(245,158,11,.18)}
-#p-sleep-pill.show{display:flex}
-#p-sleep-pill svg{width:10px;height:10px;flex-shrink:0}
-
-.p-meatball{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:none;align-items:center;justify-content:center;color:var(--t2);transition:all .17s;cursor:pointer}
+/* Player meatball menu (mobile) */
+.p-meatball{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:none;align-items:center;justify-content:center;
+  color:var(--t2);transition:all .17s;cursor:pointer;
+}
 .p-meatball:hover{color:var(--tx)}
-#p-extra-menu{position:fixed;bottom:calc(var(--pl) + 8px);right:12px;background:var(--c1);border:1.5px solid var(--bd2);border-radius:14px;min-width:180px;padding:5px;z-index:850;box-shadow:var(--sh);display:none;flex-direction:column;gap:2px;animation:mop .18s var(--ease)}
+
+/* Player extra menu popup */
+#p-extra-menu{
+  position:fixed;bottom:calc(var(--pl) + 8px);right:12px;
+  background:var(--c1);border:1.5px solid var(--bd2);
+  border-radius:14px;min-width:170px;padding:5px;
+  z-index:850;box-shadow:var(--sh);
+  display:none;flex-direction:column;gap:2px;
+  animation:mop .18s var(--ease);
+}
 #p-extra-menu.open{display:flex}
-.pem-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:.8rem;font-weight:600;color:var(--t2);cursor:pointer;transition:all .15s}
+.pem-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;border-radius:9px;
+  font-size:.8rem;font-weight:600;color:var(--t2);
+  cursor:pointer;transition:all .15s;
+}
 .pem-item:hover{background:var(--c2);color:var(--tx)}
 .pem-item svg{flex-shrink:0;width:14px;height:14px}
-.pem-item.amber{color:var(--amber)}
 
 .spin{width:16px;height:16px;border:2.5px solid rgba(0,0,0,.18);border-top-color:#000;border-radius:50%;animation:sp .6s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
+
 #toast{position:fixed;bottom:calc(var(--pl) + 12px);left:50%;transform:translateX(-50%) translateY(12px);background:var(--c3);border:1.5px solid var(--bd2);color:var(--tx);padding:8px 18px;border-radius:50px;font-size:.78rem;font-weight:600;z-index:1000;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;max-width:calc(100vw - 28px);overflow:hidden;text-overflow:ellipsis;backdrop-filter:blur(12px);box-shadow:var(--sh)}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
 #yt-wrap{position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none}
 
-/* ══ RESPONSIVE ══ */
+/* ══════════════════════════════
+   RESPONSIVE BREAKPOINTS
+══════════════════════════════ */
+
+/* ════ DESKTOP ≥ 900px ════ */
 @media(min-width:900px){
-  .logo-txt{display:block}.pills{display:flex}.sbox{display:block}
-  .pvol{display:flex}.pacts{display:flex}.pinfo{width:160px}.pbar{display:flex}
-  #b-shuf,#b-rep{display:flex}.pctrl{flex-direction:column}.crow{gap:7px}
-  .pbtn{width:32px;height:32px}.pbtn.main{width:42px;height:42px}
-  #player{height:var(--pl);padding:0 16px;gap:12px}.pthumb{width:48px;height:48px}
-  .page{padding:0 20px}.grid{grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px}
-  .hmbtn{display:none}.search-icon-btn{display:none}
+  .logo-txt{ display:block }
+  .pills{ display:flex }
+  .sbox{ display:block }
+  .pvol{ display:flex }
+  .pacts{ display:flex }
+  .pinfo{ width:160px }
+  .pbar{ display:flex }
+  #b-shuf,#b-rep{ display:flex }
+  .pctrl{ flex-direction:column }
+  .crow{ gap:7px }
+  .pbtn{ width:32px;height:32px }
+  .pbtn.main{ width:42px;height:42px }
+  #player{ height:var(--pl);padding:0 16px;gap:12px }
+  .pthumb{ width:48px;height:48px }
+  .page{ padding:0 20px }
+  .grid{ grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px }
+  /* Hide hamburger on desktop */
+  .hmbtn{ display:none }
+  .search-icon-btn{ display:none }
 }
+
+/* ════ TABLET 600–899px ════ */
 @media(min-width:600px) and (max-width:899px){
-  .logo-txt{display:none}.pills{display:flex}
-  .pill span{display:none}.pill{padding:7px 9px;gap:0}
-  .pill svg{width:15px;height:15px;opacity:.75}.pill.on svg{opacity:1}
-  .sbox{display:block;max-width:180px}.hmbtn{display:none}.search-icon-btn{display:none}
-  #player{height:var(--pl);padding:0 14px;gap:10px}.pthumb{width:46px;height:46px}
-  .pinfo{width:130px}.pbar{display:flex}#b-shuf,#b-rep{display:flex}
-  .pctrl{flex-direction:column}.crow{gap:6px}.pbtn{width:30px;height:30px}
-  .pbtn.main{width:40px;height:40px}.pvol{display:none}.pacts{display:none}
-  .p-meatball{display:flex}.grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px}
-  .page{padding:0 16px}
+  .logo-txt{ display:none }
+  .pills{ display:flex }
+  .pill span{ display:none }
+  .pill{ padding:7px 9px;gap:0 }
+  .pill svg{ width:15px;height:15px;opacity:.75 }
+  .pill.on svg{ opacity:1 }
+  .sbox{ display:block;max-width:180px }
+  .hmbtn{ display:none }
+  .search-icon-btn{ display:none }
+  #player{ height:var(--pl);padding:0 14px;gap:10px }
+  .pthumb{ width:46px;height:46px }
+  .pinfo{ width:130px }
+  .pbar{ display:flex }
+  #b-shuf,#b-rep{ display:flex }
+  .pctrl{ flex-direction:column }
+  .crow{ gap:6px }
+  .pbtn{ width:30px;height:30px }
+  .pbtn.main{ width:40px;height:40px }
+  .pvol{ display:none }
+  .pacts{ display:none }
+  .p-meatball{ display:flex }
+  .grid{ grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px }
+  .page{ padding:0 16px }
+  /* Language button: text hidden */
+  #llbl-txt{ display:none }
 }
+
+/* ════ MOBILE < 600px ════ */
 @media(max-width:599px){
-  :root{--nav:52px;--pl:64px}
-  #topbar{padding:0 10px;gap:6px}.logo-txt{display:none}.pills{display:none}
-  .sbox{display:none}.lw{display:none}.ibtn.theme-ibtn{display:none}
-  .hmbtn{display:flex}.search-icon-btn{display:flex}
-  .authbtn{padding:5px 8px;font-size:.7rem;height:30px}.authbtn .auth-txt{display:none}
-  #player{padding:0 10px;gap:6px;height:var(--pl)}.pthumb{width:42px;height:42px;border-radius:8px}
-  .pinfo{flex:1;min-width:0;width:auto}.ptitle{font-size:.8rem}.partist{font-size:.67rem}
-  .pctrl{flex-direction:row;flex:0 0 auto;gap:0;min-width:0}.pbar{display:none}
-  .crow{gap:2px}.pbtn{width:34px;height:34px}.pbtn.main{width:42px;height:42px}
-  #b-shuf,#b-rep{display:none}.pvol{display:none}.pacts{display:none}.p-meatball{display:flex}
-  #main{padding-top:calc(var(--nav) + 12px);padding-bottom:calc(var(--pl) + 16px)}
-  #toast{bottom:calc(var(--pl) + 10px)}.page{padding:0 12px}
-  .grid{grid-template-columns:repeat(auto-fill,minmax(min(150px,44vw),1fr));gap:10px}
-  .hero{padding:20px 16px;margin-bottom:18px}.hero h1{font-size:clamp(1.25rem,6vw,1.75rem)}
-  .hero p{font-size:.8rem}.hchips{gap:5px}
-  .mbox{padding:18px 16px;max-height:88vh;border-radius:18px}.moverlay{padding:8px}
-  .svrow{padding:9px 11px;gap:9px;border-radius:12px}.svthumb{width:42px;height:42px;border-radius:8px}
-  .svtit{font-size:.8rem}.svart{font-size:.67rem}.svbadge{font-size:.61rem;padding:2px 7px}
-  .act{width:30px;height:30px}.plrow{padding:10px 12px;gap:10px;border-radius:12px}
-  .plico{width:38px;height:38px;border-radius:9px}.plname{font-size:.81rem}.plcnt{font-size:.65rem}
-  .frrow{padding:9px 10px;gap:8px;border-radius:11px}.frav,.frav-ph{width:32px;height:32px;font-size:.8rem}
-  .frname{font-size:.79rem}.frsub,.frnp{font-size:.65rem}
-  .chatpanel{height:calc(100svh - var(--nav) - var(--pl) - 80px);min-height:240px;border-radius:14px}
-  #msgs{padding:10px;gap:8px}.mbbl{font-size:.8rem;padding:7px 11px}
-  .sleep-grid{grid-template-columns:repeat(4,1fr);gap:6px}
-  .sleep-opt{padding:10px 4px;font-size:.82rem}
-  .sleep-opt small{font-size:.5rem}
+  :root{ --nav:52px; --pl:64px; }
+
+  /* Topbar: logo + hamburger + search icon + avatar/auth */
+  #topbar{ padding:0 10px;gap:6px }
+  .logo-txt{ display:none }
+  .pills{ display:none } /* hidden, replaced by hamburger */
+  .sbox{ display:none }  /* hidden, replaced by search icon */
+  .lw{ display:none }    /* lang in hamburger menu */
+  .ibtn.theme-ibtn{ display:none } /* theme in hamburger menu */
+
+  /* Show hamburger and search icon */
+  .hmbtn{ display:flex }
+  .search-icon-btn{ display:flex }
+
+  /* Auth button: icon only */
+  .authbtn{ padding:5px 8px;font-size:.7rem;height:30px }
+  .authbtn .auth-txt{ display:none }
+  .authbtn.has-user{ display:none } /* when logged in, just show avatar */
+
+  /* Player: compact */
+  #player{ padding:0 10px;gap:6px;height:var(--pl) }
+  .pthumb{ width:42px;height:42px;border-radius:8px }
+  .pinfo{ flex:1;min-width:0;width:auto }
+  .ptitle{ font-size:.8rem }
+  .partist{ font-size:.67rem }
+  .pctrl{ flex-direction:row;flex:0 0 auto;gap:0;min-width:0 }
+  .pbar{ display:none }
+  .crow{ gap:2px }
+  .pbtn{ width:34px;height:34px }
+  .pbtn.main{ width:42px;height:42px }
+  #b-shuf,#b-rep{ display:none }
+  .pvol{ display:none }
+  .pacts{ display:none }
+  .p-meatball{ display:flex }
+
+  /* Layout */
+  #main{ padding-top:calc(var(--nav) + 12px);padding-bottom:calc(var(--pl) + 16px) }
+  #toast{ bottom:calc(var(--pl) + 10px) }
+  .page{ padding:0 12px }
+  .grid{ grid-template-columns:repeat(auto-fill,minmax(min(150px,44vw),1fr));gap:10px }
+  .hero{ padding:20px 16px;margin-bottom:18px }
+  .hero h1{ font-size:clamp(1.25rem,6vw,1.75rem) }
+  .hero p{ font-size:.8rem }
+  .hchips{ gap:5px }
 }
+
+/* ════ VERY SMALL < 380px ════ */
 @media(max-width:379px){
-  :root{--nav:50px;--pl:60px}
-  .pbtn{width:31px;height:31px}.pbtn.main{width:39px;height:39px}
-  .pthumb{width:38px;height:38px}.grid{gap:8px}.page{padding:0 10px}
-  .sleep-grid{grid-template-columns:repeat(2,1fr)}
+  :root{ --nav:50px; --pl:60px }
+  .pbtn{ width:31px;height:31px }
+  .pbtn.main{ width:39px;height:39px }
+  .pthumb{ width:38px;height:38px }
+  .grid{ gap:8px }
+  .page{ padding:0 10px }
+  .hero{ padding:16px 12px }
+  .ptitle{ font-size:.76rem }
 }
+
+/* ════ MODAL responsive ════ */
+@media(max-width:599px){
+  .mbox{ padding:18px 16px;max-height:88vh;border-radius:18px }
+  .moverlay{ padding:8px }
+  .mtit{ font-size:.97rem }
+}
+
+/* ════ List items mobile ════ */
+@media(max-width:599px){
+  .svrow{ padding:9px 11px;gap:9px;border-radius:12px }
+  .svthumb{ width:42px;height:42px;border-radius:8px }
+  .svtit{ font-size:.8rem }
+  .svart{ font-size:.67rem }
+  .svbadge{ font-size:.61rem;padding:2px 7px }
+  .act{ width:30px;height:30px }
+  .plrow{ padding:10px 12px;gap:10px;border-radius:12px }
+  .plico{ width:38px;height:38px;border-radius:9px }
+  .plname{ font-size:.81rem }
+  .plcnt{ font-size:.65rem }
+  .frrow{ padding:9px 10px;gap:8px;border-radius:11px }
+  .frav,.frav-ph{ width:32px;height:32px;font-size:.8rem }
+  .frname{ font-size:.79rem }
+  .frsub,.frnp{ font-size:.65rem }
+  .chatpanel{ height:calc(100svh - var(--nav) - var(--pl) - 80px);min-height:240px;border-radius:14px }
+  #msgs{ padding:10px;gap:8px }
+  .mbbl{ font-size:.8rem;padding:7px 11px }
+}
+
+/* ════ Large screens ≥ 1280px ════ */
 @media(min-width:1280px){
-  .grid{grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:16px}
-  .page{padding:0 28px}.sbox{max-width:300px}
+  .grid{ grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:16px }
+  .page{ padding:0 28px }
+  .sbox{ max-width:300px }
 }
+
+/* ════ Landscape mobile ════ */
 @media(max-height:500px) and (max-width:900px){
-  .hero{padding:12px 16px;margin-bottom:10px}.hero::before{display:none}.hchips{display:none}
-  #main{padding-top:calc(var(--nav) + 6px)}
-  .grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
-  #ham-menu{max-height:60vh}
+  .hero{ padding:12px 16px;margin-bottom:10px }
+  .hero::before{ display:none }
+  .hchips{ display:none }
+  #main{ padding-top:calc(var(--nav) + 6px) }
+  .grid{ grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px }
+  /* Hamburger menu max-height for landscape */
+  #ham-menu{ max-height:60vh }
 }
-@keyframes slideUp{0%{transform:translateX(-50%) translateY(20px);opacity:0}100%{transform:translateX(-50%) translateY(0);opacity:1}}
 </style>
 </head>
 <body>
-
-<!-- SHARE TARGET BANNER -->
-<div id="stb">
-  <div class="stb-ico"><img id="stb-img" src="" alt=""/></div>
-  <div class="stb-info">
-    <div class="stb-title" id="stb-title">Paylaşılan musiqi</div>
-    <div class="stb-sub" id="stb-sub">YouTube linki aşkarlandı</div>
-  </div>
-  <button class="stb-play" id="stb-play-btn">▶ Çal</button>
-  <button class="stb-x" id="stb-close-btn">
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-  </button>
-</div>
 
 <!-- TOPBAR -->
 <nav id="topbar">
@@ -529,24 +661,53 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
     </svg>
     <span class="logo-txt">Music Universe</span>
   </div>
+
+  <!-- Desktop nav pills -->
   <div class="pills">
-    <button class="pill on" data-pg="discover"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span id="n-disc">Kəşfet</span></button>
-    <button class="pill" data-pg="saved"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span id="n-save">Endirilmiş</span></button>
-    <button class="pill" data-pg="playlists"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg><span id="n-pl">Playlistlər</span></button>
-    <button class="pill" data-pg="social"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span id="n-soc">Sosial</span></button>
+    <button class="pill on" data-pg="discover">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span id="n-disc">Kəşfet</span>
+    </button>
+    <button class="pill" data-pg="saved">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span id="n-save">Endirilmiş</span>
+    </button>
+    <button class="pill" data-pg="playlists">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg>
+      <span id="n-pl">Playlistlər</span>
+    </button>
+    <button class="pill" data-pg="social">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span id="n-soc">Sosial</span>
+    </button>
   </div>
+
+  <!-- Desktop search -->
   <div class="sbox">
     <svg class="s-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42C1 8.14 1 11.71 1 11.71s0 3.57.46 5.29a2.78 2.78 0 0 0 1.95 1.95C5.12 19.42 12 19.42 12 19.42s6.88 0 8.59-.47a2.78 2.78 0 0 0 1.95-1.95C23 15.28 23 11.71 23 11.71s0-3.57-.46-5.29z"/><polygon points="9.75 15.02 15.5 11.71 9.75 8.4 9.75 15.02" fill="currentColor" stroke="none"/></svg>
     <input id="sinp" type="text" autocomplete="off" placeholder="YouTube linki yapıştır..."/>
   </div>
+
+  <!-- Mobile: hamburger button -->
   <button class="hmbtn" id="hmbtn" aria-label="Menyu" aria-expanded="false">
-    <svg id="ham-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-    <svg id="close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    <svg id="ham-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+    <svg id="close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="display:none">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
   </button>
+
+  <!-- Mobile: search icon -->
   <button class="search-icon-btn" id="search-icon-btn" aria-label="Axtar">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
   </button>
+
   <div class="bar-end">
+    <!-- Desktop language picker -->
     <div class="lw" id="lw-desktop">
       <button class="lbtn" id="lbtn"><span id="llbl">AZ</span><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
       <div class="ldrop" id="ldrop">
@@ -555,6 +716,7 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
         <button class="lopt" data-l="ru">🇷🇺 Русский</button>
       </div>
     </div>
+    <!-- Desktop theme toggle -->
     <button class="ibtn theme-ibtn" id="thbtn">
       <svg id="ico-m" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       <svg id="ico-s" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
@@ -567,7 +729,7 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
   </div>
 </nav>
 
-<!-- MOBILE SEARCH BAR -->
+<!-- MOBILE SEARCH BAR (slides below topbar) -->
 <div id="mobile-search-bar">
   <div class="msbox">
     <svg class="s-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -578,26 +740,36 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
   </button>
 </div>
 
-<!-- HAMBURGER MENU -->
-<div id="ham-menu" role="navigation">
+<!-- HAMBURGER DROPDOWN MENU -->
+<div id="ham-menu" role="navigation" aria-label="Əsas Menyu">
   <div class="ham-section">
     <div class="ham-label">Səhifələr</div>
-    <div class="ham-item active" data-pg="discover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span id="hm-disc">Kəşfet</span></div>
-    <div class="ham-item" data-pg="saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span id="hm-save">Endirilmiş</span></div>
-    <div class="ham-item" data-pg="playlists"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg><span id="hm-pl">Playlistlər</span></div>
-    <div class="ham-item" data-pg="social"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span id="hm-soc">Sosial</span></div>
-  </div>
-  <div class="ham-section">
-    <div class="ham-label">Görünüş</div>
-    <div class="ham-theme-row"><span class="ham-theme-lbl" id="hm-theme-lbl">Qaranlıq rejim</span><div class="theme-toggle" id="ham-theme-toggle"></div></div>
-  </div>
-  <div class="ham-section">
-    <div class="ham-label">⏱ Yuxu Taymerı</div>
-    <div class="ham-sleep-row" id="ham-sleep-row">
-      <div class="ham-sleep-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span id="hm-sleep-lbl">Yuxu Taymerı</span></div>
-      <span id="ham-sleep-cd"></span>
+    <div class="ham-item active" data-pg="discover">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span id="hm-disc">Kəşfet</span>
+    </div>
+    <div class="ham-item" data-pg="saved">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span id="hm-save">Endirilmiş</span>
+    </div>
+    <div class="ham-item" data-pg="playlists">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg>
+      <span id="hm-pl">Playlistlər</span>
+    </div>
+    <div class="ham-item" data-pg="social">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span id="hm-soc">Sosial</span>
     </div>
   </div>
+
+  <div class="ham-section">
+    <div class="ham-label">Görünüş</div>
+    <div class="ham-theme-row">
+      <span class="ham-theme-lbl" id="hm-theme-lbl">Qaranlıq rejim</span>
+      <div class="theme-toggle" id="ham-theme-toggle"></div>
+    </div>
+  </div>
+
   <div class="ham-section">
     <div class="ham-label">Dil / Language</div>
     <div class="ham-row">
@@ -606,6 +778,7 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
       <button class="ham-lang-btn" data-l="ru">🇷🇺 RU</button>
     </div>
   </div>
+
   <button class="ham-auth-btn signin" id="ham-auth-btn">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg>
     <span id="ham-auth-lbl">Google ilə daxil ol</span>
@@ -623,7 +796,6 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
         <span class="hchip">📱 <span id="c2">Oflayn saxlama</span></span>
         <span class="hchip">🎵 <span id="c3">Playlist</span></span>
         <span class="hchip">💬 <span id="c4">Dostlarla chat</span></span>
-        <span class="hchip">⏱ <span id="c5">Yuxu Taymerı</span></span>
         <span class="hchip">🌍 AZ · EN · RU</span>
       </div>
     </div>
@@ -634,6 +806,7 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
     <div class="sh"><span class="dot"></span><span id="pop-lbl">Populyar Mahnılar</span></div>
     <div class="grid" id="mgrid"></div>
   </div>
+
   <div id="page-saved" class="page">
     <div class="sh"><span class="dot"></span><span id="sv-h">Endirilmiş Mahnılar</span></div>
     <div class="svlist" id="svlist">
@@ -643,18 +816,26 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
       </div>
     </div>
   </div>
+
   <div id="page-playlists" class="page">
     <div class="sh"><span class="dot"></span><span id="pl-h">Mənim Playlistlərim</span></div>
-    <button class="newpl" id="newpl-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span id="newpl-lbl">Yeni Playlist Yarat</span></button>
+    <button class="newpl" id="newpl-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span id="newpl-lbl">Yeni Playlist Yarat</span>
+    </button>
     <div style="height:14px"></div>
     <div class="plwrap" id="pl-list"></div>
   </div>
+
   <div id="page-social" class="page">
     <div class="loginwall" id="login-wall">
       <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--g)" stroke-width="1.3" style="margin:0 auto 13px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <h2 id="wall-h">Dostlarla Söhbət</h2>
       <p id="wall-p">Dost siyahına əlavə et, DM yaz, onların dinlədiklərinə bax.</p>
-      <button class="gbtn" id="wall-sign"><svg width="16" height="16" viewBox="0 0 24 24" fill="#4285F4"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span id="gsign-lbl">Google ilə daxil ol</span></button>
+      <button class="gbtn" id="wall-sign">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#4285F4"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg>
+        <span id="gsign-lbl">Google ilə daxil ol</span>
+      </button>
     </div>
     <div class="socgrid" id="soc-main" style="display:none">
       <div class="frpanel">
@@ -663,23 +844,38 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
           <button class="ptab" id="ptab-rq"><span id="tl-rq">İstəklər</span> <span id="rqbadge" class="rqbadge" style="display:none">0</span></button>
         </div>
         <div id="fr-sec">
-          <div class="frform"><input id="fr-inp" type="email"/><button class="fradd" id="fr-add"><span id="add-lbl">Əlavə et</span></button></div>
+          <div class="frform">
+            <input id="fr-inp" type="email"/>
+            <button class="fradd" id="fr-add"><span id="add-lbl">Əlavə et</span></button>
+          </div>
           <div class="frlist" id="fr-list"></div>
         </div>
-        <div id="rq-sec" style="display:none"><div class="rqlist" id="rq-list"></div></div>
+        <div id="rq-sec" style="display:none">
+          <div class="rqlist" id="rq-list"></div>
+        </div>
       </div>
       <div class="chatpanel-wrap">
-        <button class="mob-back" onclick="closeMobileChat()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>Geri</button>
+        <button class="mob-back" onclick="closeMobileChat()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Geri
+        </button>
         <div class="chatpanel">
           <div class="chatheader">
             <div class="ldot"></div>
-            <div style="flex:1;min-width:0"><div class="chname" id="ch-title">—</div><div class="chsub" id="ch-sub"></div></div>
-            <button class="ibtn" id="vpbtn" style="display:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+            <div style="flex:1;min-width:0">
+              <div class="chname" id="ch-title">—</div>
+              <div class="chsub" id="ch-sub"></div>
+            </div>
+            <button class="ibtn" id="vpbtn" style="display:none">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </button>
           </div>
           <div id="msgs"><div class="echint" id="echint"></div></div>
           <div class="chatfoot">
             <textarea id="msginput" rows="1" placeholder="Mesaj yaz..."></textarea>
-            <button id="sndbtn" disabled><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+            <button id="sndbtn" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
           </div>
         </div>
       </div>
@@ -715,104 +911,234 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
       <span class="ptime r" id="p-dur">0:00</span>
     </div>
   </div>
-  <!-- Sleep timer pill (desktop/tablet) -->
-  <div id="p-sleep-pill">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    <span id="p-sleep-text">--:--</span>
-  </div>
+  <!-- Desktop player actions -->
   <div class="pacts">
-    <button class="pbtn" id="b-sl" title="Yuxu Taymerı"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
     <button class="pbtn" id="b-bar-pl" title="Playlist-ə əlavə et"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
     <button class="pbtn" id="b-bar-dl" title="Endir"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
     <button class="pbtn" id="b-bar-sh" title="Paylaş"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
   </div>
+  <!-- Volume (desktop) -->
   <div class="pvol">
     <svg class="vico" id="v-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
     <div class="vtrack" id="vtrack"><div class="vfill" id="vfill"></div></div>
   </div>
+  <!-- Mobile/tablet meatball menu -->
   <button class="p-meatball" id="p-meatball" aria-label="Əlavə seçimlər">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
   </button>
 </div>
 
-<!-- Player extra menu -->
+<!-- Player extra menu (mobile/tablet) -->
 <div id="p-extra-menu">
-  <div class="pem-item amber" id="pem-sleep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span id="pem-sleep-lbl">Yuxu Taymerı</span></div>
-  <div class="pem-item" id="pem-pl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span id="pem-pl-lbl">Playlist-ə əlavə et</span></div>
-  <div class="pem-item" id="pem-dl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span id="pem-dl-lbl">Endir</span></div>
-  <div class="pem-item" id="pem-sh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><span id="pem-sh-lbl">Paylaş</span></div>
-  <div class="pem-item" id="pem-shuf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg><span id="pem-shuf-lbl">Qarışdırma</span></div>
-  <div class="pem-item" id="pem-rep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span id="pem-rep-lbl">Təkrar</span></div>
+  <div class="pem-item" id="pem-pl">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span id="pem-pl-lbl">Playlist-ə əlavə et</span>
+  </div>
+  <div class="pem-item" id="pem-dl">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <span id="pem-dl-lbl">Endir</span>
+  </div>
+  <div class="pem-item" id="pem-sh">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    <span id="pem-sh-lbl">Paylaş</span>
+  </div>
+  <div class="pem-item" id="pem-shuf">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+    <span id="pem-shuf-lbl">Qarışdırma</span>
+  </div>
+  <div class="pem-item" id="pem-rep">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+    <span id="pem-rep-lbl">Təkrar</span>
+  </div>
 </div>
 
 <div id="yt-wrap"><div id="yt-player"></div></div>
 <div id="toast"></div>
 
-<!-- MODALS -->
-<div class="moverlay" id="m-prof"><div class="mbox"><button class="mcls" onclick="closeM('m-prof')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><div id="m-prof-b"></div></div></div>
-<div class="moverlay" id="m-addpl"><div class="mbox"><button class="mcls" onclick="closeM('m-addpl')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><div id="m-addpl-b"></div></div></div>
-<div class="moverlay" id="m-gen"><div class="mbox"><button class="mcls" onclick="closeM('m-gen')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><div id="m-gen-b"></div></div></div>
+<!-- Modals -->
+<div class="moverlay" id="m-prof"><div class="mbox">
+  <button class="mcls" onclick="closeM('m-prof')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div id="m-prof-b"></div>
+</div></div>
 
-<!-- SLEEP TIMER MODAL -->
-<div class="moverlay" id="m-sleep">
-  <div class="mbox">
-    <button class="mcls" onclick="closeM('m-sleep')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    <div class="mtit" id="sleep-mtit">⏱ Yuxu Taymerı</div>
-    <!-- Active countdown -->
-    <div class="sleep-active-box" id="sleep-active-box">
-      <div class="sleep-cd-digits" id="sleep-cd-digits">00:00</div>
-      <div class="sleep-cd-sub" id="sleep-cd-sub">sonra musiqi dayanacaq</div>
-      <div class="sleep-cd-track"><div class="sleep-cd-fill" id="sleep-cd-fill"></div></div>
-    </div>
-    <!-- Presets -->
-    <div class="sleep-grid">
-      <button class="sleep-opt" data-m="5">5<small>dəq</small></button>
-      <button class="sleep-opt" data-m="10">10<small>dəq</small></button>
-      <button class="sleep-opt" data-m="15">15<small>dəq</small></button>
-      <button class="sleep-opt" data-m="20">20<small>dəq</small></button>
-      <button class="sleep-opt" data-m="30">30<small>dəq</small></button>
-      <button class="sleep-opt" data-m="45">45<small>dəq</small></button>
-      <button class="sleep-opt" data-m="60">60<small>dəq</small></button>
-      <button class="sleep-opt" data-m="90">90<small>dəq</small></button>
-    </div>
-    <div class="sleep-custom-row">
-      <input id="sleep-inp" type="number" min="1" max="480" placeholder="Xüsusi (1-480 dəq)..."/>
-      <button class="sleep-set-btn" onclick="setSleepCustom()">Qur</button>
-    </div>
-    <button class="sleep-cancel-btn" id="sleep-cancel-btn" onclick="cancelSleep()">✕ Taymerı ləğv et</button>
-  </div>
-</div>
+<div class="moverlay" id="m-addpl"><div class="mbox">
+  <button class="mcls" onclick="closeM('m-addpl')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div id="m-addpl-b"></div>
+</div></div>
+
+<div class="moverlay" id="m-gen"><div class="mbox">
+  <button class="mcls" onclick="closeM('m-gen')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div id="m-gen-b"></div>
+</div></div>
 
 <script>
-/* ══ FIREBASE ══ */
-const FB_CFG={apiKey:"AIzaSyDBRbEpFepTcNcRvYDMx4oIxO7iFCBQmtk",authDomain:"lifecanvas12.firebaseapp.com",databaseURL:"https://lifecanvas12-default-rtdb.firebaseio.com",projectId:"lifecanvas12",storageBucket:"lifecanvas12.firebasestorage.app",messagingSenderId:"105457176344",appId:"1:105457176344:web:a625889e4025be61c5d86d"};
-const FB=!!FB_CFG.apiKey;
-if(FB)firebase.initializeApp(FB_CFG);
-const fbA=FB?firebase.auth():null;
-const fbD=FB?firebase.database():null;
+/* ══ FIREBASE CONFIG ══ */
+const FB_CFG = {
+  apiKey: "AIzaSyDBRbEpFepTcNcRvYDMx4oIxO7iFCBQmtk",
+  authDomain: "lifecanvas12.firebaseapp.com",
+  databaseURL: "https://lifecanvas12-default-rtdb.firebaseio.com",
+  projectId: "lifecanvas12",
+  storageBucket: "lifecanvas12.firebasestorage.app",
+  messagingSenderId: "105457176344",
+  appId: "1:105457176344:web:a625889e4025be61c5d86d",
+  measurementId: "G-9Y6MXJFEBZ"
+};
+const FB = !!FB_CFG.apiKey;
+if (FB) firebase.initializeApp(FB_CFG);
+const fbA = FB ? firebase.auth()     : null;
+const fbD = FB ? firebase.database() : null;
 
 /* ══ I18N ══ */
-const TX={
-az:{disc:"Kəşfet",save:"Endirilmiş",pls:"Playlistlər",soc:"Sosial",hh:"Musiqinin <em>Kainatı</em>nı<br>Kəşf Elə",hp:"YouTube-un bütün musiqisi — tamamilə pulsuz.",c1:"100% Pulsuz",c2:"Oflayn dinlə",c3:"Playlist",c4:"Dostlarla chat",c5:"Yuxu Taymerı",pop:"Populyar Mahnılar",svh:"Endirilmiş Mahnılar",nosv:"Hələ endirilmiş mahnı yoxdur.<br><strong style='color:var(--g)'>⬇ Endir</strong> düyməsinə bas.",plh:"Mənim Playlistlərim",newpl:"Yeni Playlist Yarat",wallh:"Dostlarla Söhbət",wallp:"Dost siyahına əlavə et, DM yaz, onların dinlədiklərinə bax.",gsign:"Google ilə daxil ol",fr:"Dostlar",rq:"İstəklər",add:"Əlavə et",frph:"E-mail ilə dost axtar...",sph:"YouTube linki yapıştır...",signin:"Giriş",signout:"Çıxış",play:"▶ Oynat",dosave:"⬇ Endir",saved:"✓ Endirildi",addpl:"+ Playlist",rec:"⬇ Endir",rec_ing:"⬇ Endirilir...",rec_ok:"✓ Endirildi",plph:"Playlist adı...",create:"Yarat",cancel:"Ləğv et",nopl:"Playlist yoxdur.",plem:"Playlist boşdur.",del:"Sil",playall:"▶ Hamısını çal",acc:"Qəbul et",rej:"Rədd et",reqsent:"Dostluq istəyi göndərildi!",alfr:"Artıq dostdur",nofnd:"İstifadəçi tapılmadı",dmbtn:"💬 Mesaj göndər",nowpl:"İndi çalınır",online:"onlayn",selhint:"Sol tərəfdən dost seçin.",typemsg:"Mesaj yaz...",resfor:"Nəticələr",themeDark:"Qaranlıq rejim",themeLight:"İşıqlı rejim",addTopl:"Playlist-ə əlavə et",share:"Paylaş",shuffle:"Qarışdırma",repeat:"Təkrar",sleep:"Yuxu Taymerı",sleepStop:"sonra musiqi dayanacaq",sleepCancel:"Taymerı ləğv et"},
-en:{disc:"Discover",save:"Downloads",pls:"Playlists",soc:"Social",hh:"Discover the <em>Universe</em><br>of Music",hp:"All YouTube music — completely free.",c1:"100% Free",c2:"Offline listen",c3:"Playlist",c4:"Chat with friends",c5:"Sleep Timer",pop:"Popular Songs",svh:"Downloaded Songs",nosv:"No downloads yet.<br><strong style='color:var(--g)'>⬇ Download</strong> any song.",plh:"My Playlists",newpl:"Create New Playlist",wallh:"Chat with Friends",wallp:"Add friends, send DMs, see what they're listening to.",gsign:"Continue with Google",fr:"Friends",rq:"Requests",add:"Add",frph:"Search by email...",sph:"Paste YouTube link...",signin:"Sign In",signout:"Sign Out",play:"▶ Play",dosave:"⬇ Download",saved:"✓ Downloaded",addpl:"+ Playlist",rec:"⬇ Download",rec_ing:"⬇ Downloading...",rec_ok:"✓ Downloaded",plph:"Playlist name...",create:"Create",cancel:"Cancel",nopl:"No playlists yet.",plem:"Playlist is empty.",del:"Delete",playall:"▶ Play All",acc:"Accept",rej:"Decline",reqsent:"Friend request sent!",alfr:"Already friends",nofnd:"User not found",dmbtn:"💬 Send message",nowpl:"Now playing",online:"online",selhint:"Select a friend from the left.",typemsg:"Type a message...",resfor:"Results",themeDark:"Dark mode",themeLight:"Light mode",addTopl:"Add to Playlist",share:"Share",shuffle:"Shuffle",repeat:"Repeat",sleep:"Sleep Timer",sleepStop:"music will stop",sleepCancel:"Cancel Timer"},
-ru:{disc:"Открыть",save:"Загрузки",pls:"Плейлисты",soc:"Социальное",hh:"Исследуй <em>Вселенную</em><br>Музыки",hp:"Вся музыка YouTube — совершенно бесплатно.",c1:"100% Бесплатно",c2:"Слушай офлайн",c3:"Плейлист",c4:"Чат с друзьями",c5:"Таймер сна",pop:"Популярные Песни",svh:"Загруженные Песни",nosv:"Нет загруженных песен.<br><strong style='color:var(--g)'>⬇ Скачать</strong>.",plh:"Мои Плейлисты",newpl:"Создать Плейлист",wallh:"Чат с Друзьями",wallp:"Добавляй друзей, пиши ЛС, смотри что слушают.",gsign:"Войти через Google",fr:"Друзья",rq:"Запросы",add:"Добавить",frph:"Поиск по e-mail...",sph:"Вставьте ссылку YouTube...",signin:"Войти",signout:"Выйти",play:"▶ Играть",dosave:"⬇ Скачать",saved:"✓ Скачано",addpl:"+ Плейлист",rec:"⬇ Скачать",rec_ing:"⬇ Скачивается...",rec_ok:"✓ Скачано",plph:"Название плейлиста...",create:"Создать",cancel:"Отмена",nopl:"Плейлистов нет.",plem:"Плейлист пуст.",del:"Удалить",playall:"▶ Играть все",acc:"Принять",rej:"Отклонить",reqsent:"Запрос отправлен!",alfr:"Уже в друзьях",nofnd:"Пользователь не найден",dmbtn:"💬 Написать",nowpl:"Сейчас играет",online:"онлайн",selhint:"Выберите друга слева.",typemsg:"Написать...",resfor:"Результаты",themeDark:"Тёмный режим",themeLight:"Светлый режим",addTopl:"В плейлист",share:"Поделиться",shuffle:"Перемешать",repeat:"Повтор",sleep:"Таймер сна",sleepStop:"музыка остановится",sleepCancel:"Отменить таймер"}
+const TX = {
+  az:{disc:"Kəşfet",save:"Endirilmiş",pls:"Playlistlər",soc:"Sosial",
+    hh:"Musiqinin <em>Kainatı</em>nı<br>Kəşf Elə",hp:"YouTube-un bütün musiqisi — tamamilə pulsuz.",
+    c1:"100% Pulsuz",c2:"Oflayn dinlə",c3:"Playlist",c4:"Dostlarla chat",
+    pop:"Populyar Mahnılar",svh:"Endirilmiş Mahnılar",
+    nosv:"Hələ endirilmiş mahnı yoxdur.<br><strong style='color:var(--g)'>⬇ Endir</strong> düyməsinə bas.",
+    plh:"Mənim Playlistlərim",newpl:"Yeni Playlist Yarat",
+    wallh:"Dostlarla Söhbət",wallp:"Dost siyahına əlavə et, DM yaz, onların dinlədiklərinə bax.",
+    gsign:"Google ilə daxil ol",fr:"Dostlar",rq:"İstəklər",add:"Əlavə et",
+    frph:"E-mail ilə dost axtar...",sph:"YouTube linki yapıştır...",
+    signin:"Giriş",signout:"Çıxış",
+    play:"▶ Oynat",dosave:"⬇ Endir",saved:"✓ Endirildi",addpl:"+ Playlist",
+    rec:"⬇ Endir",rec_ing:"⬇ Endirilir...",rec_ok:"✓ Endirildi",
+    plph:"Playlist adı...",create:"Yarat",cancel:"Ləğv et",
+    nopl:"Playlist yoxdur.",plem:"Playlist boşdur.",
+    del:"Sil",playall:"▶ Hamısını çal",
+    acc:"Qəbul et",rej:"Rədd et",
+    reqsent:"Dostluq istəyi göndərildi!",alfr:"Artıq dostdur",nofnd:"İstifadəçi tapılmadı",
+    dmbtn:"💬 Mesaj göndər",nowpl:"İndi çalınır",online:"onlayn",
+    selfr:"Dost seçin",selhint:"Sol tərəfdən dost seçin.",
+    typemsg:"Mesaj yaz...",selsong:"Mahnı seçin",resfor:"Nəticələr",
+    themeDark:"Qaranlıq rejim",themeLight:"İşıqlı rejim",
+    addTopl:"Playlist-ə əlavə et",share:"Paylaş",shuffle:"Qarışdırma",repeat:"Təkrar",
+  },
+  en:{disc:"Discover",save:"Downloads",pls:"Playlists",soc:"Social",
+    hh:"Discover the <em>Universe</em><br>of Music",hp:"All YouTube music — completely free.",
+    c1:"100% Free",c2:"Offline listen",c3:"Playlist",c4:"Chat with friends",
+    pop:"Popular Songs",svh:"Downloaded Songs",
+    nosv:"No downloads yet.<br><strong style='color:var(--g)'>⬇ Download</strong> any song.",
+    plh:"My Playlists",newpl:"Create New Playlist",
+    wallh:"Chat with Friends",wallp:"Add friends, send DMs, see what they're listening to.",
+    gsign:"Continue with Google",fr:"Friends",rq:"Requests",add:"Add",
+    frph:"Search by email...",sph:"Paste YouTube link...",
+    signin:"Sign In",signout:"Sign Out",
+    play:"▶ Play",dosave:"⬇ Download",saved:"✓ Downloaded",addpl:"+ Playlist",
+    rec:"⬇ Download",rec_ing:"⬇ Downloading...",rec_ok:"✓ Downloaded",
+    plph:"Playlist name...",create:"Create",cancel:"Cancel",
+    nopl:"No playlists yet.",plem:"Playlist is empty.",
+    del:"Delete",playall:"▶ Play All",
+    acc:"Accept",rej:"Decline",
+    reqsent:"Friend request sent!",alfr:"Already friends",nofnd:"User not found",
+    dmbtn:"💬 Send message",nowpl:"Now playing",online:"online",
+    selfr:"Select friend",selhint:"Select a friend from the left.",
+    typemsg:"Type a message...",selsong:"Select a song",resfor:"Results",
+    themeDark:"Dark mode",themeLight:"Light mode",
+    addTopl:"Add to Playlist",share:"Share",shuffle:"Shuffle",repeat:"Repeat",
+  },
+  ru:{disc:"Открыть",save:"Загрузки",pls:"Плейлисты",soc:"Социальное",
+    hh:"Исследуй <em>Вселенную</em><br>Музыки",hp:"Вся музыка YouTube — совершенно бесплатно.",
+    c1:"100% Бесплатно",c2:"Слушай офлайн",c3:"Плейлист",c4:"Чат с друзьями",
+    pop:"Популярные Песни",svh:"Загруженные Песни",
+    nosv:"Нет загруженных песен.<br><strong style='color:var(--g)'>⬇ Скачать</strong>.",
+    plh:"Мои Плейлисты",newpl:"Создать Плейлист",
+    wallh:"Чат с Друзьями",wallp:"Добавляй друзей, пиши ЛС, смотри что слушают.",
+    gsign:"Войти через Google",fr:"Друзья",rq:"Запросы",add:"Добавить",
+    frph:"Поиск по e-mail...",sph:"Вставьте ссылку YouTube...",
+    signin:"Войти",signout:"Выйти",
+    play:"▶ Играть",dosave:"⬇ Скачать",saved:"✓ Скачано",addpl:"+ Плейлист",
+    rec:"⬇ Скачать",rec_ing:"⬇ Скачивается...",rec_ok:"✓ Скачано",
+    plph:"Название плейлиста...",create:"Создать",cancel:"Отмена",
+    nopl:"Плейлистов нет.",plem:"Плейлист пуст.",
+    del:"Удалить",playall:"▶ Играть все",
+    acc:"Принять",rej:"Отклонить",
+    reqsent:"Запрос отправлен!",alfr:"Уже в друзьях",nofnd:"Пользователь не найден",
+    dmbtn:"💬 Написать",nowpl:"Сейчас играет",online:"онлайн",
+    selfr:"Выберите друга",selhint:"Выберите друга слева.",
+    typemsg:"Написать...",selsong:"Выберите песню",resfor:"Результаты",
+    themeDark:"Тёмный режим",themeLight:"Светлый режим",
+    addTopl:"В плейлист",share:"Поделиться",shuffle:"Перемешать",repeat:"Повтор",
+  }
 };
-let LANG=localStorage.getItem("mu_lang")||"az";
-let THEME=localStorage.getItem("mu_theme")||"dark";
-const T=k=>TX[LANG]?.[k]??TX.az[k]??k;
+
+let LANG  = localStorage.getItem("mu_lang")  || "az";
+let THEME = localStorage.getItem("mu_theme") || "dark";
+const T = k => TX[LANG]?.[k] ?? TX.az[k] ?? k;
 
 /* ══ DEXIE ══ */
-const ldb=new Dexie("MUv10");
-ldb.version(1).stores({saved:"++id, &videoId, title, artist, thumb",offline:"++id, &videoId, title, artist, thumb, mime",playlists:"++id, name, createdAt",pl_songs:"++id, [playlistId+videoId], playlistId, videoId, title, artist, thumb"});
-ldb.version(2).stores({saved:"++id, &videoId, title, artist, thumb",offline:"++id, &videoId, title, artist, thumb, mime",downloads:"++id, &videoId, title, artist, thumb, mime, addedAt",playlists:"++id, name, createdAt",pl_songs:"++id, [playlistId+videoId], playlistId, videoId, title, artist, thumb"});
+const ldb = new Dexie("MUv10");
+ldb.version(1).stores({
+  saved:    "++id, &videoId, title, artist, thumb",
+  offline:  "++id, &videoId, title, artist, thumb, mime",
+  playlists:"++id, name, createdAt",
+  pl_songs: "++id, [playlistId+videoId], playlistId, videoId, title, artist, thumb",
+});
+ldb.version(2).stores({
+  saved:     "++id, &videoId, title, artist, thumb",
+  offline:   "++id, &videoId, title, artist, thumb, mime",
+  downloads: "++id, &videoId, title, artist, thumb, mime, addedAt",
+  playlists: "++id, name, createdAt",
+  pl_songs:  "++id, [playlistId+videoId], playlistId, videoId, title, artist, thumb",
+});
 
 /* ══ CATALOG ══ */
-const SONGS=[{v:"3JZ4pnNtyxQ",t:"Shape of You",a:"Ed Sheeran",k:"ed sheeran"},{v:"kffacxfA7G4",t:"Baby",a:"Justin Bieber",k:"justin bieber"},{v:"RgKAFK5djSk",t:"See You Again",a:"Wiz Khalifa",k:"wiz khalifa"},{v:"hT_nvWreIhg",t:"Counting Stars",a:"OneRepublic",k:"onerepublic"},{v:"2Vv-BfVoq4g",t:"Perfect",a:"Ed Sheeran",k:"ed sheeran"},{v:"YQHsXMglC9A",t:"Hello",a:"Adele",k:"adele"},{v:"pRpeEdMmmQ0",t:"Shake It Off",a:"Taylor Swift",k:"taylor swift"},{v:"09R8_2nJtjg",t:"Sugar",a:"Maroon 5",k:"maroon 5"},{v:"CevxZvSJLk8",t:"Roar",a:"Katy Perry",k:"katy perry"},{v:"SlPhMPnQ58k",t:"Happy",a:"Pharrell Williams",k:"pharrell"},{v:"JGwWNGJdvx8",t:"Photograph",a:"Ed Sheeran",k:"ed sheeran"},{v:"nfWlot6h_JM",t:"Style",a:"Taylor Swift",k:"taylor swift"},{v:"lp-EO5I60KA",t:"Bad Habits",a:"Ed Sheeran",k:"ed sheeran"},{v:"e-ORhEE9VVg",t:"Blank Space",a:"Taylor Swift",k:"taylor swift"},{v:"rYEDA3JcQqw",t:"Rolling in the Deep",a:"Adele",k:"adele"},{v:"bo_efYhYU2A",t:"Someone Like You",a:"Adele",k:"adele"},{v:"fRh_vgS2dFE",t:"Sorry",a:"Justin Bieber",k:"justin bieber"},{v:"bu8PC51dHBw",t:"Love Yourself",a:"Justin Bieber",k:"justin bieber"},{v:"90RLzVUuXe4",t:"Apologize",a:"OneRepublic",k:"onerepublic"},{v:"XXYlFuWEuKI",t:"Blinding Lights",a:"The Weeknd",k:"weeknd"},{v:"KEI4qSrkPAs",t:"Save Your Tears",a:"The Weeknd",k:"weeknd"},{v:"waU75jdUnYw",t:"Starboy",a:"The Weeknd",k:"weeknd"},{v:"oygrmJFky_M",t:"Levitating",a:"Dua Lipa",k:"dua lipa"},{v:"DyDfgMOUjCI",t:"Don't Start Now",a:"Dua Lipa",k:"dua lipa"},{v:"TUVcZfQe-Kw",t:"New Rules",a:"Dua Lipa",k:"dua lipa"},{v:"ktvTqknDobU",t:"Radioactive",a:"Imagine Dragons",k:"imagine dragons"},{v:"mWRsgZuwf_8",t:"Demons",a:"Imagine Dragons",k:"imagine dragons"},{v:"fKopy74weus",t:"Believer",a:"Imagine Dragons",k:"imagine dragons"},{v:"dvgZkm1xWPE",t:"The Scientist",a:"Coldplay",k:"coldplay"},{v:"1G4isv_Fylg",t:"Paradise",a:"Coldplay",k:"coldplay"},{v:"PkNpCi4G_Oc",t:"Yellow",a:"Coldplay",k:"coldplay"},{v:"cmSbXsFE3l8",t:"Just The Way You Are",a:"Bruno Mars",k:"bruno mars"},{v:"gdZLi9oWNZg",t:"Uptown Funk",a:"Bruno Mars",k:"bruno mars"},{v:"UceaB4D0jpo",t:"Circles",a:"Post Malone",k:"post malone"},{v:"ApXoWvfEYVU",t:"Rockstar",a:"Post Malone",k:"post malone"},{v:"_Yhyp-_hX2s",t:"Lose Yourself",a:"Eminem",k:"eminem"},{v:"zhY_0DoQCQs",t:"God's Plan",a:"Drake",k:"drake"},{v:"DRS_PpOrUZ4",t:"One Dance",a:"Drake",k:"drake"},{v:"4m1EFMoRFvY",t:"Halo",a:"Beyoncé",k:"beyonce"},{v:"2vjPBrBU-TM",t:"Waka Waka",a:"Shakira",k:"shakira"}];
-const TH=v=>`https://img.youtube.com/vi/${v}/mqdefault.jpg`;
-const PHO=`data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%230e1521'/%3E%3Ctext x='100' y='118' font-size='72' text-anchor='middle' fill='%23283858'%3E%E2%99%AA%3C/text%3E%3C/svg%3E`;
+const SONGS=[
+  {v:"3JZ4pnNtyxQ",t:"Shape of You",        a:"Ed Sheeran",       k:"ed sheeran"},
+  {v:"kffacxfA7G4",t:"Baby",                 a:"Justin Bieber",    k:"justin bieber"},
+  {v:"RgKAFK5djSk",t:"See You Again",        a:"Wiz Khalifa",      k:"wiz khalifa"},
+  {v:"hT_nvWreIhg",t:"Counting Stars",       a:"OneRepublic",      k:"onerepublic"},
+  {v:"2Vv-BfVoq4g",t:"Perfect",              a:"Ed Sheeran",       k:"ed sheeran"},
+  {v:"YQHsXMglC9A",t:"Hello",                a:"Adele",            k:"adele"},
+  {v:"pRpeEdMmmQ0",t:"Shake It Off",         a:"Taylor Swift",     k:"taylor swift"},
+  {v:"09R8_2nJtjg",t:"Sugar",                a:"Maroon 5",         k:"maroon 5"},
+  {v:"CevxZvSJLk8",t:"Roar",                 a:"Katy Perry",       k:"katy perry"},
+  {v:"SlPhMPnQ58k",t:"Happy",                a:"Pharrell Williams",k:"pharrell"},
+  {v:"JGwWNGJdvx8",t:"Photograph",           a:"Ed Sheeran",       k:"ed sheeran"},
+  {v:"nfWlot6h_JM",t:"Style",                a:"Taylor Swift",     k:"taylor swift"},
+  {v:"lp-EO5I60KA",t:"Bad Habits",           a:"Ed Sheeran",       k:"ed sheeran"},
+  {v:"e-ORhEE9VVg",t:"Blank Space",          a:"Taylor Swift",     k:"taylor swift"},
+  {v:"rYEDA3JcQqw",t:"Rolling in the Deep",  a:"Adele",            k:"adele"},
+  {v:"bo_efYhYU2A",t:"Someone Like You",     a:"Adele",            k:"adele"},
+  {v:"fRh_vgS2dFE",t:"Sorry",                a:"Justin Bieber",    k:"justin bieber"},
+  {v:"bu8PC51dHBw",t:"Love Yourself",        a:"Justin Bieber",    k:"justin bieber"},
+  {v:"90RLzVUuXe4",t:"Apologize",            a:"OneRepublic",      k:"onerepublic"},
+  {v:"XXYlFuWEuKI",t:"Blinding Lights",      a:"The Weeknd",       k:"weeknd"},
+  {v:"KEI4qSrkPAs",t:"Save Your Tears",      a:"The Weeknd",       k:"weeknd"},
+  {v:"waU75jdUnYw",t:"Starboy",              a:"The Weeknd",       k:"weeknd"},
+  {v:"oygrmJFky_M",t:"Levitating",           a:"Dua Lipa",         k:"dua lipa"},
+  {v:"DyDfgMOUjCI",t:"Don't Start Now",      a:"Dua Lipa",         k:"dua lipa"},
+  {v:"TUVcZfQe-Kw",t:"New Rules",            a:"Dua Lipa",         k:"dua lipa"},
+  {v:"ktvTqknDobU",t:"Radioactive",          a:"Imagine Dragons",  k:"imagine dragons"},
+  {v:"mWRsgZuwf_8",t:"Demons",               a:"Imagine Dragons",  k:"imagine dragons"},
+  {v:"fKopy74weus",t:"Believer",             a:"Imagine Dragons",  k:"imagine dragons"},
+  {v:"dvgZkm1xWPE",t:"The Scientist",        a:"Coldplay",         k:"coldplay"},
+  {v:"1G4isv_Fylg",t:"Paradise",             a:"Coldplay",         k:"coldplay"},
+  {v:"PkNpCi4G_Oc",t:"Yellow",               a:"Coldplay",         k:"coldplay"},
+  {v:"cmSbXsFE3l8",t:"Just The Way You Are", a:"Bruno Mars",       k:"bruno mars"},
+  {v:"gdZLi9oWNZg",t:"Uptown Funk",          a:"Bruno Mars",       k:"bruno mars"},
+  {v:"UceaB4D0jpo",t:"Circles",              a:"Post Malone",      k:"post malone"},
+  {v:"ApXoWvfEYVU",t:"Rockstar",             a:"Post Malone",      k:"post malone"},
+  {v:"_Yhyp-_hX2s",t:"Lose Yourself",        a:"Eminem",           k:"eminem"},
+  {v:"zhY_0DoQCQs",t:"God's Plan",           a:"Drake",            k:"drake"},
+  {v:"DRS_PpOrUZ4",t:"One Dance",            a:"Drake",            k:"drake"},
+  {v:"4m1EFMoRFvY",t:"Halo",                 a:"Beyoncé",          k:"beyonce"},
+  {v:"2vjPBrBU-TM",t:"Waka Waka",            a:"Shakira",          k:"shakira"},
+];
+const TH  = v=>`https://img.youtube.com/vi/${v}/mqdefault.jpg`;
+const PHO = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%230e1521'/%3E%3Ctext x='100' y='118' font-size='72' text-anchor='middle' fill='%23283858'%3E%E2%99%AA%3C/text%3E%3C/svg%3E`;
 
 /* ══ STATE ══ */
-const S={ytOk:false,ytp:null,list:SONGS.map(s=>({videoId:s.v,title:s.t,artist:s.a,thumb:TH(s.v),kw:s.k})),idx:-1,playing:false,repeat:false,shuffle:false,vol:72,saved:new Set(),offline:new Set(),downloads:new Set(),user:null,timer:null,chatUid:null,chatTarget:null,friends:{},chatListeners:[],offAudio:null,_downloading:false,sleepEnd:null,sleepTotal:0,sleepTick:null};
+const S={
+  ytOk:false,ytp:null,
+  list:SONGS.map(s=>({videoId:s.v,title:s.t,artist:s.a,thumb:TH(s.v),kw:s.k})),
+  idx:-1,playing:false,repeat:false,shuffle:false,vol:72,
+  saved:new Set(),offline:new Set(),downloads:new Set(),
+  user:null,timer:null,
+  chatUid:null,chatTarget:null,
+  friends:{},chatListeners:[],
+  offAudio:null,
+  _downloading: false,
+};
 
 /* ══ UTILS ══ */
 const X=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
@@ -824,209 +1150,252 @@ const closeM=id=>document.getElementById(id).classList.remove("open");
 window.closeM=closeM;
 document.querySelectorAll(".moverlay").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)o.classList.remove("open");}));
 
-/* ══ VIEW TRANSITIONS ══ */
-const VT=!!document.startViewTransition;
-function vt(fn){VT?document.startViewTransition(fn):fn();}
-window.vt=vt;
+/* ══ HAMBURGER MENU ══ */
+let hamOpen = false;
 
-/* ══ SLEEP TIMER ══ */
-function fmtMs(ms){const s=Math.max(0,Math.ceil(ms/1000)),m=Math.floor(s/60),sec=s%60;return`${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;}
+function openHam(){
+  hamOpen = true;
+  document.getElementById("ham-menu").classList.add("open");
+  document.getElementById("ham-icon").style.display = "none";
+  document.getElementById("close-icon").style.display = "";
+  document.getElementById("hmbtn").classList.add("active");
+  document.getElementById("hmbtn").setAttribute("aria-expanded","true");
+}
+function closeHam(){
+  hamOpen = false;
+  document.getElementById("ham-menu").classList.remove("open");
+  document.getElementById("ham-icon").style.display = "";
+  document.getElementById("close-icon").style.display = "none";
+  document.getElementById("hmbtn").classList.remove("active");
+  document.getElementById("hmbtn").setAttribute("aria-expanded","false");
+}
+function toggleHam(){ hamOpen ? closeHam() : openHam(); }
 
-function setSleepTimer(mins){
-  clearInterval(S.sleepTick);
-  S.sleepTotal=mins*60000;
-  S.sleepEnd=Date.now()+S.sleepTotal;
-  S.sleepTick=setInterval(()=>{
-    if(!S.sleepEnd)return;
-    const rem=S.sleepEnd-Date.now();
-    if(rem<=0){
-      if(S.offAudio)S.offAudio.pause();
-      else if(S.ytOk&&S.ytp)S.ytp.pauseVideo();
-      S.playing=false;setPUI("pause");
-      clearInterval(S.sleepTick);S.sleepTick=null;S.sleepEnd=null;S.sleepTotal=0;
-      updateSleepUI();updateSleepModal();
-      toast("😴 Musiqi dayandı");return;
-    }
-    updateSleepUI(rem);
-    if(document.getElementById("m-sleep").classList.contains("open"))updateSleepModal(rem);
-  },1000);
-  updateSleepUI();updateSleepModal();
-  toast(`⏱ ${mins} dəqiqə sonra dayanacaq`);
-  document.querySelectorAll(".sleep-opt").forEach(b=>b.classList.toggle("active",parseInt(b.dataset.m)===mins));
-}
-window.setSleepCustom=function(){
-  const v=parseInt(document.getElementById("sleep-inp").value)||0;
-  if(v<1||v>480){toast("⚠ 1–480 dəq arası");return;}
-  setSleepTimer(v);
-};
-window.cancelSleep=function(){
-  clearInterval(S.sleepTick);S.sleepTick=null;S.sleepEnd=null;S.sleepTotal=0;
-  updateSleepUI();updateSleepModal();
-  document.querySelectorAll(".sleep-opt").forEach(b=>b.classList.remove("active"));
-  toast("⏱ Taymeri ləğv edildi");
-};
-function updateSleepUI(rem){
-  const pill=document.getElementById("p-sleep-pill");
-  const txt=document.getElementById("p-sleep-text");
-  const hamCd=document.getElementById("ham-sleep-cd");
-  if(!S.sleepEnd){
-    pill.classList.remove("show");hamCd.style.display="none";return;
-  }
-  const r=rem??(S.sleepEnd-Date.now());
-  const ts=fmtMs(Math.max(0,r));
-  pill.classList.add("show");txt.textContent=ts;
-  hamCd.style.display="inline-flex";hamCd.textContent=ts;
-}
-function updateSleepModal(rem){
-  const box=document.getElementById("sleep-active-box");
-  const digits=document.getElementById("sleep-cd-digits");
-  const fill=document.getElementById("sleep-cd-fill");
-  const cancelBtn=document.getElementById("sleep-cancel-btn");
-  const sub=document.getElementById("sleep-cd-sub");
-  if(S.sleepEnd){
-    const r=rem??(S.sleepEnd-Date.now());
-    box.classList.add("show");cancelBtn.classList.add("show");
-    digits.textContent=fmtMs(Math.max(0,r));
-    sub.textContent=T("sleepStop");
-    fill.style.width=(S.sleepTotal>0?Math.max(0,r/S.sleepTotal*100):0)+"%";
-  } else {
-    box.classList.remove("show");cancelBtn.classList.remove("show");
-  }
-  cancelBtn.textContent="✕ "+T("sleepCancel");
-  sub.textContent=T("sleepStop");
-  document.getElementById("sleep-mtit").textContent="⏱ "+T("sleep");
-}
-function openSleepTimer(){updateSleepModal();openM("m-sleep");closeHam();}
-window.openSleepTimer=openSleepTimer;
+document.getElementById("hmbtn").addEventListener("click", e => { e.stopPropagation(); toggleHam(); });
 
-document.querySelectorAll(".sleep-opt").forEach(btn=>{
-  btn.addEventListener("click",()=>setSleepTimer(parseInt(btn.dataset.m)));
+// Ham menu nav items
+document.querySelectorAll("#ham-menu .ham-item[data-pg]").forEach(item => {
+  item.addEventListener("click", () => {
+    const pg = item.dataset.pg;
+    switchPage(pg);
+    closeHam();
+  });
 });
-document.getElementById("p-sleep-pill").addEventListener("click",openSleepTimer);
-document.getElementById("b-sl").addEventListener("click",openSleepTimer);
-document.getElementById("ham-sleep-row").addEventListener("click",openSleepTimer);
 
-/* ══ WEB SHARE TARGET ══ */
-function extractYTId(str){
-  str=str.trim();
-  let m=str.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);if(m)return m[1];
-  m=str.match(/[?&]v=([a-zA-Z0-9_-]{11})/);if(m)return m[1];
-  m=str.match(/\/embed\/([a-zA-Z0-9_-]{11})/);if(m)return m[1];
-  m=str.match(/^([a-zA-Z0-9_-]{11})$/);if(m)return m[1];
-  return null;
+// Sync ham menu active state
+function syncHamActive(pg){
+  document.querySelectorAll("#ham-menu .ham-item[data-pg]").forEach(item => {
+    item.classList.toggle("active", item.dataset.pg === pg);
+  });
 }
-window.extractYTId=extractYTId;
 
-(function initShareTarget(){
-  const p=new URLSearchParams(location.search);
-  const shared=p.get("text")||p.get("url")||p.get("title")||"";
-  if(!shared)return;
-  history.replaceState({},"",location.pathname);
-  const ytId=extractYTId(shared);
-  if(!ytId)return;
-  const stb=document.getElementById("stb");
-  const song={videoId:ytId,title:"YouTube: "+ytId,artist:"YouTube",thumb:TH(ytId)};
-  document.getElementById("stb-img").src=song.thumb;
-  document.getElementById("stb-title").textContent=song.title;
-  document.getElementById("stb-sub").textContent="Paylaşılan musiqi • tap to play";
-  stb.classList.add("show");
-  document.getElementById("stb-play-btn").onclick=()=>{stb.classList.remove("show");vt(()=>playSong(song));};
-  document.getElementById("stb-close-btn").onclick=()=>stb.classList.remove("show");
-  setTimeout(()=>stb.classList.remove("show"),14000);
-})();
+// Ham theme toggle
+const hamThemeToggle = document.getElementById("ham-theme-toggle");
+function updateHamTheme(){
+  hamThemeToggle.classList.toggle("light", THEME === "light");
+  document.getElementById("hm-theme-lbl").textContent = THEME === "dark" ? T("themeDark") : T("themeLight");
+}
+hamThemeToggle.addEventListener("click", () => {
+  THEME = THEME === "dark" ? "light" : "dark";
+  applyTheme();
+  updateHamTheme();
+  toast(THEME === "dark" ? "🌙 Dark" : "☀️ Light");
+});
 
-/* ══ HAM MENU ══ */
-let hamOpen=false;
-function openHam(){hamOpen=true;document.getElementById("ham-menu").classList.add("open");document.getElementById("ham-icon").style.display="none";document.getElementById("close-icon").style.display="";document.getElementById("hmbtn").classList.add("active");document.getElementById("hmbtn").setAttribute("aria-expanded","true");}
-function closeHam(){hamOpen=false;document.getElementById("ham-menu").classList.remove("open");document.getElementById("ham-icon").style.display="";document.getElementById("close-icon").style.display="none";document.getElementById("hmbtn").classList.remove("active");document.getElementById("hmbtn").setAttribute("aria-expanded","false");}
-function toggleHam(){hamOpen?closeHam():openHam();}
-document.getElementById("hmbtn").addEventListener("click",e=>{e.stopPropagation();toggleHam();});
-document.querySelectorAll("#ham-menu .ham-item[data-pg]").forEach(item=>{item.addEventListener("click",()=>{switchPage(item.dataset.pg);closeHam();});});
-function syncHamActive(pg){document.querySelectorAll("#ham-menu .ham-item[data-pg]").forEach(item=>item.classList.toggle("active",item.dataset.pg===pg));}
-const hamThTgl=document.getElementById("ham-theme-toggle");
-function updateHamTheme(){hamThTgl.classList.toggle("light",THEME==="light");document.getElementById("hm-theme-lbl").textContent=THEME==="dark"?T("themeDark"):T("themeLight");}
-hamThTgl.addEventListener("click",()=>{THEME=THEME==="dark"?"light":"dark";applyTheme();updateHamTheme();toast(THEME==="dark"?"🌙 Dark":"☀️ Light");});
-document.querySelectorAll(".ham-lang-btn").forEach(btn=>{btn.addEventListener("click",()=>{LANG=btn.dataset.l;localStorage.setItem("mu_lang",LANG);document.querySelectorAll(".ham-lang-btn").forEach(b=>b.classList.toggle("on",b.dataset.l===LANG));applyLang();renderDefault();closeHam();});});
-document.getElementById("ham-auth-btn").addEventListener("click",()=>{authToggle();closeHam();});
-document.addEventListener("click",e=>{if(hamOpen&&!e.target.closest("#ham-menu")&&!e.target.closest("#hmbtn"))closeHam();});
+// Ham lang buttons
+document.querySelectorAll(".ham-lang-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    LANG = btn.dataset.l;
+    localStorage.setItem("mu_lang", LANG);
+    document.querySelectorAll(".ham-lang-btn").forEach(b => b.classList.toggle("on", b.dataset.l === LANG));
+    applyLang();
+    renderDefault();
+    closeHam();
+  });
+});
+
+// Ham auth button
+document.getElementById("ham-auth-btn").addEventListener("click", () => {
+  authToggle();
+  closeHam();
+});
+
+// Close ham on outside click
+document.addEventListener("click", e => {
+  if(hamOpen && !e.target.closest("#ham-menu") && !e.target.closest("#hmbtn")){
+    closeHam();
+  }
+});
 
 /* ══ MOBILE SEARCH ══ */
-function openMobileSearch(){document.getElementById("mobile-search-bar").classList.add("open");document.body.classList.add("search-open");setTimeout(()=>document.getElementById("sinp-mobile")?.focus(),80);}
-function closeMobileSearch(){document.getElementById("mobile-search-bar").classList.remove("open");document.body.classList.remove("search-open");document.getElementById("sinp-mobile").value="";document.getElementById("ssec").style.display="none";}
-document.getElementById("search-icon-btn").addEventListener("click",e=>{e.stopPropagation();closeHam();openMobileSearch();});
-document.getElementById("close-search-btn").addEventListener("click",closeMobileSearch);
-document.getElementById("sinp-mobile").addEventListener("input",e=>{
-  const raw=e.target.value.trim(),q=raw.toLowerCase();
-  if(!q){document.getElementById("ssec").style.display="none";return;}
-  const ytId=extractYTId(raw);
-  if(ytId){document.getElementById("ssec").style.display="none";vt(()=>playSong({videoId:ytId,title:"YouTube: "+ytId,artist:"YouTube",thumb:TH(ytId)}));e.target.value="";closeMobileSearch();return;}
-  clearTimeout(_st);_st=setTimeout(()=>doSearch(q),320);
+function openMobileSearch(){
+  document.getElementById("mobile-search-bar").classList.add("open");
+  document.body.classList.add("search-open");
+  setTimeout(() => document.getElementById("sinp-mobile")?.focus(), 80);
+}
+function closeMobileSearch(){
+  document.getElementById("mobile-search-bar").classList.remove("open");
+  document.body.classList.remove("search-open");
+  document.getElementById("sinp-mobile").value = "";
+  document.getElementById("ssec").style.display = "none";
+}
+document.getElementById("search-icon-btn").addEventListener("click", e => {
+  e.stopPropagation();
+  closeHam();
+  openMobileSearch();
+});
+document.getElementById("close-search-btn").addEventListener("click", closeMobileSearch);
+
+// Mobile search input
+document.getElementById("sinp-mobile").addEventListener("input", e => {
+  const raw = e.target.value.trim();
+  const q = raw.toLowerCase();
+  if(!q){ document.getElementById("ssec").style.display = "none"; return; }
+  const ytId = extractYTId(raw);
+  if(ytId){
+    document.getElementById("ssec").style.display = "none";
+    playSong({videoId:ytId,title:"YouTube: "+ytId,artist:"YouTube",thumb:TH(ytId)});
+    e.target.value = "";
+    closeMobileSearch();
+    return;
+  }
+  clearTimeout(_st);
+  _st = setTimeout(() => doSearch(q), 320);
 });
 
-/* ══ MEATBALL ══ */
-const pExtraMenu=document.getElementById("p-extra-menu");
-let meatOpen=false;
-function toggleMeat(e){e.stopPropagation();meatOpen=!meatOpen;pExtraMenu.classList.toggle("open",meatOpen);}
-function closeMeat(){meatOpen=false;pExtraMenu.classList.remove("open");}
-document.getElementById("p-meatball").addEventListener("click",toggleMeat);
-document.getElementById("pem-sleep").addEventListener("click",()=>{closeMeat();openSleepTimer();});
-document.getElementById("pem-pl").addEventListener("click",()=>{closeMeat();const s=S.list[S.idx];if(!s){toast("⚠ Əvvəlcə mahnı seçin");return;}openAddToPL(s);});
-document.getElementById("pem-dl").addEventListener("click",async()=>{closeMeat();const s=S.list[S.idx];if(!s){toast("⚠ Əvvəlcə mahnı seçin");return;}if(S.downloads.has(s.videoId)||S.offline.has(s.videoId)){toast("📱 Artıq endirilmişdir");return;}await startDownload(s,null,null,()=>toast("✅ Endirildi!"),()=>{});});
-document.getElementById("pem-sh").addEventListener("click",async()=>{closeMeat();const s=S.list[S.idx];if(!s){toast("⚠ Əvvəlcə mahnı seçin");return;}const url=`https://www.youtube.com/watch?v=${s.videoId}`;if(navigator.share){try{await navigator.share({title:s.title,text:`${s.title} — ${s.artist}`,url});return;}catch(_){}}try{await navigator.clipboard.writeText(url);toast("🔗 Link kopyalandı!");}catch(_){toast("Link: "+url);}});
-document.getElementById("pem-shuf").addEventListener("click",()=>{closeMeat();S.shuffle=!S.shuffle;document.getElementById("b-shuf").classList.toggle("on",S.shuffle);document.getElementById("pem-shuf").style.color=S.shuffle?"var(--g)":"";toast(S.shuffle?"🔀 Qarışdırma":"Qapalı");});
-document.getElementById("pem-rep").addEventListener("click",()=>{closeMeat();S.repeat=!S.repeat;document.getElementById("b-rep").classList.toggle("on",S.repeat);document.getElementById("pem-rep").style.color=S.repeat?"var(--g)":"";toast(S.repeat?"🔁 Təkrar":"Qapalı");});
-document.addEventListener("click",e=>{if(meatOpen&&!e.target.closest("#p-extra-menu")&&!e.target.closest("#p-meatball"))closeMeat();});
+/* ══ PLAYER MEATBALL MENU ══ */
+const pMeatball = document.getElementById("p-meatball");
+const pExtraMenu = document.getElementById("p-extra-menu");
+let meatballOpen = false;
+
+function toggleMeatball(e){
+  e.stopPropagation();
+  meatballOpen = !meatballOpen;
+  pExtraMenu.classList.toggle("open", meatballOpen);
+}
+function closeMeatball(){
+  meatballOpen = false;
+  pExtraMenu.classList.remove("open");
+}
+pMeatball.addEventListener("click", toggleMeatball);
+
+document.getElementById("pem-pl").addEventListener("click", () => {
+  closeMeatball();
+  const song = S.list[S.idx];
+  if(!song){ toast("⚠ Əvvəlcə mahnı seçin"); return; }
+  openAddToPL(song);
+});
+document.getElementById("pem-dl").addEventListener("click", async () => {
+  closeMeatball();
+  const song = S.list[S.idx];
+  if(!song){ toast("⚠ Əvvəlcə mahnı seçin"); return; }
+  if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){ toast("📱 Artıq endirilmişdir"); return; }
+  await startDownload(song, null, null,
+    () => toast("✅ Endirildi!"),
+    () => {}
+  );
+});
+document.getElementById("pem-sh").addEventListener("click", async () => {
+  closeMeatball();
+  const song = S.list[S.idx];
+  if(!song){ toast("⚠ Əvvəlcə mahnı seçin"); return; }
+  const url = `https://www.youtube.com/watch?v=${song.videoId}`;
+  if(navigator.share){ try{ await navigator.share({title:song.title,text:`${song.title} — ${song.artist}`,url}); return; }catch(_){} }
+  try{ await navigator.clipboard.writeText(url); toast("🔗 Link kopyalandı!"); }catch(_){ toast("Link: "+url); }
+});
+document.getElementById("pem-shuf").addEventListener("click", () => {
+  closeMeatball();
+  S.shuffle = !S.shuffle;
+  document.getElementById("b-shuf").classList.toggle("on", S.shuffle);
+  document.getElementById("pem-shuf").style.color = S.shuffle ? "var(--g)" : "";
+  toast(S.shuffle ? "🔀 Qarışdırma" : "Qapalı");
+});
+document.getElementById("pem-rep").addEventListener("click", () => {
+  closeMeatball();
+  S.repeat = !S.repeat;
+  document.getElementById("b-rep").classList.toggle("on", S.repeat);
+  document.getElementById("pem-rep").style.color = S.repeat ? "var(--g)" : "";
+  toast(S.repeat ? "🔁 Təkrar" : "Qapalı");
+});
+
+// Close meatball on outside click
+document.addEventListener("click", e => {
+  if(meatballOpen && !e.target.closest("#p-extra-menu") && !e.target.closest("#p-meatball")){
+    closeMeatball();
+  }
+});
 
 /* ══ THEME ══ */
-function applyTheme(){document.documentElement.setAttribute("data-theme",THEME);document.getElementById("ico-m").style.display=THEME==="dark"?"":"none";document.getElementById("ico-s").style.display=THEME==="light"?"":"none";localStorage.setItem("mu_theme",THEME);updateHamTheme();}
+function applyTheme(){
+  document.documentElement.setAttribute("data-theme", THEME);
+  document.getElementById("ico-m").style.display = THEME==="dark" ? "" : "none";
+  document.getElementById("ico-s").style.display = THEME==="light" ? "" : "none";
+  localStorage.setItem("mu_theme", THEME);
+  updateHamTheme();
+}
 applyTheme();
-document.getElementById("thbtn").addEventListener("click",()=>{THEME=THEME==="dark"?"light":"dark";applyTheme();toast(THEME==="dark"?"🌙 Dark":"☀️ Light");});
+document.getElementById("thbtn").addEventListener("click", () => {
+  THEME = THEME==="dark" ? "light" : "dark";
+  applyTheme();
+  toast(THEME==="dark" ? "🌙 Dark" : "☀️ Light");
+});
 
 /* ══ LANGUAGE ══ */
 function applyLang(){
-  document.documentElement.lang=LANG;
-  document.getElementById("llbl").textContent=LANG.toUpperCase();
-  const s=(id,k,h=false)=>{const e=document.getElementById(id);if(!e)return;h?e.innerHTML=T(k):e.textContent=T(k);};
-  s("n-disc","disc");s("n-save","save");s("n-pl","pls");s("n-soc","soc");
-  s("hm-disc","disc");s("hm-save","save");s("hm-pl","pls");s("hm-soc","soc");
-  s("hero-h","hh",true);s("hero-p","hp");s("c1","c1");s("c2","c2");s("c3","c3");s("c4","c4");s("c5","c5");
-  s("pop-lbl","pop");s("sv-h","svh");s("no-sv-p","nosv",true);
-  s("pl-h","plh");s("newpl-lbl","newpl");s("wall-h","wallh");s("wall-p","wallp");s("gsign-lbl","gsign");
-  s("tl-fr","fr");s("tl-rq","rq");s("add-lbl","add");
-  s("auth-lbl",S.user?"signout":"signin");s("ham-auth-lbl",S.user?"signout":"gsign");
-  s("echint","selhint");s("pem-pl-lbl","addTopl");s("pem-dl-lbl","dosave");
-  s("pem-sh-lbl","share");s("pem-shuf-lbl","shuffle");s("pem-rep-lbl","repeat");
-  s("pem-sleep-lbl","sleep");s("hm-sleep-lbl","sleep");s("sleep-mtit","sleep");
+  document.documentElement.lang = LANG;
+  document.getElementById("llbl").textContent = LANG.toUpperCase();
+  const s=(id,k,html=false)=>{ const e=document.getElementById(id); if(!e) return; html ? e.innerHTML=T(k) : e.textContent=T(k); };
+  s("n-disc","disc"); s("n-save","save"); s("n-pl","pls"); s("n-soc","soc");
+  s("hm-disc","disc"); s("hm-save","save"); s("hm-pl","pls"); s("hm-soc","soc");
+  s("hero-h","hh",true); s("hero-p","hp"); s("c1","c1"); s("c2","c2"); s("c3","c3"); s("c4","c4");
+  s("pop-lbl","pop"); s("sv-h","svh"); s("no-sv-p","nosv",true);
+  s("pl-h","plh"); s("newpl-lbl","newpl");
+  s("wall-h","wallh"); s("wall-p","wallp"); s("gsign-lbl","gsign");
+  s("tl-fr","fr"); s("tl-rq","rq"); s("add-lbl","add");
+  s("auth-lbl", S.user ? "signout" : "signin");
+  s("ham-auth-lbl", S.user ? "signout" : "gsign");
+  s("echint","selhint");
+  s("pem-pl-lbl","addTopl"); s("pem-dl-lbl","dosave");
+  s("pem-sh-lbl","share"); s("pem-shuf-lbl","shuffle"); s("pem-rep-lbl","repeat");
   updateHamTheme();
-  const fi=document.getElementById("fr-inp");if(fi)fi.placeholder=T("frph");
-  const si=document.getElementById("sinp");if(si)si.placeholder=T("sph");
-  const sim=document.getElementById("sinp-mobile");if(sim)sim.placeholder=T("sph");
-  const mi=document.getElementById("msginput");if(mi)mi.placeholder=T("typemsg");
-  document.querySelectorAll(".lopt").forEach(o=>o.classList.toggle("on",o.dataset.l===LANG));
-  document.querySelectorAll(".ham-lang-btn").forEach(o=>o.classList.toggle("on",o.dataset.l===LANG));
-  if(S.sleepEnd)updateSleepModal();
+  const fi = document.getElementById("fr-inp"); if(fi) fi.placeholder = T("frph");
+  const si = document.getElementById("sinp"); if(si) si.placeholder = T("sph");
+  const sim = document.getElementById("sinp-mobile"); if(sim) sim.placeholder = T("sph");
+  const mi = document.getElementById("msginput"); if(mi) mi.placeholder = T("typemsg");
+  document.querySelectorAll(".lopt").forEach(o => o.classList.toggle("on", o.dataset.l===LANG));
+  document.querySelectorAll(".ham-lang-btn").forEach(o => o.classList.toggle("on", o.dataset.l===LANG));
 }
-document.getElementById("lbtn").addEventListener("click",()=>document.getElementById("ldrop").classList.toggle("open"));
-document.querySelectorAll(".lopt").forEach(o=>o.addEventListener("click",()=>{LANG=o.dataset.l;localStorage.setItem("mu_lang",LANG);document.getElementById("ldrop").classList.remove("open");applyLang();renderDefault();}));
-document.addEventListener("click",e=>{if(!e.target.closest(".lw"))document.getElementById("ldrop").classList.remove("open");});
 
-/* ══ PAGE SWITCHING with View Transitions ══ */
+document.getElementById("lbtn").addEventListener("click", () => document.getElementById("ldrop").classList.toggle("open"));
+document.querySelectorAll(".lopt").forEach(o => o.addEventListener("click", () => {
+  LANG = o.dataset.l; localStorage.setItem("mu_lang", LANG);
+  document.getElementById("ldrop").classList.remove("open");
+  applyLang(); renderDefault();
+}));
+document.addEventListener("click", e => {
+  if(!e.target.closest(".lw")) document.getElementById("ldrop").classList.remove("open");
+});
+
+/* ══ PAGE SWITCHING ══ */
 function switchPage(pg){
-  vt(()=>{
-    document.querySelectorAll(".pill").forEach(x=>x.classList.toggle("on",x.dataset.pg===pg));
-    document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
-    document.getElementById(`page-${pg}`).classList.add("on");
-    syncHamActive(pg);
-    if(pg==="saved")renderDownloads();
-    if(pg==="playlists")renderPlaylists();
-    if(pg!=="social"){const sg=document.getElementById("soc-main");if(sg)sg.classList.remove("chat-open");}
-  });
+  document.querySelectorAll(".pill").forEach(x => x.classList.toggle("on", x.dataset.pg===pg));
+  document.querySelectorAll(".page").forEach(x => x.classList.remove("on"));
+  document.getElementById(`page-${pg}`).classList.add("on");
+  syncHamActive(pg);
+  if(pg==="saved") renderDownloads();
+  if(pg==="playlists") renderPlaylists();
+  if(pg!=="social"){ const sg=document.getElementById("soc-main"); if(sg) sg.classList.remove("chat-open"); }
 }
-document.querySelectorAll(".pill").forEach(b=>b.addEventListener("click",()=>switchPage(b.dataset.pg)));
+
+document.querySelectorAll(".pill").forEach(b => b.addEventListener("click", () => switchPage(b.dataset.pg)));
 
 /* ══ YOUTUBE API ══ */
 window.onYouTubeIframeAPIReady=()=>{
-  S.ytp=new YT.Player("yt-player",{height:"1",width:"1",playerVars:{autoplay:0,controls:0,disablekb:1,enablejsapi:1,fs:0,iv_load_policy:3,modestbranding:1,rel:0,playsinline:1,origin:location.origin},events:{onReady:e=>{S.ytOk=true;e.target.setVolume(S.vol);},onStateChange:onYTS,onError:onYTE}});
+  S.ytp=new YT.Player("yt-player",{
+    height:"1",width:"1",
+    playerVars:{autoplay:0,controls:0,disablekb:1,enablejsapi:1,fs:0,iv_load_policy:3,modestbranding:1,rel:0,playsinline:1,origin:location.origin},
+    events:{onReady:e=>{S.ytOk=true;e.target.setVolume(S.vol);},onStateChange:onYTS,onError:onYTE}
+  });
 };
 function onYTS(e){
   const P=YT.PlayerState;
@@ -1047,17 +1416,24 @@ async function playSong(song){
   document.querySelector(`.card[data-vid="${song.videoId}"]`)?.classList.add("now");
   updPI(song.title,song.artist,song.thumb||TH(song.videoId));
   setPUI("loading");
-  const cached=await ldb.downloads.where("videoId").equals(song.videoId).first().catch(()=>null)||await ldb.offline.where("videoId").equals(song.videoId).first().catch(()=>null);
-  if(cached&&cached.blob){playFromBlob(cached,song);if(FB&&S.user)fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});return;}
+  const cached = await ldb.downloads.where("videoId").equals(song.videoId).first().catch(()=>null)
+              || await ldb.offline.where("videoId").equals(song.videoId).first().catch(()=>null);
+  if(cached&&cached.blob){ playFromBlob(cached,song);
+    if(FB&&S.user) fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});
+    return;
+  }
   if(!navigator.onLine){toast("📵 İnternet yoxdur — əvvəlcə endir");setPUI("pause");return;}
   toast(`▶ ${song.title}`);
-  if(FB&&S.user)fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});
+  if(FB&&S.user) fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});
   if(!S.ytOk){toast("⏳ Player yüklənir...");setPUI("pause");return;}
   S.ytp.loadVideoById({videoId:song.videoId,suggestedQuality:"small"});
 }
+
 function playFromBlob(rec,song){
-  const url=URL.createObjectURL(new Blob([rec.blob],{type:rec.mime||"audio/mpeg"}));
-  S.offAudio=new Audio(url);S.offAudio._blobUrl=url;S.offAudio.volume=S.vol/100;
+  const blobMime=rec.mime||"audio/mpeg";
+  const url=URL.createObjectURL(new Blob([rec.blob],{type:blobMime}));
+  S.offAudio=new Audio(url); S.offAudio._blobUrl=url;
+  S.offAudio.volume=S.vol/100;
   S.offAudio.onplay=()=>{S.playing=true;setPUI("play");};
   S.offAudio.onpause=()=>{S.playing=false;setPUI("pause");};
   S.offAudio.onended=()=>{S.playing=false;stopTimer();S.repeat?(S.offAudio.currentTime=0,S.offAudio.play()):nextSong();};
@@ -1065,89 +1441,131 @@ function playFromBlob(rec,song){
   S.offAudio.play().catch(()=>toast("❌ Oflayn çalma xətası"));
   toast(`📱 ${song.title}`);
 }
-function stopOffAudio(){if(S.offAudio){const a=S.offAudio;S.offAudio=null;a.ontimeupdate=null;a.onplay=null;a.onpause=null;a.onended=null;a.onerror=null;a.pause();try{a.src="";}catch(_){}try{if(a._blobUrl)URL.revokeObjectURL(a._blobUrl);}catch(_){}}}
+function stopOffAudio(){
+  if(S.offAudio){const a=S.offAudio;S.offAudio=null;a.ontimeupdate=null;a.onplay=null;a.onpause=null;a.onended=null;a.onerror=null;a.pause();try{a.src='';}catch(_){}try{if(a._blobUrl)URL.revokeObjectURL(a._blobUrl);}catch(_){}}
+}
 
 function updPI(title,artist,src){
-  // Use View Transition for title/artist/thumb changes
-  if(VT&&(document.getElementById("p-title").textContent!==title)){
-    document.startViewTransition(()=>{
-      document.getElementById("p-title").textContent=title||"—";
-      document.getElementById("p-artist").textContent=artist||"—";
-      const img=document.getElementById("p-img"),ico=document.getElementById("note-ico");
-      if(src){img.src=src;img.onerror=()=>{img.style.display="none";ico.style.display="";};img.onload=()=>{img.style.display="block";ico.style.display="none";};}
-    });
-  } else {
-    document.getElementById("p-title").textContent=title||"—";
-    document.getElementById("p-artist").textContent=artist||"—";
-    const img=document.getElementById("p-img"),ico=document.getElementById("note-ico");
-    if(src){img.src=src;img.onerror=()=>{img.style.display="none";ico.style.display="";};img.onload=()=>{img.style.display="block";ico.style.display="none";};}
-  }
+  document.getElementById("p-title").textContent=title||"—";
+  document.getElementById("p-artist").textContent=artist||"—";
+  const img=document.getElementById("p-img"),ico=document.getElementById("note-ico");
+  if(src){img.src=src;img.onerror=()=>{img.style.display="none";ico.style.display="";};img.onload=()=>{img.style.display="block";ico.style.display="none";};}
 }
-function setPUI(s){document.getElementById("ico-play").style.display=s==="play"||s==="loading"?"none":"block";document.getElementById("ico-pause").style.display=s==="play"?"block":"none";document.getElementById("p-spin").style.display=s==="loading"?"flex":"none";}
+function setPUI(s){
+  document.getElementById("ico-play").style.display=s==="play"||s==="loading"?"none":"block";
+  document.getElementById("ico-pause").style.display=s==="play"?"block":"none";
+  document.getElementById("p-spin").style.display=s==="loading"?"flex":"none";
+}
 
 /* ══ CONTROLS ══ */
-document.getElementById("b-play").addEventListener("click",()=>{if(S.offAudio){S.offAudio.paused?S.offAudio.play():S.offAudio.pause();return;}if(!S.ytOk)return;if(S.idx<0){playSong(S.list[0]);return;}S.playing?S.ytp.pauseVideo():S.ytp.playVideo();});
-document.getElementById("b-prev").addEventListener("click",()=>{stopOffAudio();const i=S.idx>0?S.idx-1:S.list.length-1;if(S.list[i])vt(()=>playSong(S.list[i]));});
-document.getElementById("b-next").addEventListener("click",()=>nextSong());
-function nextSong(){stopOffAudio();if(S.shuffle){vt(()=>playSong(S.list[Math.floor(Math.random()*S.list.length)]));return;}const n=S.idx<S.list.length-1?S.idx+1:0;if(S.list[n])vt(()=>playSong(S.list[n]));}
-document.getElementById("b-rep").addEventListener("click",()=>{S.repeat=!S.repeat;document.getElementById("b-rep").classList.toggle("on",S.repeat);toast(S.repeat?"🔁 Təkrar":"Qapalı");});
-document.getElementById("b-shuf").addEventListener("click",()=>{S.shuffle=!S.shuffle;document.getElementById("b-shuf").classList.toggle("on",S.shuffle);toast(S.shuffle?"🔀 Qarışdırma":"Qapalı");});
+document.getElementById("b-play").addEventListener("click", () => {
+  if(S.offAudio){S.offAudio.paused?S.offAudio.play():S.offAudio.pause();return;}
+  if(!S.ytOk)return;if(S.idx<0){playSong(S.list[0]);return;}
+  S.playing?S.ytp.pauseVideo():S.ytp.playVideo();
+});
+document.getElementById("b-prev").addEventListener("click", ()=>{stopOffAudio();const i=S.idx>0?S.idx-1:S.list.length-1;if(S.list[i])playSong(S.list[i]);});
+document.getElementById("b-next").addEventListener("click", ()=>nextSong());
+function nextSong(){stopOffAudio();if(S.shuffle){playSong(S.list[Math.floor(Math.random()*S.list.length)]);return;}const n=S.idx<S.list.length-1?S.idx+1:0;if(S.list[n])playSong(S.list[n]);}
+document.getElementById("b-rep").addEventListener("click", ()=>{S.repeat=!S.repeat;document.getElementById("b-rep").classList.toggle("on",S.repeat);toast(S.repeat?"🔁 Təkrar":"Qapalı");});
+document.getElementById("b-shuf").addEventListener("click", ()=>{S.shuffle=!S.shuffle;document.getElementById("b-shuf").classList.toggle("on",S.shuffle);toast(S.shuffle?"🔀 Qarışdırma":"Qapalı");});
+
 function startTimer(){stopTimer();S.timer=setInterval(()=>{if(!S.ytOk||!S.ytp||S.offAudio)return;const c=S.ytp.getCurrentTime()||0,d=S.ytp.getDuration()||0,b=S.ytp.getVideoLoadedFraction()||0;if(d>0){document.getElementById("pfill").style.width=(c/d*100)+"%";document.getElementById("pbuf").style.width=(b*100)+"%";document.getElementById("p-cur").textContent=fmt(c);document.getElementById("p-dur").textContent=fmt(d);}},500);}
 function stopTimer(){clearInterval(S.timer);S.timer=null;}
-document.getElementById("ptrack").addEventListener("click",e=>{const r=e.currentTarget.getBoundingClientRect(),p=(e.clientX-r.left)/r.width;if(S.offAudio&&S.offAudio.duration){S.offAudio.currentTime=p*S.offAudio.duration;return;}if(!S.ytOk)return;const d=S.ytp.getDuration()||0;if(!d)return;S.ytp.seekTo(p*d,true);});
-document.getElementById("vtrack").addEventListener("click",e=>{const r=e.currentTarget.getBoundingClientRect(),v=Math.round(Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100)));S.vol=v;if(S.ytOk)S.ytp.setVolume(v);if(S.offAudio)S.offAudio.volume=v/100;document.getElementById("vfill").style.width=v+"%";});
-document.getElementById("v-ico").addEventListener("click",()=>{if(!S.ytOk)return;S.ytp.isMuted()?(S.ytp.unMute(),document.getElementById("vfill").style.width=S.vol+"%",toast("🔊")):(S.ytp.mute(),document.getElementById("vfill").style.width="0%",toast("🔇"));});
+
+document.getElementById("ptrack").addEventListener("click", e=>{const r=e.currentTarget.getBoundingClientRect(),p=(e.clientX-r.left)/r.width;if(S.offAudio&&S.offAudio.duration){S.offAudio.currentTime=p*S.offAudio.duration;return;}if(!S.ytOk)return;const d=S.ytp.getDuration()||0;if(!d)return;S.ytp.seekTo(p*d,true);});
+document.getElementById("vtrack").addEventListener("click", e=>{const r=e.currentTarget.getBoundingClientRect(),v=Math.round(Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100)));S.vol=v;if(S.ytOk)S.ytp.setVolume(v);if(S.offAudio)S.offAudio.volume=v/100;document.getElementById("vfill").style.width=v+"%";});
+document.getElementById("v-ico").addEventListener("click", ()=>{if(!S.ytOk)return;S.ytp.isMuted()?(S.ytp.unMute(),document.getElementById("vfill").style.width=S.vol+"%",toast("🔊")):(S.ytp.mute(),document.getElementById("vfill").style.width="0%",toast("🔇"));});
 document.getElementById("vfill").style.width=S.vol+"%";
-document.getElementById("b-bar-pl").addEventListener("click",()=>{const s=S.list[S.idx];if(!s){toast("⚠ Əvvəlcə mahnı seçin");return;}openAddToPL(s);});
-document.getElementById("b-bar-dl").addEventListener("click",async()=>{const s=S.list[S.idx];if(!s){toast("⚠ Əvvəlcə mahnı seçin");return;}if(S.downloads.has(s.videoId)||S.offline.has(s.videoId)){toast("📱 Artıq endirilmişdir");return;}document.getElementById("b-bar-dl").style.color="var(--g)";await startDownload(s,null,null,()=>{document.getElementById("b-bar-dl").style.color="";toast("✅ Endirildi!");},()=>{document.getElementById("b-bar-dl").style.color="";});});
-document.getElementById("b-bar-sh").addEventListener("click",async()=>{const s=S.list[S.idx];if(!s){toast("⚠ Əvvəlcə mahnı seçin");return;}const url=`https://www.youtube.com/watch?v=${s.videoId}`;if(navigator.share){try{await navigator.share({title:s.title,text:`${s.title} — ${s.artist}`,url});return;}catch(_){}}try{await navigator.clipboard.writeText(url);toast("🔗 Link kopyalandı!");}catch(_){toast("Link: "+url);}});
+
+/* Desktop player action buttons */
+document.getElementById("b-bar-pl").addEventListener("click", ()=>{
+  const song=S.list[S.idx]; if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;} openAddToPL(song);
+});
+document.getElementById("b-bar-dl").addEventListener("click", async()=>{
+  const song=S.list[S.idx]; if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
+  if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){toast("📱 Artıq endirilmişdir");return;}
+  document.getElementById("b-bar-dl").style.color="var(--g)";
+  await startDownload(song,null,null,()=>{document.getElementById("b-bar-dl").style.color="";toast("✅ Endirildi!");},()=>{document.getElementById("b-bar-dl").style.color="";});
+});
+document.getElementById("b-bar-sh").addEventListener("click", async()=>{
+  const song=S.list[S.idx]; if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
+  const url=`https://www.youtube.com/watch?v=${song.videoId}`;
+  if(navigator.share){try{await navigator.share({title:song.title,text:`${song.title} — ${song.artist}`,url});return;}catch(_){}}
+  try{await navigator.clipboard.writeText(url);toast("🔗 Link kopyalandı!");}catch(_){toast("Link: "+url);}
+});
 
 /* ══ DOWNLOAD ══ */
 async function downloadAndSave(song,setProgress){
   const apiRes=await fetch(`/api/dl?v=${song.videoId}`,{signal:AbortSignal.timeout(58000)});
   if(!apiRes.ok){const j=await apiRes.json().catch(()=>({}));throw new Error(`Server ${apiRes.status}: ${j.detail||j.error||"xəta"}`);}
   const apiJson=await apiRes.json();
-  if(!apiJson.ok||!apiJson.link)throw new Error(apiJson.error||"MP3 linki alınmadı");
+  if(!apiJson.ok||!apiJson.link){throw new Error(apiJson.error||"MP3 linki alınmadı");}
   setProgress(10);
   const audioRes=await fetch(apiJson.link,{signal:AbortSignal.timeout(120000)});
   if(!audioRes.ok)throw new Error(`Audio fetch ${audioRes.status}`);
   const mime=audioRes.headers.get("content-type")||"audio/mpeg";
   const total=parseInt(audioRes.headers.get("content-length")||"0",10);
-  const reader=audioRes.body.getReader();const chunks=[];let received=0,tick=0;
+  const reader=audioRes.body.getReader();
+  const chunks=[];let received=0,tick=0;
   while(true){const{done,value}=await reader.read();if(done)break;chunks.push(value);received+=value.byteLength;if(total>0)setProgress(Math.min(95,Math.round(10+received/total*85)));else{tick++;setProgress(Math.min(90,10+tick*2));}}
-  const blob=new Blob(chunks,{type:mime});const data=new Uint8Array(await blob.arrayBuffer());
+  const blob=new Blob(chunks,{type:mime});
+  const data=new Uint8Array(await blob.arrayBuffer());
   await ldb.downloads.put({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId),mime,blob:data,addedAt:Date.now()});
   await ldb.offline.put({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId),mime,blob:data});
-  S.downloads.add(song.videoId);S.offline.add(song.videoId);
+  S.downloads.add(song.videoId); S.offline.add(song.videoId);
   const card=document.querySelector(`.card[data-vid="${song.videoId}"]`);
   if(card){const sb=card.querySelector(".cb-save");if(sb){sb.className="cb cb-save on";sb.textContent=T("saved");sb.disabled=false;}}
 }
+
 async function startDownload(song,badgeEl,barEl,onDone,onFail){
   if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){toast(`📱 "${song.title}" artıq endirilmişdir`);onDone&&onDone();return;}
-  if(S._downloading){toast("⏳ Başqa bir mahnı endirilir...");onFail&&onFail();return;}
+  if(S._downloading){toast("⏳ Başqa bir mahnı endirilir, gözləyin...");onFail&&onFail();return;}
   S._downloading=true;
   if(badgeEl){badgeEl.className="svbadge rec";badgeEl.textContent=T("rec_ing");}
   if(barEl)barEl.classList.add("show");
   const setProgress=pct=>{const fill=barEl?.querySelector(".recbar-fill");if(fill)fill.style.width=pct+"%";};
-  setProgress(5);toast(`⬇ "${song.title}" endirilir...`);
-  try{await downloadAndSave(song,p=>setProgress(5+p*0.93));setProgress(100);setTimeout(()=>{if(barEl)barEl.classList.remove("show");if(badgeEl){badgeEl.className="svbadge offline";badgeEl.textContent=T("rec_ok");}toast(`✅ "${song.title}" endirildi!`);renderDownloads();onDone&&onDone();},400);}
-  catch(err){if(barEl)barEl.classList.remove("show");if(badgeEl){badgeEl.className="svbadge";badgeEl.textContent="⬇";}toast("❌ Endirmə uğursuz");console.error("[dl]",err.message);onFail&&onFail();}
-  finally{S._downloading=false;}
+  setProgress(5); toast(`⬇ "${song.title}" endirilir...`);
+  try{
+    await downloadAndSave(song,p=>setProgress(5+p*0.93));
+    setProgress(100);
+    setTimeout(()=>{if(barEl)barEl.classList.remove("show");if(badgeEl){badgeEl.className="svbadge offline";badgeEl.textContent=T("rec_ok");}toast(`✅ "${song.title}" endirildi — oflayn dinləyə bilərsən!`);renderDownloads();onDone&&onDone();},400);
+  }catch(err){
+    if(barEl)barEl.classList.remove("show");
+    if(badgeEl){badgeEl.className="svbadge";badgeEl.textContent="⬇";}
+    toast("❌ Endirmə uğursuz — bir az sonra yenidən cəhd edin.");
+    console.error("[download] xəta:",err.message); onFail&&onFail();
+  }finally{S._downloading=false;}
 }
 
 /* ══ CARD ══ */
 function mkCard(song){
   const d=document.createElement("div");d.className="card";d.dataset.vid=song.videoId;
   const dl=S.downloads.has(song.videoId)||S.offline.has(song.videoId);
-  d.innerHTML=`<div class="cimg"><img src="${song.thumb||PHO}" alt="${X(song.title)}" loading="lazy" onerror="this.onerror=null;this.src='${PHO}'"/><div class="covl"><div class="pring"><svg width="19" height="19" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div><div class="eqbar"><span></span><span></span><span></span><span></span></div></div><div class="cinfo"><div class="ctit">${X(song.title)}</div><div class="cart">${X(song.artist)}</div></div><div class="cbtns"><button class="cb cb-play"></button><button class="cb cb-save ${dl?"on":""}"></button><button class="cb cb-pl"></button></div>`;
+  d.innerHTML=`
+<div class="cimg">
+  <img src="${song.thumb||PHO}" alt="${X(song.title)}" loading="lazy" onerror="this.onerror=null;this.src='${PHO}'"/>
+  <div class="covl"><div class="pring"><svg width="19" height="19" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+  <div class="eqbar"><span></span><span></span><span></span><span></span></div>
+</div>
+<div class="cinfo"><div class="ctit">${X(song.title)}</div><div class="cart">${X(song.artist)}</div></div>
+<div class="cbtns">
+  <button class="cb cb-play"></button>
+  <button class="cb cb-save ${dl?"on":""}"></button>
+  <button class="cb cb-pl"></button>
+</div>`;
   d.querySelector(".cb-play").textContent=T("play");
   d.querySelector(".cb-save").textContent=dl?T("saved"):T("dosave");
   d.querySelector(".cb-pl").textContent=T("addpl");
-  d.querySelector(".covl").addEventListener("click",()=>vt(()=>playSong(song)));
-  d.querySelector(".cb-play").addEventListener("click",e=>{e.stopPropagation();vt(()=>playSong(song));});
+  d.querySelector(".covl").addEventListener("click", ()=>playSong(song));
+  d.querySelector(".cb-play").addEventListener("click", e=>{e.stopPropagation();playSong(song);});
   const sb=d.querySelector(".cb-save");
-  sb.addEventListener("click",async e=>{e.stopPropagation();if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){toast(`📱 Artıq endirilmişdir`);return;}sb.disabled=true;sb.textContent="⏳";await startDownload(song,null,null,()=>{sb.className="cb cb-save on";sb.textContent=T("saved");sb.disabled=false;},()=>{sb.disabled=false;sb.textContent=T("dosave");});});
-  d.querySelector(".cb-pl").addEventListener("click",e=>{e.stopPropagation();openAddToPL(song);});
+  sb.addEventListener("click", async e=>{
+    e.stopPropagation();
+    if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){toast(`📱 "${song.title}" artıq endirilmişdir`);return;}
+    sb.disabled=true;sb.textContent="⏳";
+    await startDownload(song,null,null,()=>{sb.className="cb cb-save on";sb.textContent=T("saved");sb.disabled=false;},()=>{sb.disabled=false;sb.textContent=T("dosave");});
+  });
+  d.querySelector(".cb-pl").addEventListener("click", e=>{e.stopPropagation();openAddToPL(song);});
   return d;
 }
 
@@ -1160,24 +1578,38 @@ function renderDefault(){
 
 /* ══ SEARCH ══ */
 let _st;
-document.getElementById("sinp").addEventListener("input",e=>{
-  clearTimeout(_st);const raw=e.target.value.trim(),q=raw.toLowerCase();
+function extractYTId(str){
+  str=str.trim();
+  let m=str.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/); if(m)return m[1];
+  m=str.match(/[?&]v=([a-zA-Z0-9_-]{11})/); if(m)return m[1];
+  m=str.match(/\/embed\/([a-zA-Z0-9_-]{11})/); if(m)return m[1];
+  m=str.match(/^([a-zA-Z0-9_-]{11})$/); if(m)return m[1];
+  return null;
+}
+
+document.getElementById("sinp").addEventListener("input", e=>{
+  clearTimeout(_st);
+  const raw=e.target.value.trim(); const q=raw.toLowerCase();
   if(!q){document.getElementById("ssec").style.display="none";return;}
   const ytId=extractYTId(raw);
-  if(ytId){document.getElementById("ssec").style.display="none";vt(()=>playSong({videoId:ytId,title:"YouTube: "+ytId,artist:"YouTube",thumb:TH(ytId)}));e.target.value="";return;}
+  if(ytId){document.getElementById("ssec").style.display="none";playSong({videoId:ytId,title:"YouTube: "+ytId,artist:"YouTube",thumb:TH(ytId)});e.target.value="";return;}
   _st=setTimeout(()=>doSearch(q),320);
 });
+
 function doSearch(q){
   switchPage("discover");
   const ss=document.getElementById("ssec"),gr=document.getElementById("sgrid"),lb=document.getElementById("slbl");
   ss.style.display="block";lb.textContent=`${T("resfor")}: "${q}"`;gr.innerHTML="";
   const res=S.list.filter(s=>s.title.toLowerCase().includes(q)||s.artist.toLowerCase().includes(q)||(s.kw||"").toLowerCase().includes(q)).slice(0,12);
-  if(!res.length){gr.innerHTML=`<div style="grid-column:1/-1;padding:14px 0"><p style="color:var(--t2);margin-bottom:12px;font-size:.86rem">"${X(q)}" — nəticə tapılmadı.</p><div style="display:flex;gap:8px;max-width:380px"><input id="vid-inp" class="mfi" style="margin:0;flex:1" placeholder="YouTube Video ID"/><button onclick="playVID()" style="padding:11px 14px;background:var(--g);color:#000;border-radius:10px;font-weight:700;font-size:.8rem;cursor:pointer;border:none;font-family:var(--fb);white-space:nowrap">${T("play")}</button></div></div>`;return;}
+  if(!res.length){
+    gr.innerHTML=`<div style="grid-column:1/-1;padding:14px 0"><p style="color:var(--t2);margin-bottom:12px;font-size:.86rem">"${X(q)}" — nəticə tapılmadı.</p><div style="display:flex;gap:8px;max-width:380px"><input id="vid-inp" class="mfi" style="margin:0;flex:1" placeholder="YouTube Video ID"/><button onclick="playVID()" style="padding:11px 14px;background:var(--g);color:#000;border-radius:10px;font-weight:700;font-size:.8rem;cursor:pointer;border:none;font-family:var(--fb);white-space:nowrap">${T("play")}</button></div></div>`;
+    return;
+  }
   res.forEach(s=>{gr.appendChild(mkCard(s));if(!S.list.find(p=>p.videoId===s.videoId))S.list.push(s);});
 }
-window.playVID=()=>{const v=document.getElementById("vid-inp")?.value.trim();if(!v){toast("⚠ ID daxil edin");return;}vt(()=>playSong({videoId:v,title:"Video "+v,artist:"YouTube",thumb:TH(v)}));};
+window.playVID=()=>{const v=document.getElementById("vid-inp")?.value.trim();if(!v){toast("⚠ ID daxil edin");return;}playSong({videoId:v,title:"Video "+v,artist:"YouTube",thumb:TH(v)});};
 
-/* ══ DOWNLOADS PAGE ══ */
+/* ══ DOWNLOADS ══ */
 async function renderDownloads(){
   const list=document.getElementById("svlist"),nodl=document.getElementById("no-sv");
   let songs=[];
@@ -1187,12 +1619,27 @@ async function renderDownloads(){
   nodl.style.display="none";
   songs.forEach(song=>{
     const row=document.createElement("div");row.className="svrow";
-    row.innerHTML=`<div class="svthumb"><img src="${song.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="svinfo"><div class="svtit">${X(song.title)}</div><div class="svart">${X(song.artist)}</div><div class="recbar" id="rb-${song.videoId}"><div class="recbar-fill"></div><div class="recbar-pulse"></div></div></div><span class="svbadge offline">✓</span><div class="svacts"><button class="act play-a"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button><button class="act danger del-a"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div>`;
-    row.querySelector(".play-a").addEventListener("click",()=>vt(()=>playSong({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb})));
-    row.querySelector(".del-a").addEventListener("click",async()=>{if(!confirm(`"${song.title}" silinsin?`))return;await ldb.downloads.where("videoId").equals(song.videoId).delete().catch(()=>{});await ldb.offline.where("videoId").equals(song.videoId).delete().catch(()=>{});S.downloads.delete(song.videoId);S.offline.delete(song.videoId);toast(`🗑 "${song.title}" silindi`);renderDownloads();});
+    row.innerHTML=`
+<div class="svthumb"><img src="${song.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div>
+<div class="svinfo"><div class="svtit">${X(song.title)}</div><div class="svart">${X(song.artist)}</div>
+<div class="recbar" id="rb-${song.videoId}"><div class="recbar-fill"></div><div class="recbar-pulse"></div></div></div>
+<span class="svbadge offline" id="bd-${song.videoId}">✓ Endirildi</span>
+<div class="svacts">
+  <button class="act play-a" title="${T("play")}"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+  <button class="act danger del-a" title="${T("del")}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button>
+</div>`;
+    row.querySelector(".play-a").addEventListener("click", ()=>playSong({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb}));
+    row.querySelector(".del-a").addEventListener("click", async()=>{
+      if(!confirm(`"${song.title}" silinsin?`))return;
+      await ldb.downloads.where("videoId").equals(song.videoId).delete().catch(()=>{});
+      await ldb.offline.where("videoId").equals(song.videoId).delete().catch(()=>{});
+      S.downloads.delete(song.videoId);S.offline.delete(song.videoId);
+      toast(`🗑 "${song.title}" silindi`);renderDownloads();
+    });
     list.appendChild(row);
   });
 }
+function renderSaved(){ renderDownloads(); }
 
 /* ══ PLAYLISTS ══ */
 async function renderPlaylists(){
@@ -1202,99 +1649,343 @@ async function renderPlaylists(){
   for(const pl of pls){
     const cnt=await ldb.pl_songs.where("playlistId").equals(pl.id).count().catch(()=>0);
     const row=document.createElement("div");row.className="plrow";
-    row.innerHTML=`<div class="plico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg></div><div class="plmeta"><div class="plname">${X(pl.name)}</div><div class="plcnt">${cnt} mahnı</div></div><div class="placts"><button class="act opl"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></button><button class="act danger dpl"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div>`;
-    row.querySelector(".opl").addEventListener("click",e=>{e.stopPropagation();openPL(pl);});
-    row.querySelector(".dpl").addEventListener("click",async e=>{e.stopPropagation();if(!confirm(`"${pl.name}" silinsin?`))return;await ldb.pl_songs.where("playlistId").equals(pl.id).delete().catch(()=>{});await ldb.playlists.delete(pl.id).catch(()=>{});toast(`🗑 "${pl.name}"`);renderPlaylists();});
-    row.addEventListener("click",()=>openPL(pl));
+    row.innerHTML=`
+<div class="plico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg></div>
+<div class="plmeta"><div class="plname">${X(pl.name)}</div><div class="plcnt">${cnt} mahnı</div></div>
+<div class="placts">
+  <button class="act opl"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></button>
+  <button class="act danger dpl"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button>
+</div>`;
+    row.querySelector(".opl").addEventListener("click", e=>{e.stopPropagation();openPL(pl);});
+    row.querySelector(".dpl").addEventListener("click", async e=>{e.stopPropagation();if(!confirm(`"${pl.name}" silinsin?`))return;await ldb.pl_songs.where("playlistId").equals(pl.id).delete().catch(()=>{});await ldb.playlists.delete(pl.id).catch(()=>{});toast(`🗑 "${pl.name}"`);renderPlaylists();});
+    row.addEventListener("click", ()=>openPL(pl));
     c.appendChild(row);
   }
 }
+
 async function openPL(pl){
   const songs=await ldb.pl_songs.where("playlistId").equals(pl.id).toArray().catch(()=>[]);
   const b=document.getElementById("m-gen-b");
   b.innerHTML=`<div class="mtit">${X(pl.name)}</div><p style="color:var(--t2);font-size:.78rem;margin-bottom:15px">${songs.length} mahnı</p>${!songs.length?`<p style="color:var(--t3);text-align:center;padding:16px 0">${T("plem")}</p>`:""}<div class="svlist" id="pl-sc"></div><button class="mbg" style="margin-top:13px" onclick="playAllPL(${pl.id})">${T("playall")}</button>`;
   const sc=b.querySelector("#pl-sc");
-  songs.forEach(s=>{const row=document.createElement("div");row.className="svrow";row.innerHTML=`<div class="svthumb"><img src="${s.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="svinfo"><div class="svtit">${X(s.title)}</div><div class="svart">${X(s.artist)}</div></div><div class="svacts"><button class="act"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button><button class="act danger"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div>`;row.querySelectorAll(".act")[0].addEventListener("click",()=>vt(()=>playSong({videoId:s.videoId,title:s.title,artist:s.artist,thumb:s.thumb})));row.querySelectorAll(".act")[1].addEventListener("click",async()=>{await ldb.pl_songs.delete(s.id).catch(()=>{});toast("🗑");openPL(pl);});sc.appendChild(row);});
+  songs.forEach(s=>{
+    const row=document.createElement("div");row.className="svrow";
+    row.innerHTML=`<div class="svthumb"><img src="${s.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="svinfo"><div class="svtit">${X(s.title)}</div><div class="svart">${X(s.artist)}</div></div><div class="svacts"><button class="act"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button><button class="act danger"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div>`;
+    row.querySelectorAll(".act")[0].addEventListener("click", ()=>playSong({videoId:s.videoId,title:s.title,artist:s.artist,thumb:s.thumb}));
+    row.querySelectorAll(".act")[1].addEventListener("click", async()=>{await ldb.pl_songs.delete(s.id).catch(()=>{});toast("🗑");openPL(pl);});
+    sc.appendChild(row);
+  });
   openM("m-gen");
 }
-window.playAllPL=async plId=>{const songs=await ldb.pl_songs.where("playlistId").equals(plId).toArray().catch(()=>[]);if(!songs.length){toast(T("plem"));return;}songs.forEach(s=>{if(!S.list.find(p=>p.videoId===s.videoId))S.list.push(s);});vt(()=>playSong(songs[0]));closeM("m-gen");};
-document.getElementById("newpl-btn").addEventListener("click",()=>{document.getElementById("m-gen-b").innerHTML=`<div class="mtit">${T("newpl")}</div><input class="mfi" id="pl-ni" type="text" placeholder="${T("plph")}"/><button class="mbg" onclick="createPL()">${T("create")}</button><button class="mbm" onclick="closeM('m-gen')">${T("cancel")}</button>`;openM("m-gen");setTimeout(()=>document.getElementById("pl-ni")?.focus(),100);});
+
+window.playAllPL=async plId=>{const songs=await ldb.pl_songs.where("playlistId").equals(plId).toArray().catch(()=>[]);if(!songs.length){toast(T("plem"));return;}songs.forEach(s=>{if(!S.list.find(p=>p.videoId===s.videoId))S.list.push(s);});playSong(songs[0]);closeM("m-gen");};
+
+document.getElementById("newpl-btn").addEventListener("click", ()=>{
+  document.getElementById("m-gen-b").innerHTML=`<div class="mtit">${T("newpl")}</div><input class="mfi" id="pl-ni" type="text" placeholder="${T("plph")}"/><button class="mbg" onclick="createPL()">${T("create")}</button><button class="mbm" onclick="closeM('m-gen')">${T("cancel")}</button>`;
+  openM("m-gen");setTimeout(()=>document.getElementById("pl-ni")?.focus(),100);
+});
 window.createPL=async()=>{const name=document.getElementById("pl-ni")?.value.trim();if(!name){toast("⚠ Ad daxil edin");return;}await ldb.playlists.put({name,createdAt:Date.now()}).catch(()=>{});toast(`✅ "${name}"`);closeM("m-gen");document.querySelector('.pill[data-pg="playlists"]').click();renderPlaylists();};
+
 async function openAddToPL(song){
   const pls=await ldb.playlists.toArray().catch(()=>[]);
   const b=document.getElementById("m-addpl-b");
   const e2=s=>String(s||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
   if(!pls.length){b.innerHTML=`<div class="mtit">📋 ${T("addpl")}</div><p style="color:var(--t2);font-size:.85rem;margin-bottom:13px">${T("nopl")}</p><button class="mbg" onclick="closeM('m-addpl');document.querySelector('.pill[data-pg=playlists]').click();document.getElementById('newpl-btn').click()">${T("newpl")}</button>`;}
-  else{b.innerHTML=`<div class="mtit">📋 ${T("addpl")}</div><p style="color:var(--t2);font-size:.77rem;margin-bottom:13px">${X(song.title)}</p><div class="plwrap">${pls.map(pl=>`<div class="plrow" onclick="addToP(${pl.id},'${e2(song.videoId)}','${e2(song.title)}','${e2(song.artist)}','${e2(song.thumb||TH(song.videoId))}')"><div class="plico" style="width:36px;height:36px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/></svg></div><div class="plmeta"><div class="plname">${X(pl.name)}</div></div></div>`).join("")}</div>`;}
+  else{b.innerHTML=`<div class="mtit">📋 ${T("addpl")}</div><p style="color:var(--t2);font-size:.77rem;margin-bottom:13px">${X(song.title)}</p><div class="plwrap">${pls.map(pl=>`<div class="plrow" onclick="addToP(${pl.id},'${e2(song.videoId)}','${e2(song.title)}','${e2(song.artist)}','${e2(song.thumb||TH(song.videoId))}')"><div class="plico" style="width:36px;height:36px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/></svg></div><div class="plmeta"><div class="plname">${X(pl.name)}</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></div>`).join("")}</div>`;}
   openM("m-addpl");
 }
 window.addToP=async(plId,videoId,title,artist,thumb)=>{try{const ex=await ldb.pl_songs.where({playlistId:plId,videoId}).first();if(ex){toast("Artıq playlistdədir");closeM("m-addpl");return;}await ldb.pl_songs.put({playlistId:plId,videoId,title,artist,thumb,addedAt:Date.now()});toast(`✅ "${title}" əlavə edildi`);}catch(e){toast("❌ "+e.message);}closeM("m-addpl");};
 
 /* ══ AUTH ══ */
-function updateHamAuthBtn(){const btn=document.getElementById("ham-auth-btn"),lbl=document.getElementById("ham-auth-lbl");if(S.user){btn.className="ham-auth-btn signout";lbl.textContent=T("signout");}else{btn.className="ham-auth-btn signin";lbl.textContent=T("gsign");}}
-async function authToggle(){if(!FB){toast("⚠ FB_CFG doldurun");return;}if(S.user){await fbA.signOut();toast(T("signout"));return;}try{await fbA.signInWithPopup(new firebase.auth.GoogleAuthProvider());}catch(e){if(e.code==="auth/popup-blocked")await fbA.signInWithRedirect(new firebase.auth.GoogleAuthProvider());else toast("❌ "+e.message);}}
-document.getElementById("authbtn").addEventListener("click",authToggle);
-document.getElementById("wall-sign").addEventListener("click",authToggle);
+function updateHamAuthBtn(){
+  const btn = document.getElementById("ham-auth-btn");
+  const lbl = document.getElementById("ham-auth-lbl");
+  if(S.user){
+    btn.className = "ham-auth-btn signout";
+    lbl.textContent = T("signout");
+  } else {
+    btn.className = "ham-auth-btn signin";
+    lbl.textContent = T("gsign");
+  }
+}
+
+async function authToggle(){
+  if(!FB){toast("⚠ FB_CFG doldurun");return;}
+  if(S.user){await fbA.signOut();toast(T("signout"));return;}
+  try{await fbA.signInWithPopup(new firebase.auth.GoogleAuthProvider());}
+  catch(e){if(e.code==="auth/popup-blocked")await fbA.signInWithRedirect(new firebase.auth.GoogleAuthProvider());else toast("❌ "+e.message);}
+}
+document.getElementById("authbtn").addEventListener("click", authToggle);
+document.getElementById("wall-sign").addEventListener("click", authToggle);
+
 if(FB){
   fbA.getRedirectResult().catch(()=>{});
   fbA.onAuthStateChanged(user=>{
     S.user=user;
     const av=document.getElementById("uav"),btn=document.getElementById("authbtn");
-    if(user){av.src=user.photoURL||PHO;av.style.display="block";av.onclick=()=>showMyProfile();btn.innerHTML=`<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>${T("signout")}</span>`;fbD.ref(`users/${user.uid}`).update({uid:user.uid,name:user.displayName,email:user.email,photo:user.photoURL||"",online:true,lastSeen:Date.now()});fbD.ref(`users/${user.uid}/online`).onDisconnect().set(false);document.getElementById("login-wall").style.display="none";document.getElementById("soc-main").style.display="grid";initFriends();}
-    else{av.style.display="none";btn.innerHTML=`<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span>${T("signin")}</span>`;document.getElementById("login-wall").style.display="block";document.getElementById("soc-main").style.display="none";}
+    if(user){
+      av.src=user.photoURL||PHO;av.style.display="block";av.onclick=()=>showMyProfile();
+      btn.innerHTML=`<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>${T("signout")}</span>`;
+      fbD.ref(`users/${user.uid}`).update({uid:user.uid,name:user.displayName,email:user.email,photo:user.photoURL||"",online:true,lastSeen:Date.now()});
+      fbD.ref(`users/${user.uid}/online`).onDisconnect().set(false);
+      fbD.ref(`users/${user.uid}/lastSeen`).onDisconnect().set(Date.now());
+      document.getElementById("login-wall").style.display="none";
+      document.getElementById("soc-main").style.display="grid";
+      initFriends();
+    } else {
+      av.style.display="none";
+      btn.innerHTML=`<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span>${T("signin")}</span>`;
+      document.getElementById("login-wall").style.display="block";
+      document.getElementById("soc-main").style.display="none";
+    }
     updateHamAuthBtn();
   });
 }
 
 /* ══ FRIENDS ══ */
-function initFriends(){if(!FB||!fbD||!S.user)return;const uid=S.user.uid;clearCL();const fRef=fbD.ref(`friends/${uid}`);fRef.on("value",async snap=>{S.friends={};const p=[];snap.forEach(ch=>p.push(fbD.ref(`users/${ch.key}`).get().then(u=>{if(u.exists())S.friends[ch.key]={...u.val()};})));await Promise.all(p);Object.keys(S.friends).forEach(fuid=>{fbD.ref(`users/${fuid}/online`).on("value",v=>{if(S.friends[fuid])S.friends[fuid].online=v.val();renderFrList();});fbD.ref(`users/${fuid}/nowPlaying`).on("value",v=>{if(S.friends[fuid])S.friends[fuid].nowPlaying=v.val();renderFrList();});});renderFrList();});addCL(()=>fRef.off());const rRef=fbD.ref(`friendRequests/${uid}`);rRef.on("value",snap=>{const reqs=[];snap.forEach(ch=>reqs.push({key:ch.key,...ch.val()}));renderReqs(reqs);const n=reqs.length,b=document.getElementById("rqbadge");b.style.display=n?"inline-flex":"none";b.textContent=n;});addCL(()=>rRef.off());}
-function renderFrList(){const list=document.getElementById("fr-list");if(!list)return;list.innerHTML="";const friends=Object.values(S.friends);if(!friends.length){list.innerHTML=`<p style="color:var(--t3);font-size:.79rem;padding:12px;text-align:center">${T("fr")} yoxdur.</p>`;return;}friends.forEach(f=>{const row=document.createElement("div");row.className="frrow"+(S.chatUid===f.uid?" on":"");row.dataset.uid=f.uid;const np=f.nowPlaying;row.innerHTML=`${f.photo?`<img class="frav" src="${f.photo}" onerror="this.src='${PHO}'" alt=""/>`:`<div class="frav-ph">${(f.name||"?")[0].toUpperCase()}</div>`}<div class="frinf"><div class="frname">${X(f.name||"Anonim")}</div>${np?`<div class="frnp">🎵 ${X(np.title||"")}</div>`:`<div class="frsub" style="color:${f.online?"var(--g)":"var(--t3)"}">${f.online?T("online"):"offline"}</div>`}</div>${f.online?`<div class="ondot"></div>`:""}`;row.addEventListener("click",()=>openDM(f));list.appendChild(row);});}
-function renderReqs(reqs){const list=document.getElementById("rq-list");if(!list)return;list.innerHTML="";if(!reqs.length){list.innerHTML=`<p style="color:var(--t3);font-size:.79rem;padding:12px;text-align:center">Gözləyən istək yoxdur.</p>`;return;}reqs.forEach(req=>{const row=document.createElement("div");row.className="rqrow";row.innerHTML=`${req.fromPhoto?`<img class="frav" src="${req.fromPhoto}" onerror="this.src='${PHO}'" alt=""/>`:`<div class="frav-ph">${(req.fromName||"?")[0].toUpperCase()}</div>`}<div class="frinf"><div class="frname">${X(req.fromName||"Anonim")}</div><div class="frsub">${X(req.fromEmail||"")}</div></div><div class="rqbtns"><button class="rqacc">${T("acc")}</button><button class="rqrej">${T("rej")}</button></div>`;row.querySelector(".rqacc").addEventListener("click",()=>acceptFr(req));row.querySelector(".rqrej").addEventListener("click",()=>rejectFr(req.key));list.appendChild(row);});}
-document.getElementById("fr-add").addEventListener("click",async()=>{if(!S.user){toast(T("signin"));return;}const email=document.getElementById("fr-inp").value.trim().toLowerCase();if(!email){toast("⚠ E-mail daxil edin");return;}if(email===S.user.email?.toLowerCase()){toast("⚠ Özünüzü əlavə edə bilməzsiniz");return;}const btn=document.getElementById("fr-add"),lbl=document.getElementById("add-lbl");btn.disabled=true;if(lbl)lbl.textContent="...";try{let tuid=null,td=null;const snap=await fbD.ref("users").orderByChild("email").equalTo(email).get();if(snap.exists())snap.forEach(ch=>{tuid=ch.key;td=ch.val();});if(!tuid){toast("❌ "+T("nofnd")+": "+email);return;}if(tuid===S.user.uid){toast("⚠ Özünüzü əlavə edə bilməzsiniz");return;}const alr=await fbD.ref(`friends/${S.user.uid}/${tuid}`).get();if(alr.exists()){toast("✓ "+T("alfr"));return;}await fbD.ref(`friendRequests/${tuid}/${S.user.uid}`).set({fromUid:S.user.uid,fromName:S.user.displayName||"Anonim",fromEmail:S.user.email||"",fromPhoto:S.user.photoURL||"",ts:Date.now()});document.getElementById("fr-inp").value="";toast("✅ "+T("reqsent")+" → "+(td?.name||email));}catch(e){toast("❌ Xəta: "+e.message);}finally{btn.disabled=false;if(lbl)lbl.textContent=T("add");}});
-async function acceptFr(req){await fbD.ref(`friends/${S.user.uid}/${req.key}`).set(true);await fbD.ref(`friends/${req.key}/${S.user.uid}`).set(true);await fbD.ref(`friendRequests/${S.user.uid}/${req.key}`).remove();toast(`✅ ${req.fromName||"Dost"} indi dostdur!`);}
+function initFriends(){
+  if(!FB||!fbD||!S.user)return;
+  const uid=S.user.uid;clearCL();
+  const fRef=fbD.ref(`friends/${uid}`);
+  fRef.on("value",async snap=>{
+    S.friends={};const p=[];
+    snap.forEach(ch=>p.push(fbD.ref(`users/${ch.key}`).get().then(u=>{if(u.exists())S.friends[ch.key]={...u.val()};})));
+    await Promise.all(p);
+    Object.keys(S.friends).forEach(fuid=>{
+      fbD.ref(`users/${fuid}/online`).on("value",v=>{if(S.friends[fuid])S.friends[fuid].online=v.val();renderFrList();});
+      fbD.ref(`users/${fuid}/nowPlaying`).on("value",v=>{if(S.friends[fuid])S.friends[fuid].nowPlaying=v.val();renderFrList();});
+    });
+    renderFrList();
+  });
+  addCL(()=>fRef.off());
+  const rRef=fbD.ref(`friendRequests/${uid}`);
+  rRef.on("value",snap=>{
+    const reqs=[];snap.forEach(ch=>reqs.push({key:ch.key,...ch.val()}));
+    renderReqs(reqs);
+    const n=reqs.length,b=document.getElementById("rqbadge");
+    b.style.display=n?"inline-flex":"none";b.textContent=n;
+  });
+  addCL(()=>rRef.off());
+}
+
+function renderFrList(){
+  const list=document.getElementById("fr-list");if(!list)return;list.innerHTML="";
+  const friends=Object.values(S.friends);
+  if(!friends.length){list.innerHTML=`<p style="color:var(--t3);font-size:.79rem;padding:12px;text-align:center">${T("fr")} yoxdur.</p>`;return;}
+  friends.forEach(f=>{
+    const row=document.createElement("div");row.className="frrow"+(S.chatUid===f.uid?" on":"");row.dataset.uid=f.uid;
+    const np=f.nowPlaying;
+    row.innerHTML=`${f.photo?`<img class="frav" src="${f.photo}" onerror="this.src='${PHO}'" alt=""/>`:`<div class="frav-ph">${(f.name||"?")[0].toUpperCase()}</div>`}<div class="frinf"><div class="frname">${X(f.name||"Anonim")}</div>${np?`<div class="frnp">🎵 ${X(np.title||"")}</div>`:`<div class="frsub" style="color:${f.online?"var(--g)":"var(--t3)"}">${f.online?T("online"):"offline"}</div>`}</div>${f.online?`<div class="ondot"></div>`:""}`;
+    row.addEventListener("click", ()=>openDM(f));
+    list.appendChild(row);
+  });
+}
+
+function renderReqs(reqs){
+  const list=document.getElementById("rq-list");if(!list)return;list.innerHTML="";
+  if(!reqs.length){list.innerHTML=`<p style="color:var(--t3);font-size:.79rem;padding:12px;text-align:center">Gözləyən istək yoxdur.</p>`;return;}
+  reqs.forEach(req=>{
+    const row=document.createElement("div");row.className="rqrow";
+    row.innerHTML=`${req.fromPhoto?`<img class="frav" src="${req.fromPhoto}" onerror="this.src='${PHO}'" alt=""/>`:`<div class="frav-ph">${(req.fromName||"?")[0].toUpperCase()}</div>`}<div class="frinf"><div class="frname">${X(req.fromName||"Anonim")}</div><div class="frsub">${X(req.fromEmail||"")}</div></div><div class="rqbtns"><button class="rqacc">${T("acc")}</button><button class="rqrej">${T("rej")}</button></div>`;
+    row.querySelector(".rqacc").addEventListener("click", ()=>acceptFr(req));
+    row.querySelector(".rqrej").addEventListener("click", ()=>rejectFr(req.key));
+    list.appendChild(row);
+  });
+}
+
+document.getElementById("fr-add").addEventListener("click", async()=>{
+  if(!S.user){toast(T("signin"));return;}
+  const email=document.getElementById("fr-inp").value.trim().toLowerCase();
+  if(!email){toast("⚠ E-mail daxil edin");return;}
+  if(email===S.user.email?.toLowerCase()){toast("⚠ Özünüzü əlavə edə bilməzsiniz");return;}
+  const btn=document.getElementById("fr-add"),lbl=document.getElementById("add-lbl");
+  btn.disabled=true;if(lbl)lbl.textContent="...";
+  try{
+    let tuid=null,td=null;
+    const snap=await fbD.ref("users").orderByChild("email").equalTo(email).get();
+    if(snap.exists())snap.forEach(ch=>{tuid=ch.key;td=ch.val();});
+    if(!tuid){toast("❌ "+T("nofnd")+": "+email);return;}
+    if(tuid===S.user.uid){toast("⚠ Özünüzü əlavə edə bilməzsiniz");return;}
+    const alr=await fbD.ref(`friends/${S.user.uid}/${tuid}`).get();
+    if(alr.exists()){toast("✓ "+T("alfr"));return;}
+    const sentReq=await fbD.ref(`friendRequests/${tuid}/${S.user.uid}`).get().catch(()=>null);
+    if(sentReq?.exists()){toast("⏳ İstək artıq göndərilmişdir");return;}
+    await fbD.ref(`friendRequests/${tuid}/${S.user.uid}`).set({fromUid:S.user.uid,fromName:S.user.displayName||"Anonim",fromEmail:S.user.email||"",fromPhoto:S.user.photoURL||"",ts:Date.now()});
+    document.getElementById("fr-inp").value="";
+    toast("✅ "+T("reqsent")+" → "+(td?.name||email));
+  }catch(e){
+    console.error("[FR add]",e);
+    if(e.code==="PERMISSION_DENIED"||e.message?.includes("Permission denied")){toast("❌ İcazə xətası — Firebase Rules yoxlayın");}
+    else{toast("❌ Xəta: "+e.message);}
+  }finally{btn.disabled=false;if(lbl)lbl.textContent=T("add")||"Əlavə et";}
+});
+
+async function acceptFr(req){const uid=S.user.uid,fuid=req.key;await fbD.ref(`friends/${uid}/${fuid}`).set(true);await fbD.ref(`friends/${fuid}/${uid}`).set(true);await fbD.ref(`friendRequests/${uid}/${fuid}`).remove();toast(`✅ ${req.fromName||"Dost"} indi dostdur!`);}
 async function rejectFr(fuid){await fbD.ref(`friendRequests/${S.user.uid}/${fuid}`).remove();toast("Rədd edildi.");}
-document.getElementById("ptab-fr").addEventListener("click",()=>{document.getElementById("ptab-fr").classList.add("on");document.getElementById("ptab-rq").classList.remove("on");document.getElementById("fr-sec").style.display="";document.getElementById("rq-sec").style.display="none";});
-document.getElementById("ptab-rq").addEventListener("click",()=>{document.getElementById("ptab-rq").classList.add("on");document.getElementById("ptab-fr").classList.remove("on");document.getElementById("rq-sec").style.display="";document.getElementById("fr-sec").style.display="none";});
+
+document.getElementById("ptab-fr").addEventListener("click", ()=>{document.getElementById("ptab-fr").classList.add("on");document.getElementById("ptab-rq").classList.remove("on");document.getElementById("fr-sec").style.display="";document.getElementById("rq-sec").style.display="none";});
+document.getElementById("ptab-rq").addEventListener("click", ()=>{document.getElementById("ptab-rq").classList.add("on");document.getElementById("ptab-fr").classList.remove("on");document.getElementById("rq-sec").style.display="";document.getElementById("fr-sec").style.display="none";});
 
 /* ══ DM ══ */
 let _dmRef=null;
 function closeDMRef(){if(_dmRef){try{_dmRef.off();}catch(e){}}_dmRef=null;}
-function getDMRoom(a,b){return[a,b].sort().join("_");}
-function openDM(friend){if(!FB||!fbD||!S.user){toast("Giriş edin");return;}S.chatUid=friend.uid;S.chatTarget=friend;document.querySelectorAll(".frrow").forEach(r=>r.classList.toggle("on",r.dataset.uid===friend.uid));document.getElementById("ch-title").textContent=friend.name||"?";document.getElementById("ch-sub").textContent=friend.email||"";document.getElementById("vpbtn").style.display="flex";document.getElementById("sndbtn").disabled=false;document.getElementById("soc-main").classList.add("chat-open");closeDMRef();const cont=document.getElementById("msgs");cont.innerHTML='<div class="echint">Yüklənir...</div>';const room=getDMRoom(S.user.uid,friend.uid);const ref=fbD.ref("dms/"+room).orderByChild("ts").limitToLast(80);_dmRef=ref;ref.on("value",snap=>{const ms=[];snap.forEach(ch=>{const v=ch.val()||{};ms.push({uid:v.uid||"",name:v.name||"Anonim",photo:v.photo||"",text:v.text||"",ts:v.ts||0});});ms.sort((a,b)=>a.ts-b.ts);const c=document.getElementById("msgs");c.innerHTML="";if(!ms.length){c.innerHTML='<div class="echint">Hələ mesaj yoxdur 👋</div>';return;}ms.forEach(m=>appendMsg(m,c));requestAnimationFrame(()=>{c.scrollTop=c.scrollHeight;});},err=>{document.getElementById("msgs").innerHTML='<div class="echint" style="color:var(--red)">❌ '+err.message+'</div>';});}
-function closeMobileChat(){document.getElementById("soc-main").classList.remove("chat-open");closeDMRef();S.chatUid=null;S.chatTarget=null;document.getElementById("sndbtn").disabled=true;document.getElementById("vpbtn").style.display="none";document.getElementById("ch-title").textContent="—";document.getElementById("ch-sub").textContent="";document.getElementById("msgs").innerHTML='<div class="echint" id="echint"></div>';document.querySelectorAll(".frrow").forEach(r=>r.classList.remove("on"));}
+function getDMRoom(a,b){return [a,b].sort().join("_");}
+
+function openDM(friend){
+  if(!FB||!fbD){toast("❌ Firebase yüklənməyib");return;}
+  if(!S.user){toast("Giriş edin");return;}
+  S.chatUid=friend.uid;S.chatTarget=friend;
+  document.querySelectorAll(".frrow").forEach(r=>r.classList.toggle("on",r.dataset.uid===friend.uid));
+  document.getElementById("ch-title").textContent=friend.name||friend.displayName||"?";
+  document.getElementById("ch-sub").textContent=friend.email||"";
+  document.getElementById("vpbtn").style.display="flex";
+  document.getElementById("sndbtn").disabled=false;
+  document.getElementById("soc-main").classList.add("chat-open");
+  closeDMRef();
+  const cont=document.getElementById("msgs");cont.innerHTML='<div class="echint">Yüklənir...</div>';
+  const room=getDMRoom(S.user.uid,friend.uid);
+  const ref=fbD.ref("dms/"+room).orderByChild("ts").limitToLast(80);
+  _dmRef=ref;
+  ref.on("value",snap=>{
+    const ms=[];snap.forEach(ch=>{const v=ch.val()||{};ms.push({uid:v.uid||"",name:v.name||"Anonim",photo:v.photo||"",text:v.text||"",ts:v.ts||0});});
+    ms.sort((a,b)=>a.ts-b.ts);
+    const c=document.getElementById("msgs");c.innerHTML="";
+    if(!ms.length){c.innerHTML='<div class="echint">Hələ mesaj yoxdur 👋<br><small style="color:var(--t3)">Mərhabalaş!</small></div>';return;}
+    ms.forEach(m=>appendMsg(m,c));
+    requestAnimationFrame(()=>{c.scrollTop=c.scrollHeight;});
+  },err=>{document.getElementById("msgs").innerHTML='<div class="echint" style="color:var(--red)">❌ '+err.message+'<br><small>Firebase Rules yoxlayın</small></div>';});
+}
+
+function closeMobileChat(){
+  document.getElementById("soc-main").classList.remove("chat-open");
+  closeDMRef();S.chatUid=null;S.chatTarget=null;
+  document.getElementById("sndbtn").disabled=true;
+  document.getElementById("vpbtn").style.display="none";
+  document.getElementById("ch-title").textContent="—";
+  document.getElementById("ch-sub").textContent="";
+  document.getElementById("msgs").innerHTML='<div class="echint" id="echint"></div>';
+  document.querySelectorAll(".frrow").forEach(r=>r.classList.remove("on"));
+}
 window.closeMobileChat=closeMobileChat;
-function appendMsg(m,c){const me=S.user&&m.uid===S.user.uid;const d=document.createElement("div");d.className="mrow"+(me?" me":"");const tm=m.ts?new Date(m.ts).toLocaleTimeString("az",{hour:"2-digit",minute:"2-digit"}):"";d.innerHTML='<img class="mav" src="'+(m.photo||PHO)+'" alt="" onerror="this.src=\''+PHO+'\'"/><div class="mbody">'+(me?"":'<div class="mname">'+X(m.name)+'</div>')+'<div class="mbbl">'+X(m.text)+'</div><div class="mtime">'+tm+'</div></div>';c.appendChild(d);}
-document.getElementById("sndbtn").addEventListener("click",sendMsg);
-document.getElementById("msginput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMsg();}});
-async function sendMsg(){if(!FB||!fbD||!S.user||!S.chatTarget)return;const inp=document.getElementById("msginput");const txt=inp.value.trim();if(!txt)return;const btn=document.getElementById("sndbtn");inp.value="";btn.disabled=true;const room=getDMRoom(S.user.uid,S.chatTarget.uid);try{await fbD.ref("dms/"+room).push({uid:S.user.uid,name:S.user.displayName||"Anonim",photo:S.user.photoURL||"",text:txt,ts:firebase.database.ServerValue.TIMESTAMP});requestAnimationFrame(()=>{const c=document.getElementById("msgs");c.scrollTop=c.scrollHeight;});}catch(e){inp.value=txt;toast("❌ Göndərilmədi: "+e.message);}finally{btn.disabled=false;inp.focus();}}
-document.getElementById("vpbtn").addEventListener("click",()=>{if(S.chatTarget)showProfile(S.chatTarget);});
+
+function appendMsg(m,c){
+  const me=S.user&&m.uid===S.user.uid;
+  const d=document.createElement("div");d.className="mrow"+(me?" me":"");
+  const tm=m.ts?new Date(m.ts).toLocaleTimeString("az",{hour:"2-digit",minute:"2-digit"}):"";
+  d.innerHTML='<img class="mav" src="'+(m.photo||PHO)+'" alt="" onerror="this.src=\''+(PHO)+'\'"/><div class="mbody">'+(me?"":'<div class="mname">'+X(m.name)+'</div>')+'<div class="mbbl">'+X(m.text)+'</div><div class="mtime">'+tm+'</div></div>';
+  c.appendChild(d);
+}
+
+document.getElementById("sndbtn").addEventListener("click", sendMsg);
+document.getElementById("msginput").addEventListener("keydown", e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMsg();}});
+
+async function sendMsg(){
+  if(!FB||!fbD){toast("❌ Firebase yüklənməyib");return;}
+  if(!S.user){toast("Giriş edin");return;}
+  if(!S.chatTarget){toast("Dost seçin");return;}
+  const inp=document.getElementById("msginput");
+  const txt=inp.value.trim();if(!txt)return;
+  const btn=document.getElementById("sndbtn");inp.value="";btn.disabled=true;
+  const room=getDMRoom(S.user.uid,S.chatTarget.uid);
+  try{
+    await fbD.ref("dms/"+room).push({uid:S.user.uid,name:S.user.displayName||"Anonim",photo:S.user.photoURL||"",text:txt,ts:firebase.database.ServerValue.TIMESTAMP});
+    requestAnimationFrame(()=>{const c=document.getElementById("msgs");c.scrollTop=c.scrollHeight;});
+  }catch(e){inp.value=txt;toast("❌ Göndərilmədi: "+e.message);}
+  finally{btn.disabled=false;inp.focus();}
+}
+
+document.getElementById("vpbtn").addEventListener("click", ()=>{if(S.chatTarget)showProfile(S.chatTarget);});
 function showMyProfile(){if(S.user)showProfile({uid:S.user.uid,name:S.user.displayName,email:S.user.email,photo:S.user.photoURL});}
-async function showProfile(u){let np=null;if(FB&&fbD){const s=await fbD.ref(`users/${u.uid}/nowPlaying`).get().catch(()=>null);if(s?.exists())np=s.val();}const b=document.getElementById("m-prof-b");const e2=s=>String(s||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");b.innerHTML=`<div class="ptop">${u.photo?`<img class="ppic" src="${u.photo}" onerror="this.src='${PHO}'" alt=""/>`:`<div class="ppic-ph">${(u.name||"?")[0].toUpperCase()}</div>`}<div><div class="pname">${X(u.name||"Anonim")}</div><div class="pemail">${X(u.email||"")}</div>${np?`<div class="pnow">▶ ${T("nowpl")}: ${X(np.title)}</div>`:""}</div></div>${np?`<div class="sh" style="margin-bottom:10px"><span class="dot"></span>${T("nowpl")}</div><div class="psong" onclick="vt(()=>playSong({videoId:'${e2(np.videoId)}',title:'${e2(np.title)}',artist:'${e2(np.artist||"")}',thumb:'${e2(np.thumb||TH(np.videoId))}'}));closeM('m-prof')"><img src="${np.thumb||PHO}" onerror="this.src='${PHO}'" alt=""/><div><div class="pst">${X(np.title)}</div><div class="psa">${X(np.artist||"")}</div></div></div>`:""} ${u.uid!==S.user?.uid&&S.friends[u.uid]?`<button class="dmbtn" onclick="closeM('m-prof');openDM(${JSON.stringify(u).replace(/"/g,'&quot;')})">💬 ${T("dmbtn")}</button>`:""}`;openM("m-prof");}
+
+async function showProfile(u){
+  let np=null;if(FB&&fbD){const s=await fbD.ref(`users/${u.uid}/nowPlaying`).get().catch(()=>null);if(s?.exists())np=s.val();}
+  const b=document.getElementById("m-prof-b");
+  const e2=s=>String(s||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+  b.innerHTML=`<div class="ptop">${u.photo?`<img class="ppic" src="${u.photo}" onerror="this.src='${PHO}'" alt=""/>`:`<div class="ppic-ph">${(u.name||"?")[0].toUpperCase()}</div>`}<div><div class="pname">${X(u.name||"Anonim")}</div><div class="pemail">${X(u.email||"")}</div>${np?`<div class="pnow"><svg width="10" height="10" viewBox="0 0 24 24" fill="var(--g)"><polygon points="5 3 19 12 5 21 5 3"/></svg>${T("nowpl")}: ${X(np.title)}</div>`:""}</div></div>${np?`<div class="sh" style="margin-bottom:10px"><span class="dot"></span>${T("nowpl")}</div><div class="psong" onclick="playSong({videoId:'${e2(np.videoId)}',title:'${e2(np.title)}',artist:'${e2(np.artist||"")}',thumb:'${e2(np.thumb||TH(np.videoId))}'});closeM('m-prof')"><img src="${np.thumb||PHO}" onerror="this.src='${PHO}'" alt=""/><div><div class="pst">${X(np.title)}</div><div class="psa">${X(np.artist||"")}</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="var(--g)"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>`:""} ${u.uid!==S.user?.uid&&S.friends[u.uid]?`<button class="dmbtn" onclick="closeM('m-prof');openDM(${JSON.stringify(u).replace(/"/g,'&quot;')})">💬 ${T("dmbtn")}</button>`:""}`;
+  openM("m-prof");
+}
+
 function addCL(fn){S.chatListeners.push(fn);}
 function clearCL(){S.chatListeners.forEach(fn=>{try{fn();}catch(e){}});S.chatListeners=[];}
 
 /* ══ INIT ══ */
 (async()=>{
-  try{(await ldb.saved.toArray()).forEach(s=>S.saved.add(s.videoId));(await ldb.offline.toArray()).forEach(s=>S.offline.add(s.videoId));(await ldb.downloads.toArray()).forEach(s=>{S.downloads.add(s.videoId);S.offline.add(s.videoId);});}catch(e){console.warn("IndexedDB:",e);}
+  try{
+    (await ldb.saved.toArray()).forEach(s=>S.saved.add(s.videoId));
+    (await ldb.offline.toArray()).forEach(s=>S.offline.add(s.videoId));
+    (await ldb.downloads.toArray()).forEach(s=>{S.downloads.add(s.videoId);S.offline.add(s.videoId);});
+  }catch(e){console.warn("IndexedDB:",e);}
   applyLang();applyTheme();renderDefault();
   document.getElementById("vfill").style.width=S.vol+"%";
-  syncHamActive("discover");updateHamTheme();updateHamAuthBtn();
+  syncHamActive("discover");
+  updateHamTheme();
+  updateHamAuthBtn();
 })();
 
 /* ══ SERVICE WORKER + PWA ══ */
 (async()=>{
-  if(!('serviceWorker' in navigator))return;
-  try{
-    const reg=await navigator.serviceWorker.register('/sw.js',{scope:'/'});
-    reg.addEventListener('updatefound',()=>{const nw=reg.installing;nw.addEventListener('statechange',()=>{if(nw.state==='installed'&&navigator.serviceWorker.controller)toast('🔄 Yeniləmə hazırdır — səhifəni yeniləyin');});});
-    navigator.serviceWorker.ready.then(sw=>{if(sw.active){const thumbUrls=SONGS.slice(0,20).map(s=>`https://img.youtube.com/vi/${s.v}/mqdefault.jpg`);sw.active.postMessage({type:'CACHE_URLS',urls:thumbUrls});}});
-  }catch(e){console.warn('[SW]',e);}
-  let deferredPrompt=null;
-  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;showInstallBanner();});
-  function showInstallBanner(){if(document.getElementById('pwa-banner'))return;const banner=document.createElement('div');banner.id='pwa-banner';banner.style.cssText=`position:fixed;bottom:calc(var(--pl) + 16px);left:50%;transform:translateX(-50%);background:var(--c1);border:1.5px solid var(--g);border-radius:14px;padding:11px 16px;display:flex;align-items:center;gap:10px;z-index:9999;box-shadow:0 8px 32px rgba(30,215,96,.22);max-width:320px;width:calc(100% - 32px);animation:slideUp .35s cubic-bezier(.34,1.4,.64,1)`;banner.innerHTML=`<img src="/icon-192.png" style="width:36px;height:36px;border-radius:9px;object-fit:cover;flex-shrink:0" onerror="this.style.display='none'"/><div style="flex:1;min-width:0"><div style="font-family:var(--fh);font-weight:700;font-size:.83rem;margin-bottom:2px">Music Universe</div><div style="font-size:.71rem;color:var(--t2)">Ana ekrana əlavə et, oflayn işlə</div></div><button id="pwa-install" style="padding:7px 13px;border-radius:8px;background:var(--g);color:#000;font-size:.74rem;font-weight:700;border:none;cursor:pointer;white-space:nowrap;font-family:var(--fb)">Yüklə</button><button id="pwa-close" style="width:26px;height:26px;border-radius:50%;background:var(--c3);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:var(--t2)">✕</button>`;document.body.appendChild(banner);document.getElementById('pwa-install').addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();const{outcome}=await deferredPrompt.userChoice;deferredPrompt=null;banner.remove();if(outcome==='accepted')toast('✅ Music Universe quraşdırıldı!');});document.getElementById('pwa-close').addEventListener('click',()=>banner.remove());setTimeout(()=>banner?.remove(),8000);}
-  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
-  if(isIOS&&!isStandalone)setTimeout(()=>toast('📲 Safari → Paylaş → Ana ekrana əlavə et'),3500);
+  if(!('serviceWorker' in navigator)) return;
+  try {
+    const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    console.log('[SW] Qeydiyyat uğurlu:', reg.scope);
+    reg.addEventListener('updatefound', () => {
+      const nw = reg.installing;
+      nw.addEventListener('statechange', () => {
+        if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+          toast('🔄 Yeniləmə hazırdır — səhifəni yeniləyin');
+        }
+      });
+    });
+    navigator.serviceWorker.ready.then(sw => {
+      if (sw.active) {
+        const thumbUrls = SONGS.slice(0, 20).map(s => `https://img.youtube.com/vi/${s.v}/mqdefault.jpg`);
+        sw.active.postMessage({ type: 'CACHE_URLS', urls: thumbUrls });
+      }
+    });
+  } catch(e) { console.warn('[SW] Xəta:', e); }
+
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); deferredPrompt = e; showInstallBanner();
+  });
+
+  function showInstallBanner() {
+    if (document.getElementById('pwa-banner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'pwa-banner';
+    banner.style.cssText = `
+      position:fixed;bottom:calc(var(--pl) + 16px);left:50%;transform:translateX(-50%);
+      background:var(--c1);border:1.5px solid var(--g);border-radius:14px;
+      padding:11px 16px;display:flex;align-items:center;gap:10px;z-index:9999;
+      box-shadow:0 8px 32px rgba(30,215,96,.22);max-width:320px;width:calc(100% - 32px);
+      animation:slideUp .35s cubic-bezier(.34,1.4,.64,1);
+    `;
+    banner.innerHTML = `
+      <img src="/icon-192.png" style="width:36px;height:36px;border-radius:9px;object-fit:cover;flex-shrink:0" onerror="this.style.display='none'"/>
+      <div style="flex:1;min-width:0">
+        <div style="font-family:var(--fh);font-weight:700;font-size:.83rem;margin-bottom:2px">Music Universe</div>
+        <div style="font-size:.71rem;color:var(--t2)">Ana ekrana əlavə et, oflayn işlə</div>
+      </div>
+      <button id="pwa-install" style="padding:7px 13px;border-radius:8px;background:var(--g);color:#000;font-size:.74rem;font-weight:700;border:none;cursor:pointer;white-space:nowrap;font-family:var(--fb)">Yüklə</button>
+      <button id="pwa-close" style="width:26px;height:26px;border-radius:50%;background:var(--c3);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:var(--t2)">✕</button>
+    `;
+    document.body.appendChild(banner);
+    document.getElementById('pwa-install').addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null; banner.remove();
+      if (outcome === 'accepted') toast('✅ Music Universe quraşdırıldı!');
+    });
+    document.getElementById('pwa-close').addEventListener('click', () => banner.remove());
+    setTimeout(() => banner?.remove(), 8000);
+  }
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (isIOS && !isStandalone) {
+    setTimeout(() => { toast('📲 Safari → Paylaş → Ana ekrana əlavə et'); }, 3500);
+  }
 })();
 </script>
 </body>
