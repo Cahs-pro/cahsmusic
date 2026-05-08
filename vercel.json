@@ -2,7 +2,11 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/((?!api/)(?!icon\\.png)(?!manifest\\.json)(?!sw\\.js)(?!favicon\\.ico).*)",
+      "source": "/s/:videoId",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/((?!api/)(?!icon\\.png)(?!icon-192\\.png)(?!icon-512\\.png)(?!manifest\\.json)(?!sw\\.js)(?!favicon\\.ico).*)",
       "destination": "/index.html"
     }
   ],
