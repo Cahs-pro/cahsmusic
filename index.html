@@ -1012,6 +1012,7 @@ const TX = {
     typemsg:"Mesaj yaz...",selsong:"Mahnı seçin",resfor:"Nəticələr",
     themeDark:"Qaranlıq rejim",themeLight:"İşıqlı rejim",
     addTopl:"Playlist-ə əlavə et",share:"Paylaş",shuffle:"Qarışdırma",repeat:"Təkrar",
+    linkCopied:"Link kopyalandı!",sharedSong:"Paylaşılan mahnı çalınır",
   },
   en:{disc:"Discover",save:"Downloads",pls:"Playlists",soc:"Social",
     hh:"Discover the <em>Universe</em><br>of Music",hp:"All YouTube music — completely free.",
@@ -1035,6 +1036,7 @@ const TX = {
     typemsg:"Type a message...",selsong:"Select a song",resfor:"Results",
     themeDark:"Dark mode",themeLight:"Light mode",
     addTopl:"Add to Playlist",share:"Share",shuffle:"Shuffle",repeat:"Repeat",
+    linkCopied:"Link copied!",sharedSong:"Playing shared song",
   },
   ru:{disc:"Открыть",save:"Загрузки",pls:"Плейлисты",soc:"Социальное",
     hh:"Исследуй <em>Вселенную</em><br>Музыки",hp:"Вся музыка YouTube — совершенно бесплатно.",
@@ -1058,6 +1060,7 @@ const TX = {
     typemsg:"Написать...",selsong:"Выберите песню",resfor:"Результаты",
     themeDark:"Тёмный режим",themeLight:"Светлый режим",
     addTopl:"В плейлист",share:"Поделиться",shuffle:"Перемешать",repeat:"Повтор",
+    linkCopied:"Ссылка скопирована!",sharedSong:"Воспроизведение трека из ссылки",
   }
 };
 
@@ -1299,9 +1302,7 @@ document.getElementById("pem-sh").addEventListener("click", async () => {
   closeMeatball();
   const song = S.list[S.idx];
   if(!song){ toast("⚠ Əvvəlcə mahnı seçin"); return; }
-  const url = `https://www.youtube.com/watch?v=${song.videoId}`;
-  if(navigator.share){ try{ await navigator.share({title:song.title,text:`${song.title} — ${song.artist}`,url}); return; }catch(_){} }
-  try{ await navigator.clipboard.writeText(url); toast("🔗 Link kopyalandı!"); }catch(_){ toast("Link: "+url); }
+  await shareSong(song);
 });
 document.getElementById("pem-shuf").addEventListener("click", () => {
   closeMeatball();
@@ -1511,9 +1512,7 @@ document.getElementById("b-bar-dl").addEventListener("click", async()=>{
 });
 document.getElementById("b-bar-sh").addEventListener("click", async()=>{
   const song=S.list[S.idx]; if(!song){toast("⚠ Əvvəlcə mahnı seçin");return;}
-  const url=`https://www.youtube.com/watch?v=${song.videoId}`;
-  if(navigator.share){try{await navigator.share({title:song.title,text:`${song.title} — ${song.artist}`,url});return;}catch(_){}}
-  try{await navigator.clipboard.writeText(url);toast("🔗 Link kopyalandı!");}catch(_){toast("Link: "+url);}
+  await shareSong(song);
 });
 
 /* ══ DOWNLOAD ══ */
@@ -1930,6 +1929,64 @@ async function showProfile(u){
 function addCL(fn){S.chatListeners.push(fn);}
 function clearCL(){S.chatListeners.forEach(fn=>{try{fn();}catch(e){}});S.chatListeners=[];}
 
+/* ══════════════════════════════
+   DEEP LINK SHARE SYSTEM
+   Share URL format: https://cahsmusic.vercel.app/s/VIDEO_ID
+   • buildShareUrl(videoId)  → constructs the app link
+   • shareSong(song)         → Web Share API → clipboard fallback
+   • handleDeepLink()        → runs on load, parses /s/VIDEO_ID from path
+══════════════════════════════ */
+const APP_ORIGIN = "https://cahsmusic.vercel.app";
+
+function buildShareUrl(videoId){
+  // Use current origin in dev, production origin in production
+  const origin = location.hostname === "localhost" || location.hostname === "127.0.0.1"
+    ? location.origin
+    : APP_ORIGIN;
+  return `${origin}/s/${videoId}`;
+}
+
+async function shareSong(song){
+  const url = buildShareUrl(song.videoId);
+  const shareData = {
+    title: song.title,
+    text: `${song.title} — ${song.artist}`,
+    url,
+  };
+  if(navigator.share){
+    try{ await navigator.share(shareData); return; }catch(e){ if(e.name==="AbortError") return; }
+  }
+  // Fallback: copy to clipboard
+  try{
+    await navigator.clipboard.writeText(url);
+    toast("🔗 " + T("linkCopied"));
+  }catch(_){
+    // Last resort: prompt so user can manually copy
+    prompt(T("linkCopied"), url);
+  }
+}
+
+function handleDeepLink(){
+  try{
+    // Match /s/VIDEO_ID  (11-char YouTube ID)
+    const m = window.location.pathname.match(/^\/s\/([a-zA-Z0-9_-]{11})$/);
+    if(!m) return;
+    const videoId = m[1];
+    // Clean the path so refreshing doesn't re-trigger
+    window.history.replaceState({}, document.title, "/");
+    // Wait for YouTube player to be ready, then play
+    const tryPlay = (attempts=0) => {
+      if(S.ytOk || attempts > 40){
+        playSong({ videoId, title: "YouTube: "+videoId, artist: "YouTube", thumb: TH(videoId) });
+        toast("▶ " + T("sharedSong"));
+      } else {
+        setTimeout(()=>tryPlay(attempts+1), 300);
+      }
+    };
+    setTimeout(()=>tryPlay(), 400);
+  }catch(e){ console.warn("[DeepLink]", e); }
+}
+
 /* ══ INIT ══ */
 (async()=>{
   try{
@@ -1942,6 +1999,7 @@ function clearCL(){S.chatListeners.forEach(fn=>{try{fn();}catch(e){}});S.chatLis
   syncHamActive("discover");
   updateHamTheme();
   updateHamAuthBtn();
+  handleDeepLink();
 })();
 
 /* ══ SERVICE WORKER + PWA ══ */
