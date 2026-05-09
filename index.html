@@ -21,7 +21,15 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-<script src="https://www.youtube.com/iframe_api" async></script>
+<script>
+// Load YouTube IFrame API without async to avoid race condition
+(function(){
+  var tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  var first = document.getElementsByTagName('script')[0];
+  first.parentNode.insertBefore(tag, first);
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -1013,6 +1021,11 @@ const TX = {
     themeDark:"Qaranlıq rejim",themeLight:"İşıqlı rejim",
     addTopl:"Playlist-ə əlavə et",share:"Paylaş",shuffle:"Qarışdırma",repeat:"Təkrar",
     linkCopied:"Link kopyalandı!",sharedSong:"Paylaşılan mahnı çalınır",
+    ytFallback:"Alternativ üsulla yüklənir...",ytNotFound:"Mahnı tapılmadı və ya gizlidir",
+    ytBadId:"Yanlış video ID",ytHtml5:"HTML5 player xətası",ytGenErr:"Oynatma xətası",
+    streamErr:"Axın xətası — endirməyi sınayın",
+    browserWarnTitle:"bu mahnını birbaşa çala bilmir.",
+    browserWarnBody:"YouTube bu brauzerdə bloklanıb. Mahnını endirin — oflayn da işləyər.",
   },
   en:{disc:"Discover",save:"Downloads",pls:"Playlists",soc:"Social",
     hh:"Discover the <em>Universe</em><br>of Music",hp:"All YouTube music — completely free.",
@@ -1037,6 +1050,11 @@ const TX = {
     themeDark:"Dark mode",themeLight:"Light mode",
     addTopl:"Add to Playlist",share:"Share",shuffle:"Shuffle",repeat:"Repeat",
     linkCopied:"Link copied!",sharedSong:"Playing shared song",
+    ytFallback:"Loading via alternative method...",ytNotFound:"Song not found or private",
+    ytBadId:"Invalid video ID",ytHtml5:"HTML5 player error",ytGenErr:"Playback error",
+    streamErr:"Stream error — try downloading",
+    browserWarnTitle:"can't play this song directly.",
+    browserWarnBody:"YouTube is blocked in this browser. Download the song — it works offline too.",
   },
   ru:{disc:"Открыть",save:"Загрузки",pls:"Плейлисты",soc:"Социальное",
     hh:"Исследуй <em>Вселенную</em><br>Музыки",hp:"Вся музыка YouTube — совершенно бесплатно.",
@@ -1061,6 +1079,11 @@ const TX = {
     themeDark:"Тёмный режим",themeLight:"Светлый режим",
     addTopl:"В плейлист",share:"Поделиться",shuffle:"Перемешать",repeat:"Повтор",
     linkCopied:"Ссылка скопирована!",sharedSong:"Воспроизведение трека из ссылки",
+    ytFallback:"Загружается альтернативным способом...",ytNotFound:"Трек не найден или закрыт",
+    ytBadId:"Неверный ID видео",ytHtml5:"Ошибка HTML5 плеера",ytGenErr:"Ошибка воспроизведения",
+    streamErr:"Ошибка потока — попробуйте скачать",
+    browserWarnTitle:"не может воспроизвести трек напрямую.",
+    browserWarnBody:"YouTube заблокирован в этом браузере. Скачайте трек — он работает и офлайн.",
   }
 };
 
@@ -1141,6 +1164,7 @@ const S={
   friends:{},chatListeners:[],
   offAudio:null,
   _downloading: false,
+  _streamPlaying: false,
 };
 
 /* ══ UTILS ══ */
@@ -1405,7 +1429,15 @@ function onYTS(e){
   else if(e.data===P.BUFFERING){setPUI("loading");}
   else if(e.data===P.ENDED){S.playing=false;stopTimer();S.repeat?(S.ytp.seekTo(0),S.ytp.playVideo()):nextSong();}
 }
-function onYTE(e){const m={2:"Yanlış ID",5:"HTML5 xəta",100:"Tapılmadı",101:"Embed qadağandır",150:"Embed qadağandır"};toast(`⚠ ${m[e.data]||"Xəta"}`);setTimeout(()=>nextSong(),1800);}
+function onYTE(e){
+  if(e.data===101||e.data===150){
+    const song=S.list[S.idx];
+    if(song){ toast("\u23F3 "+T("ytFallback")); streamPlay(song); return; }
+  }
+  if(e.data===100){ toast("\u274C "+T("ytNotFound")); setTimeout(()=>nextSong(),1800); return; }
+  toast("\u26A0 "+(T("ytGenErr")||"Xəta"));
+  setTimeout(()=>nextSong(),1800);
+}
 
 /* ══ PLAY ══ */
 async function playSong(song){
@@ -1450,6 +1482,100 @@ async function playSong(song){
   if(FB&&S.user) fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});
   if(!S.ytOk){toast("⏳ Player yüklənir...");setPUI("pause");return;}
   S.ytp.loadVideoById({videoId:song.videoId,suggestedQuality:"small"});
+}
+
+/* ══ STREAM PLAY (fallback for browsers where YT embed is blocked) ══
+   Fetches an MP3 link via /api/dl and plays it with a native <Audio> element.
+   Works in Firefox, Safari, Opera — any browser that can play audio/mpeg.
+══════════════════════════════════════════════════════════════════════ */
+async function streamPlay(song){
+  if(S._streamPlaying){ return; } // prevent double-trigger
+  S._streamPlaying = true;
+  setPUI("loading");
+  // Check IndexedDB first — if already downloaded, use that
+  const cached = await ldb.downloads.where("videoId").equals(song.videoId).first().catch(()=>null)
+               || await ldb.offline.where("videoId").equals(song.videoId).first().catch(()=>null);
+  if(cached && cached.blob){
+    S._streamPlaying = false;
+    playFromBlob(cached, song);
+    return;
+  }
+  try{
+    const res = await fetch(`/api/dl?v=${song.videoId}`,{signal:AbortSignal.timeout(55000)});
+    if(!res.ok){ throw new Error("api "+res.status); }
+    const j = await res.json();
+    if(!j.ok || !j.link){ throw new Error(j.error||"link yoxdur"); }
+    // Update song title if API returned it
+    if(j.title && j.title !== song.videoId){
+      song.title = j.title;
+      updPI(j.title, song.artist, song.thumb||TH(song.videoId));
+    }
+    stopOffAudio();
+    S.offAudio = new Audio();
+    S.offAudio.crossOrigin = "anonymous";
+    S.offAudio.src = j.link;
+    S.offAudio.volume = S.vol / 100;
+    S.offAudio.onplay  = ()=>{ S.playing=true;  setPUI("play");  };
+    S.offAudio.onpause = ()=>{ S.playing=false; setPUI("pause"); };
+    S.offAudio.onended = ()=>{ S.playing=false; stopTimer(); S.repeat?(S.offAudio.currentTime=0,S.offAudio.play()):nextSong(); };
+    S.offAudio.onerror = ()=>{ toast("\u274C "+T("streamErr")); setPUI("pause"); };
+    S.offAudio.ontimeupdate = ()=>{
+      if(!S.offAudio)return;
+      const d=S.offAudio.duration, c=S.offAudio.currentTime;
+      if(!d||isNaN(d))return;
+      document.getElementById("pfill").style.width=(c/d*100)+"%";
+      document.getElementById("p-cur").textContent=fmt(c);
+      document.getElementById("p-dur").textContent=fmt(d);
+    };
+    await S.offAudio.play();
+    toast("\u25B6 "+song.title);
+  } catch(err){
+    console.warn("[streamPlay]", err.message);
+    setPUI("pause");
+    // Show a helpful cross-browser message
+    showBrowserWarning(song);
+  } finally {
+    S._streamPlaying = false;
+  }
+}
+
+function showBrowserWarning(song){
+  // Detect browser roughly
+  const ua = navigator.userAgent;
+  const isFirefox = ua.includes("Firefox");
+  const isSafari  = /^((?!chrome|android).)*safari/i.test(ua);
+  const isOpera   = ua.includes("OPR") || ua.includes("Opera");
+  const name = isFirefox?"Firefox":isSafari?"Safari":isOpera?"Opera":"Bu brauzer";
+  // Build a non-blocking banner below the player
+  let banner = document.getElementById("browser-warn-banner");
+  if(!banner){
+    banner = document.createElement("div");
+    banner.id = "browser-warn-banner";
+    banner.style.cssText = `position:fixed;bottom:calc(var(--pl) + 10px);left:50%;transform:translateX(-50%);`+
+      `background:var(--c1);border:1.5px solid var(--red);border-radius:14px;`+
+      `padding:12px 16px;display:flex;align-items:center;gap:10px;z-index:999;`+
+      `box-shadow:0 8px 28px rgba(240,48,80,.18);max-width:min(380px,calc(100vw - 24px));`+
+      `width:100%;animation:mop .22s ease;`;
+    document.body.appendChild(banner);
+  }
+  banner.innerHTML =
+    `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" flex-shrink="0">`+
+      `<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`+
+    `<div style="flex:1;min-width:0">`+
+      `<div style="font-family:var(--fh);font-weight:700;font-size:.82rem;color:var(--tx);margin-bottom:3px">`+
+        `${name} ${T("browserWarnTitle")}</div>`+
+      `<div style="font-size:.73rem;color:var(--t2);line-height:1.4">${T("browserWarnBody")}</div>`+
+    `</div>`+
+    `<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">`+
+      `<button onclick="startDownload(S.list[S.idx],null,null,()=>playSong(S.list[S.idx]),()=>{})" `+
+        `style="padding:6px 11px;border-radius:8px;background:var(--g);color:#000;font-size:.72rem;font-weight:700;border:none;cursor:pointer;white-space:nowrap">`+
+        `\u2B07 ${T("dosave")}</button>`+
+      `<button onclick="document.getElementById('browser-warn-banner').remove()" `+
+        `style="padding:5px 11px;border-radius:8px;background:var(--c3);color:var(--t2);font-size:.7rem;font-weight:600;border:1.5px solid var(--bd2);cursor:pointer">`+
+        `${T("cancel")}</button>`+
+    `</div>`;
+  // Auto-hide after 12 seconds
+  setTimeout(()=>{ banner?.remove(); }, 12000);
 }
 
 function playFromBlob(rec,song){
