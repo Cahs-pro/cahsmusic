@@ -494,6 +494,158 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
 #yt-wrap{position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none}
 
 /* ══════════════════════════════
+   VIP SYSTEM
+══════════════════════════════ */
+:root{--vip:#f5c518;--vip2:#e6b800;--vpd:rgba(245,197,24,.12)}
+.vip-badge{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;font-weight:800;padding:2px 7px;border-radius:20px;background:var(--vpd);color:var(--vip);border:1px solid rgba(245,197,24,.3);vertical-align:middle;white-space:nowrap}
+.vip-badge svg{width:9px;height:9px;flex-shrink:0}
+#uav.vip-user{border-color:var(--vip);box-shadow:0 0 0 3px rgba(245,197,24,.25)}
+.uav-wrap{position:relative;flex-shrink:0;display:none}
+.uav-wrap.show{display:inline-block}
+.vip-crown{position:absolute;top:-8px;right:-5px;font-size:13px;line-height:1;pointer-events:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+.vip-wall{text-align:center;padding:6px 0 2px}
+.vip-wall-ico{font-size:2.5rem;margin-bottom:8px}
+.vip-wall h3{font-family:var(--fh);font-size:.98rem;font-weight:800;margin-bottom:7px}
+.vip-wall p{color:var(--t2);font-size:.81rem;line-height:1.6;margin-bottom:14px}
+.vip-perks{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;text-align:left}
+.vip-perk{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:10px;background:var(--vpd);border:1px solid rgba(245,197,24,.18);font-size:.79rem;font-weight:600}
+.vip-perk svg{color:var(--vip);flex-shrink:0;width:15px;height:15px}
+.vip-btn{width:100%;padding:12px;border-radius:12px;background:linear-gradient(135deg,#f5c518,#e6b800);color:#000;font-weight:800;font-size:.87rem;cursor:pointer;border:none;font-family:var(--fh);transition:all .18s;letter-spacing:.02em}
+.vip-btn:hover{filter:brightness(1.08);transform:scale(1.01)}
+.vip-btn-sec{width:100%;padding:9px;border-radius:10px;background:var(--c3);color:var(--t2);font-weight:600;font-size:.82rem;margin-top:7px;cursor:pointer;border:1.5px solid var(--bd2);font-family:var(--fb);transition:all .17s}
+.vip-btn-sec:hover{background:var(--c4);color:var(--tx)}
+.limit-bar-wrap{margin:8px 0 14px}
+.limit-bar-lbl{display:flex;justify-content:space-between;font-size:.71rem;color:var(--t2);margin-bottom:5px}
+.limit-bar{height:5px;background:var(--c4);border-radius:5px;overflow:hidden}
+.limit-bar-fill{height:100%;border-radius:5px;background:var(--g);transition:width .4s}
+.limit-bar-fill.warn{background:var(--vip)}
+.limit-bar-fill.full{background:var(--red)}
+
+/* ══════════════════════════════
+   LIKES + ACTIVITY FEED
+══════════════════════════════ */
+.like-btn{display:flex;align-items:center;gap:3px;padding:5px 8px;border-radius:8px;font-size:.65rem;font-weight:700;background:var(--c3);color:var(--t2);border:1.5px solid var(--bd2);transition:all .17s;cursor:pointer;flex-shrink:0}
+.like-btn:hover{border-color:var(--red);color:var(--red)}
+.like-btn.liked{color:var(--red);border-color:var(--red);background:rgba(240,48,80,.09)}
+.like-btn svg{width:11px;height:11px;flex-shrink:0;transition:transform .2s}
+.like-btn.liked svg{transform:scale(1.25)}
+.feed-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:12px;background:var(--c1);border:1.5px solid var(--bd);transition:all .17s;cursor:pointer}
+.feed-item:hover{border-color:var(--g);background:var(--c2)}
+.feed-av{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--c3)}
+.feed-av-ph{width:32px;height:32px;border-radius:50%;background:var(--gd);display:flex;align-items:center;justify-content:center;color:var(--g);font-family:var(--fh);font-weight:800;font-size:.8rem;flex-shrink:0}
+.feed-info{flex:1;min-width:0}
+.feed-act{font-size:.72rem;color:var(--t2);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.feed-name{font-weight:700;color:var(--tx)}
+.feed-song{color:var(--g);font-style:italic}
+.feed-time{font-size:.63rem;color:var(--t3);flex-shrink:0}
+
+/* ══════════════════════════════
+   PLAY QUEUE
+══════════════════════════════ */
+#queue-panel{position:fixed;bottom:calc(var(--pl) + 8px);right:12px;background:var(--c1);border:1.5px solid var(--bd2);border-radius:16px;width:min(310px,calc(100vw - 24px));max-height:400px;z-index:840;box-shadow:var(--sh);display:none;flex-direction:column;animation:mop .2s var(--ease)}
+#queue-panel.open{display:flex}
+.qp-head{display:flex;align-items:center;justify-content:space-between;padding:11px 13px 8px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.qp-title{font-family:var(--fh);font-weight:700;font-size:.86rem}
+.qp-close{width:26px;height:26px;border-radius:50%;background:var(--c3);display:flex;align-items:center;justify-content:center;color:var(--t2);transition:all .15s;cursor:pointer}
+.qp-close:hover{color:var(--tx);background:var(--c4)}
+#queue-list{flex:1;overflow-y:auto;padding:5px 7px}
+.q-row{display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:9px;transition:all .15s;cursor:pointer}
+.q-row:hover{background:var(--c2)}
+.q-row.q-now{background:var(--gd);border:1px solid rgba(30,215,96,.18)}
+.q-drag{color:var(--t3);flex-shrink:0;cursor:grab}
+.q-drag svg{width:13px;height:13px}
+.q-thumb{width:34px;height:34px;border-radius:7px;overflow:hidden;flex-shrink:0;background:var(--c3)}
+.q-thumb img{width:100%;height:100%;object-fit:cover}
+.q-info{flex:1;min-width:0}
+.q-title{font-weight:700;font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.q-artist{font-size:.65rem;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.q-del{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:all .15s;flex-shrink:0;cursor:pointer}
+.q-del:hover{color:var(--red)}
+.q-del svg{width:11px;height:11px}
+.q-add-btn{margin:5px 7px 7px;padding:9px;border-radius:9px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:.74rem;font-weight:700;color:var(--g);background:var(--gd);border:1.5px dashed rgba(30,215,96,.28);cursor:pointer;transition:all .17s}
+.q-add-btn:hover{background:rgba(30,215,96,.18);border-color:var(--g)}
+
+/* ══════════════════════════════
+   HISTORY PAGE TAB
+══════════════════════════════ */
+.hist-row{background:var(--c1);border:1.5px solid var(--bd);border-radius:13px;padding:9px 12px;display:flex;align-items:center;gap:10px;transition:border-color .2s;cursor:pointer}
+.hist-row:hover{border-color:var(--g)}
+.hist-thumb{width:40px;height:40px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--c3)}
+.hist-thumb img{width:100%;height:100%;object-fit:cover}
+.hist-info{flex:1;min-width:0}
+.hist-tit{font-family:var(--fh);font-weight:700;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-art{font-size:.68rem;color:var(--t2);font-weight:500}
+.hist-time{font-size:.63rem;color:var(--t3);flex-shrink:0;white-space:nowrap}
+
+/* ══════════════════════════════
+   NOW PLAYING WIDGET
+══════════════════════════════ */
+#npw{position:fixed;top:calc(var(--nav) + 8px);right:12px;z-index:830;background:var(--c1);border:1.5px solid rgba(30,215,96,.28);border-radius:14px;padding:9px 12px;display:none;align-items:center;gap:10px;box-shadow:0 4px 24px rgba(30,215,96,.12);min-width:200px;max-width:260px;cursor:pointer;transition:transform .2s}
+#npw.show{display:flex}
+#npw:hover{transform:translateY(-2px)}
+@keyframes slideInR{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+#npw.show{animation:slideInR .3s var(--spring)}
+.npw-thumb{width:36px;height:36px;border-radius:7px;overflow:hidden;flex-shrink:0;background:var(--c3);position:relative}
+.npw-thumb img{width:100%;height:100%;object-fit:cover}
+.npw-eq{position:absolute;bottom:3px;right:3px;display:flex;align-items:flex-end;gap:1.5px;height:9px}
+.npw-eq span{width:2px;background:var(--g);border-radius:1px}
+.npw-eq span:nth-child(1){height:4px;animation:eq .7s ease-in-out infinite alternate}
+.npw-eq span:nth-child(2){height:8px;animation:eq .7s ease-in-out .1s infinite alternate}
+.npw-eq span:nth-child(3){height:5px;animation:eq .7s ease-in-out .2s infinite alternate}
+.npw-info{flex:1;min-width:0}
+.npw-label{font-size:.57rem;font-weight:700;color:var(--g);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px}
+.npw-title{font-family:var(--fh);font-weight:700;font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.npw-artist{font-size:.65rem;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.npw-x{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--t3);flex-shrink:0;transition:color .15s}
+.npw-x:hover{color:var(--tx)}
+
+/* ══════════════════════════════
+   STATS IN PROFILE
+══════════════════════════════ */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}
+.stat-card{background:var(--c2);border-radius:10px;padding:9px 8px;text-align:center}
+.stat-num{font-family:var(--fh);font-weight:800;font-size:1.1rem;color:var(--g);line-height:1}
+.stat-lbl{font-size:.63rem;color:var(--t2);margin-top:3px;font-weight:600}
+.top-songs{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+.top-song-row{display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:9px;cursor:pointer;transition:background .15s}
+.top-song-row:hover{background:var(--c2)}
+.top-rank{font-family:var(--fh);font-weight:800;font-size:.75rem;color:var(--t3);width:15px;flex-shrink:0;text-align:center}
+.top-rank.gold{color:var(--vip)}
+.top-thumb{width:30px;height:30px;border-radius:6px;overflow:hidden;flex-shrink:0;background:var(--c3)}
+.top-thumb img{width:100%;height:100%;object-fit:cover}
+.top-info{flex:1;min-width:0}
+.top-tit{font-weight:700;font-size:.74rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top-cnt{font-size:.62rem;color:var(--t2)}
+
+/* ══════════════════════════════
+   CROSSFADE + EQ SETTINGS
+══════════════════════════════ */
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd)}
+.settings-row:last-child{border-bottom:none;padding-bottom:0}
+.settings-lbl{font-size:.82rem;font-weight:600;color:var(--t2)}
+.settings-sub{font-size:.69rem;color:var(--t3);margin-top:1px}
+.settings-val{font-size:.78rem;font-weight:700;color:var(--g);min-width:28px;text-align:right;flex-shrink:0}
+.range-sm{width:90px;accent-color:var(--g);flex-shrink:0}
+.eq-bands{display:flex;gap:8px;margin-top:10px;padding:12px;background:var(--c2);border-radius:12px;justify-content:center}
+.eq-band{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;max-width:50px}
+.eq-band input[type=range]{-webkit-appearance:slider-vertical;appearance:slider-vertical;writing-mode:vertical-lr;direction:rtl;width:20px;height:65px;accent-color:var(--g);cursor:pointer}
+.eq-band label{font-size:.6rem;color:var(--t3);font-weight:700;text-align:center}
+.eq-band span{font-size:.6rem;color:var(--g);font-weight:700;min-width:26px;text-align:center}
+
+/* ══════════════════════════════
+   NOTIFICATIONS
+══════════════════════════════ */
+.notif-row{display:flex;align-items:flex-start;gap:9px;padding:10px 12px;border-radius:12px;background:var(--c1);border:1.5px solid var(--bd);transition:all .17s;margin-bottom:6px}
+.notif-row.unread{border-color:rgba(30,215,96,.25);background:var(--gd)}
+.notif-ico{width:30px;height:30px;border-radius:50%;background:var(--c3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px}
+.notif-body{flex:1;min-width:0}
+.notif-text{font-size:.77rem;line-height:1.45}
+.notif-time{font-size:.63rem;color:var(--t3);margin-top:2px}
+#notif-badge{position:absolute;top:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:var(--red);color:#fff;font-size:.55rem;font-weight:800;display:none;align-items:center;justify-content:center}
+#notif-badge.show{display:flex}
+.pub-pl-badge{font-size:.63rem;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(59,130,246,.1);color:var(--blue);border:1px solid rgba(59,130,246,.22);white-space:nowrap}
+
+/* ══════════════════════════════
    RESPONSIVE BREAKPOINTS
 ══════════════════════════════ */
 
@@ -688,6 +840,10 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span id="n-soc">Sosial</span>
     </button>
+    <button class="pill" data-pg="history">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span id="n-hist">Tarix</span>
+    </button>
   </div>
 
   <!-- Desktop search -->
@@ -729,7 +885,14 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
       <svg id="ico-m" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       <svg id="ico-s" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
     </button>
-    <img id="uav" src="" alt=""/>
+    <div class="uav-wrap" id="uav-wrap">
+      <img id="uav" src="" alt=""/>
+      <span class="vip-crown" id="vip-crown" style="display:none">👑</span>
+    </div>
+    <button class="ibtn" id="notif-btn" style="position:relative;display:none">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span id="notif-badge"></span>
+    </button>
     <button class="authbtn" id="authbtn">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg>
       <span id="auth-lbl" class="auth-txt">Giriş</span>
@@ -767,6 +930,10 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
     <div class="ham-item" data-pg="social">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span id="hm-soc">Sosial</span>
+    </div>
+    <div class="ham-item" data-pg="history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span id="hm-hist">Tarix</span>
     </div>
   </div>
 
@@ -889,6 +1056,18 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
       </div>
     </div>
   </div>
+  <div id="page-history" class="page">
+    <div class="sh"><span class="dot"></span><span id="hist-h">Dinləmə Tarixi</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <span id="hist-cnt" style="font-size:.78rem;color:var(--t2)"></span>
+      <button onclick="clearHistory()" style="font-size:.73rem;font-weight:700;color:var(--red);padding:5px 11px;border-radius:8px;background:rgba(240,48,80,.08);border:1.5px solid rgba(240,48,80,.18);cursor:pointer" id="hist-clear-btn">🗑 Təmizlə</button>
+    </div>
+    <div id="hist-list" style="display:flex;flex-direction:column;gap:7px"></div>
+    <div id="no-hist" style="text-align:center;padding:46px 20px;color:var(--t3);display:none">
+      <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" style="margin:0 auto 12px;opacity:.28"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <p id="no-hist-p" style="font-size:.85rem;line-height:1.7">Hələ heç nə dinləməmisiniz.</p>
+    </div>
+  </div>
 </main>
 
 <!-- PLAYER -->
@@ -958,6 +1137,47 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
     <span id="pem-rep-lbl">Təkrar</span>
   </div>
+  <div style="border-top:1px solid var(--bd);margin:3px 0"></div>
+  <div class="pem-item" id="pem-queue">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="9" y1="18" x2="21" y2="18"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="9" y1="6" x2="21" y2="6"/><polyline points="3 6 4 7 6 5"/><polyline points="3 12 4 13 6 11"/><polyline points="3 18 4 19 6 17"/></svg>
+    <span id="pem-queue-lbl">Növbə</span>
+  </div>
+  <div class="pem-item" id="pem-settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span id="pem-settings-lbl">Parametrlər</span>
+  </div>
+</div>
+
+<!-- Now Playing Widget -->
+<div id="npw" onclick="switchPage('discover')" title="Kəşf et">
+  <div class="npw-thumb">
+    <img id="npw-img" src="" alt="" onerror="this.style.display='none'"/>
+    <div class="npw-eq"><span></span><span></span><span></span></div>
+  </div>
+  <div class="npw-info">
+    <div class="npw-label" id="npw-label">İndi çalınır</div>
+    <div class="npw-title" id="npw-title">—</div>
+    <div class="npw-artist" id="npw-artist"></div>
+  </div>
+  <button class="npw-x" onclick="event.stopPropagation();document.getElementById('npw').classList.remove('show')">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+</div>
+
+<!-- Queue Panel -->
+<div id="queue-panel">
+  <div class="qp-head">
+    <span class="qp-title" id="qp-title">⚡ Növbə</span>
+    <div style="display:flex;gap:5px;align-items:center">
+      <button onclick="clearQueue()" style="font-size:.68rem;font-weight:700;color:var(--t2);padding:4px 9px;border-radius:7px;background:var(--c3);border:1.5px solid var(--bd2);cursor:pointer" id="q-clr-btn">Sil</button>
+      <button class="qp-close" onclick="toggleQueue()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div id="queue-list"></div>
+  <button class="q-add-btn" onclick="addCurrentToQueue()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span id="q-add-lbl">Cari mahnını əlavə et</span>
+  </button>
 </div>
 
 <div id="yt-wrap"><div id="yt-player"></div></div>
@@ -977,6 +1197,24 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
 <div class="moverlay" id="m-gen"><div class="mbox">
   <button class="mcls" onclick="closeM('m-gen')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   <div id="m-gen-b"></div>
+</div></div>
+
+<!-- VIP Modal -->
+<div class="moverlay" id="m-vip"><div class="mbox" style="max-width:380px">
+  <button class="mcls" onclick="closeM('m-vip')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div id="m-vip-b"></div>
+</div></div>
+
+<!-- Settings Modal -->
+<div class="moverlay" id="m-settings"><div class="mbox" style="max-width:420px">
+  <button class="mcls" onclick="closeM('m-settings')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div id="m-settings-b"></div>
+</div></div>
+
+<!-- Notifications Modal -->
+<div class="moverlay" id="m-notif"><div class="mbox" style="max-width:380px">
+  <button class="mcls" onclick="closeM('m-notif')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div id="m-notif-b"></div>
 </div></div>
 
 <script>
@@ -1026,6 +1264,20 @@ const TX = {
     streamErr:"Axın xətası — endirməyi sınayın",
     browserWarnTitle:"bu mahnını birbaşa çala bilmir.",
     browserWarnBody:"YouTube bu brauzerdə bloklanıb. Mahnını endirin — oflayn da işləyər.",
+    hist:"Tarix",histH:"Dinləmə Tarixi",noHist:"Hələ heç nə dinləməmisiniz.",histCleared:"Tarix təmizləndi",
+    queue:"Növbə",queueEmpty:"Növbə boşdur",queueAdded:"Növbəyə əlavə edildi",queueCleared:"Növbə silindi",
+    like:"Bəyən",unlike:"Bəyənildi",likeAdded:"❤️ Bəyənildi",likeRemoved:"Bəyənmə silindi",
+    nowPlaying:"İndi çalınır",
+    vipTitle:"Music Universe VIP",vipSub:"Limitsiz musiqi, premium xüsusiyyətlər",
+    vipPerk1:"Limitsiz playlist yarat",vipPerk2:"Limitsiz mahnı endir",
+    vipPerk3:"Crossfade keçid efekti",vipPerk4:"Ekvalayzır (EQ)",vipPerk5:"VIP badge + tac 👑",
+    vipUpgrade:"VIP-ə Keç — $2.99/ay",vipActive:"✅ VIP Aktiv",vipContact:"Admin: admin@cahsmusic.com",
+    limitDl:"Endirmə limiti",limitPl:"Playlist limiti",limitReached:"Limit doldu — VIP ilə limitsiz!",
+    settings:"Parametrlər",crossfadeSet:"Crossfade keçid",eqSet:"Ekvalayzır",
+    eqBass:"Bass",eqMid:"Orta",eqTreble:"Tiz",eqReset:"Sıfırla",
+    notifTitle:"Bildirişlər",notifEmpty:"Bildiriş yoxdur",notifAllow:"Bildirişlərə icazə ver",
+    actFeed:"Dostların aktivliyi",noFeed:"Dostlarınız hələ heç nə etməyib.",
+    addToQueue:"Növbəyə əlavə et",settingsLbl:"Parametrlər",pubPlShare:"Playlist linki kopyalandı",
   },
   en:{disc:"Discover",save:"Downloads",pls:"Playlists",soc:"Social",
     hh:"Discover the <em>Universe</em><br>of Music",hp:"All YouTube music — completely free.",
@@ -1055,6 +1307,20 @@ const TX = {
     streamErr:"Stream error — try downloading",
     browserWarnTitle:"can't play this song directly.",
     browserWarnBody:"YouTube is blocked in this browser. Download the song — it works offline too.",
+    hist:"History",histH:"Listening History",noHist:"You haven't listened to anything yet.",histCleared:"History cleared",
+    queue:"Queue",queueEmpty:"Queue is empty",queueAdded:"Added to queue",queueCleared:"Queue cleared",
+    like:"Like",unlike:"Liked",likeAdded:"❤️ Liked",likeRemoved:"Like removed",
+    nowPlaying:"Now Playing",
+    vipTitle:"Music Universe VIP",vipSub:"Unlimited music, premium features",
+    vipPerk1:"Unlimited playlists",vipPerk2:"Unlimited downloads",
+    vipPerk3:"Crossfade transition",vipPerk4:"Equalizer (EQ)",vipPerk5:"VIP badge + crown 👑",
+    vipUpgrade:"Go VIP — $2.99/mo",vipActive:"✅ VIP Active",vipContact:"Admin: admin@cahsmusic.com",
+    limitDl:"Download limit",limitPl:"Playlist limit",limitReached:"Limit reached — unlimited with VIP!",
+    settings:"Settings",crossfadeSet:"Crossfade transition",eqSet:"Equalizer",
+    eqBass:"Bass",eqMid:"Mid",eqTreble:"Treble",eqReset:"Reset",
+    notifTitle:"Notifications",notifEmpty:"No notifications",notifAllow:"Allow notifications",
+    actFeed:"Friends' activity",noFeed:"Your friends haven't done anything yet.",
+    addToQueue:"Add to queue",settingsLbl:"Settings",pubPlShare:"Playlist link copied",
   },
   ru:{disc:"Открыть",save:"Загрузки",pls:"Плейлисты",soc:"Социальное",
     hh:"Исследуй <em>Вселенную</em><br>Музыки",hp:"Вся музыка YouTube — совершенно бесплатно.",
@@ -1084,6 +1350,20 @@ const TX = {
     streamErr:"Ошибка потока — попробуйте скачать",
     browserWarnTitle:"не может воспроизвести трек напрямую.",
     browserWarnBody:"YouTube заблокирован в этом браузере. Скачайте трек — он работает и офлайн.",
+    hist:"История",histH:"История прослушиваний",noHist:"Вы ещё ничего не слушали.",histCleared:"История очищена",
+    queue:"Очередь",queueEmpty:"Очередь пуста",queueAdded:"Добавлено в очередь",queueCleared:"Очередь очищена",
+    like:"Нравится",unlike:"Понравилось",likeAdded:"❤️ Понравилось",likeRemoved:"Лайк убран",
+    nowPlaying:"Сейчас играет",
+    vipTitle:"Music Universe VIP",vipSub:"Безлимитная музыка, премиум-функции",
+    vipPerk1:"Безлимитные плейлисты",vipPerk2:"Безлимитные загрузки",
+    vipPerk3:"Эффект кроссфейда",vipPerk4:"Эквалайзер (EQ)",vipPerk5:"VIP значок + корона 👑",
+    vipUpgrade:"Перейти на VIP — $2.99/мес",vipActive:"✅ VIP Активен",vipContact:"Админ: admin@cahsmusic.com",
+    limitDl:"Лимит загрузок",limitPl:"Лимит плейлистов",limitReached:"Лимит исчерпан — безлимит с VIP!",
+    settings:"Настройки",crossfadeSet:"Кроссфейд переход",eqSet:"Эквалайзер",
+    eqBass:"Бас",eqMid:"Средние",eqTreble:"Высокие",eqReset:"Сброс",
+    notifTitle:"Уведомления",notifEmpty:"Нет уведомлений",notifAllow:"Разрешить уведомления",
+    actFeed:"Активность друзей",noFeed:"Ваши друзья ещё ничего не делали.",
+    addToQueue:"В очередь",settingsLbl:"Настройки",pubPlShare:"Ссылка на плейлист скопирована",
   }
 };
 
@@ -1105,6 +1385,15 @@ ldb.version(2).stores({
   downloads: "++id, &videoId, title, artist, thumb, mime, addedAt",
   playlists: "++id, name, createdAt",
   pl_songs:  "++id, [playlistId+videoId], playlistId, videoId, title, artist, thumb",
+});
+ldb.version(3).stores({
+  saved:     "++id, &videoId, title, artist, thumb",
+  offline:   "++id, &videoId, title, artist, thumb, mime",
+  downloads: "++id, &videoId, title, artist, thumb, mime, addedAt",
+  playlists: "++id, name, createdAt",
+  pl_songs:  "++id, [playlistId+videoId], playlistId, videoId, title, artist, thumb",
+  history:   "++id, videoId, playedAt",
+  likes:     "++id, &videoId",
 });
 
 /* ══ CATALOG ══ */
@@ -1163,8 +1452,25 @@ const S={
   chatUid:null,chatTarget:null,
   friends:{},chatListeners:[],
   offAudio:null,
-  _downloading: false,
-  _streamPlaying: false,
+  _downloading:false,
+  _streamPlaying:false,
+  // VIP
+  vip:false,
+  // Queue
+  queue:[],
+  // History
+  historyIds:new Set(),
+  // Likes
+  likes:new Set(),
+  // Crossfade
+  crossfade:0, // seconds 0-8
+  // EQ gains (bass, mid, treble) in dB
+  eq:{bass:0,mid:0,treble:0},
+  eqNodes:null,
+  audioCtx:null,
+  // Sleep timer
+  sleepTimer:null,sleepEnd:0,sleepActive:false,
+  streamAudio:null,_strTimer:null,
 };
 
 /* ══ UTILS ══ */
@@ -1371,7 +1677,9 @@ function applyLang(){
   document.getElementById("llbl").textContent = LANG.toUpperCase();
   const s=(id,k,html=false)=>{ const e=document.getElementById(id); if(!e) return; html ? e.innerHTML=T(k) : e.textContent=T(k); };
   s("n-disc","disc"); s("n-save","save"); s("n-pl","pls"); s("n-soc","soc");
+  s("n-hist","hist");
   s("hm-disc","disc"); s("hm-save","save"); s("hm-pl","pls"); s("hm-soc","soc");
+  s("hm-hist","hist");
   s("hero-h","hh",true); s("hero-p","hp"); s("c1","c1"); s("c2","c2"); s("c3","c3"); s("c4","c4");
   s("pop-lbl","pop"); s("sv-h","svh"); s("no-sv-p","nosv",true);
   s("pl-h","plh"); s("newpl-lbl","newpl");
@@ -1382,6 +1690,9 @@ function applyLang(){
   s("echint","selhint");
   s("pem-pl-lbl","addTopl"); s("pem-dl-lbl","dosave");
   s("pem-sh-lbl","share"); s("pem-shuf-lbl","shuffle"); s("pem-rep-lbl","repeat");
+  s("pem-queue-lbl","queue"); s("pem-settings-lbl","settingsLbl");
+  s("hist-h","histH"); s("no-hist-p","noHist");
+  s("npw-label","nowPlaying"); s("qp-title","queue"); s("q-add-lbl","addToQueue");
   updateHamTheme();
   const fi = document.getElementById("fr-inp"); if(fi) fi.placeholder = T("frph");
   const si = document.getElementById("sinp"); if(si) si.placeholder = T("sph");
@@ -1403,195 +1714,235 @@ document.addEventListener("click", e => {
 
 /* ══ PAGE SWITCHING ══ */
 function switchPage(pg){
-  document.querySelectorAll(".pill").forEach(x => x.classList.toggle("on", x.dataset.pg===pg));
-  document.querySelectorAll(".page").forEach(x => x.classList.remove("on"));
-  document.getElementById(`page-${pg}`).classList.add("on");
-  syncHamActive(pg);
-  if(pg==="saved") renderDownloads();
-  if(pg==="playlists") renderPlaylists();
-  if(pg!=="social"){ const sg=document.getElementById("soc-main"); if(sg) sg.classList.remove("chat-open"); }
+  withViewTransition(()=>{
+    document.querySelectorAll(".pill").forEach(x => x.classList.toggle("on", x.dataset.pg===pg));
+    document.querySelectorAll(".page").forEach(x => x.classList.remove("on"));
+    const pageEl = document.getElementById(`page-${pg}`);
+    if(pageEl) pageEl.classList.add("on");
+    syncHamActive(pg);
+    if(pg==="saved") renderDownloads();
+    if(pg==="playlists") renderPlaylists();
+    if(pg==="history") renderHistory();
+    if(pg!=="social"){ const sg=document.getElementById("soc-main"); if(sg) sg.classList.remove("chat-open"); }
+  });
 }
 
 document.querySelectorAll(".pill").forEach(b => b.addEventListener("click", () => switchPage(b.dataset.pg)));
 
 /* ══ YOUTUBE API ══ */
-window.onYouTubeIframeAPIReady=()=>{
-  S.ytp=new YT.Player("yt-player",{
-    height:"1",width:"1",
-    playerVars:{autoplay:0,controls:0,disablekb:1,enablejsapi:1,fs:0,iv_load_policy:3,modestbranding:1,rel:0,playsinline:1,origin:location.origin},
-    events:{onReady:e=>{S.ytOk=true;e.target.setVolume(S.vol);},onStateChange:onYTS,onError:onYTE}
-  });
+window.onYouTubeIframeAPIReady = () => {
+  try {
+    S.ytp = new YT.Player("yt-player", {
+      height:"1", width:"1",
+      playerVars:{autoplay:0,controls:0,disablekb:1,enablejsapi:1,fs:0,iv_load_policy:3,modestbranding:1,rel:0,playsinline:1,origin:location.origin},
+      events:{
+        onReady:   e => { S.ytOk = true; try{ e.target.setVolume(S.vol); }catch(_){} },
+        onStateChange: onYTS,
+        onError:   onYTE
+      }
+    });
+  } catch(e){ console.warn("[YT] init xəta:", e); }
 };
+
 function onYTS(e){
-  const P=YT.PlayerState;
-  if(e.data===P.PLAYING){S.playing=true;setPUI("play");startTimer();const d=S.ytp.getVideoData?.();if(d?.title)updPI(d.title,d.author||"",null);}
-  else if(e.data===P.PAUSED){S.playing=false;setPUI("pause");stopTimer();}
-  else if(e.data===P.BUFFERING){setPUI("loading");}
-  else if(e.data===P.ENDED){S.playing=false;stopTimer();S.repeat?(S.ytp.seekTo(0),S.ytp.playVideo()):nextSong();}
+  const P = YT.PlayerState;
+  if(e.data===P.PLAYING){ S.playing=true; setPUI("play"); startTimer(); const d=S.ytp.getVideoData?.(); if(d?.title) updPI(d.title,d.author||"",null); }
+  else if(e.data===P.PAUSED){ S.playing=false; setPUI("pause"); stopTimer(); }
+  else if(e.data===P.BUFFERING){ setPUI("loading"); }
+  else if(e.data===P.ENDED){ S.playing=false; stopTimer(); S.repeat?(S.ytp.seekTo(0),S.ytp.playVideo()):nextSong(); }
 }
+
 function onYTE(e){
-  if(e.data===101||e.data===150){
-    const song=S.list[S.idx];
-    if(song){ toast("\u23F3 "+T("ytFallback")); streamPlay(song); return; }
+  // YT embed xətası → stream engine-ə keç
+  console.warn("[YT] player xəta kodu:", e.data);
+  const song = S.list[S.idx];
+  if(song){ setTimeout(()=> streamPlay(song), 300); }
+}
+
+/* ══════════════════════════════
+   3-QATLI AUDIO ENGINE
+   Layer 1: IndexedDB blob (bütün brauzer, oflayn)
+   Layer 2: YouTube IFrame (Chrome/Edge)
+   Layer 3: /api/dl → native <audio> (Firefox/Safari/Opera)
+══════════════════════════════ */
+
+// AbortSignal.timeout polyfill — Firefox < 88, Safari < 15.4
+if(typeof AbortSignal.timeout !== 'function'){
+  AbortSignal.timeout = ms => {
+    const c = new AbortController();
+    setTimeout(()=> c.abort(new DOMException('TimeoutError','TimeoutError')), ms);
+    return c.signal;
+  };
+}
+
+// streamAudio: stream engine-in <Audio> elementi
+function stopStreamAudio(){
+  if(S.streamAudio){
+    const a = S.streamAudio; S.streamAudio = null;
+    a.ontimeupdate=null; a.onplay=null; a.onpause=null;
+    a.onended=null; a.onerror=null; a.onwaiting=null; a.onplaying=null;
+    try{ a.pause(); }catch(_){}
+    try{ a.src=''; }catch(_){}
   }
-  if(e.data===100){ toast("\u274C "+T("ytNotFound")); setTimeout(()=>nextSong(),1800); return; }
-  toast("\u26A0 "+(T("ytGenErr")||"Xəta"));
-  setTimeout(()=>nextSong(),1800);
+  clearInterval(S._strTimer); S._strTimer=null;
+}
+
+async function streamPlay(song){
+  stopStreamAudio();
+  setPUI("loading");
+  try{
+    const res = await fetch(`/api/dl?v=${song.videoId}`, {signal: AbortSignal.timeout(55000)});
+    if(!res.ok) throw new Error("API "+res.status);
+    const j = await res.json();
+    if(!j.ok || !j.link) throw new Error(j.error||"link yoxdur");
+    if(j.title && j.title !== song.videoId){
+      song.title = j.title;
+      updPI(j.title, song.artist, song.thumb||TH(song.videoId));
+    }
+    const audio = new Audio();
+    audio.crossOrigin = "anonymous";
+    audio.volume = S.vol / 100;
+    audio.src = j.link;
+    S.streamAudio = audio;
+    audio.onplay    = ()=>{ S.playing=true;  setPUI("play");    };
+    audio.onpause   = ()=>{ S.playing=false; setPUI("pause");   };
+    audio.onwaiting = ()=> setPUI("loading");
+    audio.onplaying = ()=> setPUI("play");
+    audio.onended   = ()=>{ S.playing=false; S.repeat?(audio.currentTime=0,audio.play()):nextSong(); };
+    audio.onerror   = ()=>{ toast("❌ Stream xətası"); setPUI("pause"); showBrowserHint(song); };
+    audio.ontimeupdate = ()=>{
+      const c=audio.currentTime, d=audio.duration;
+      if(!d||isNaN(d)) return;
+      document.getElementById("pfill").style.width=(c/d*100)+"%";
+      document.getElementById("p-cur").textContent=fmt(c);
+      document.getElementById("p-dur").textContent=fmt(d);
+    };
+    await audio.play();
+    toast(`▶ ${song.title}`);
+  }catch(err){
+    console.warn("[streamPlay]", err.message);
+    setPUI("pause");
+    if(err.name==='NotAllowedError'){
+      toast("🔇 Autoplay qadağası — oynat düyməsini basın");
+    } else {
+      showBrowserHint(song);
+    }
+  }
+}
+
+function showBrowserHint(song){
+  const ua = navigator.userAgent;
+  const name = ua.includes("Firefox")?"Firefox": /^((?!chrome|android).)*safari/i.test(ua)?"Safari": ua.includes("OPR")||ua.includes("Opera")?"Opera":"Bu brauzer";
+  let b = document.getElementById("bwarn");
+  if(!b){ b=document.createElement("div"); b.id="bwarn"; document.body.appendChild(b); }
+  b.style.cssText="position:fixed;bottom:calc(var(--pl) + 10px);left:50%;transform:translateX(-50%);"+
+    "background:var(--c1);border:1.5px solid var(--red);border-radius:14px;"+
+    "padding:11px 14px;display:flex;align-items:center;gap:10px;z-index:999;"+
+    "box-shadow:0 8px 28px rgba(240,48,80,.18);max-width:min(380px,calc(100vw - 24px));"+
+    "width:100%;animation:mop .22s ease;";
+  b.innerHTML=
+    `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" style="flex-shrink:0">`+
+      `<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`+
+    `<div style="flex:1;min-width:0">`+
+      `<div style="font-family:var(--fh);font-weight:700;font-size:.81rem;margin-bottom:2px">${name} ilə açılmır</div>`+
+      `<div style="font-size:.72rem;color:var(--t2);line-height:1.4">Mahnını ⬇ Endir, sonra oflayn dinlə — bütün brauzerlər dəstəkləyir</div>`+
+    `</div>`+
+    `<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">`+
+      `<button onclick="const s=S.list[S.idx];if(s)startDownload(s,null,null,()=>playSong(s),()=>{})"
+        style="padding:6px 11px;border-radius:8px;background:var(--g);color:#000;font-size:.72rem;font-weight:700;border:none;cursor:pointer;white-space:nowrap">⬇ Endir</button>`+
+      `<button onclick="document.getElementById('bwarn').remove()"
+        style="padding:5px 11px;border-radius:8px;background:var(--c3);color:var(--t2);font-size:.7rem;font-weight:600;border:1.5px solid var(--bd2);cursor:pointer">Bağla</button>`+
+    `</div>`;
+  clearTimeout(b._t); b._t = setTimeout(()=>b?.remove(), 14000);
 }
 
 /* ══ PLAY ══ */
 async function playSong(song){
   const isSameSong = S.list[S.idx]?.videoId === song.videoId;
 
-  // ── Same song already loaded: just toggle play / pause ──
+  // ── Eyni mahnı: play/pause toggle ──
   if(isSameSong){
-    if(S.offAudio){
-      S.offAudio.paused ? S.offAudio.play() : S.offAudio.pause();
-      return;
-    }
-    if(S.ytOk && S.ytp){
-      try{ S.playing ? S.ytp.pauseVideo() : S.ytp.playVideo(); }catch(_){}
-      return;
-    }
-    // player not ready yet – fall through to (re)load
+    if(S.offAudio){ S.offAudio.paused ? S.offAudio.play() : S.offAudio.pause(); return; }
+    if(S.streamAudio){ S.streamAudio.paused ? S.streamAudio.play() : S.streamAudio.pause(); return; }
+    if(S.ytOk && S.ytp){ try{ S.playing ? S.ytp.pauseVideo() : S.ytp.playVideo(); }catch(_){} return; }
   }
 
-  // ── New song: fully stop whatever is playing first ──
+  // ── Yeni mahnı: hamısını dayandır ──
   stopOffAudio();
+  stopStreamAudio();
   if(S.ytOk && S.ytp){ try{ S.ytp.stopVideo(); }catch(_){} }
   stopTimer();
   S.playing = false;
 
-  let idx=S.list.findIndex(s=>s.videoId===song.videoId);
-  if(idx<0){S.list.push({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)});idx=S.list.length-1;}
-  S.idx=idx;
+  let idx = S.list.findIndex(s=>s.videoId===song.videoId);
+  if(idx<0){ S.list.push({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}); idx=S.list.length-1; }
+  S.idx = idx;
   document.querySelectorAll(".card.now").forEach(c=>c.classList.remove("now"));
   document.querySelector(`.card[data-vid="${song.videoId}"]`)?.classList.add("now");
-  updPI(song.title,song.artist,song.thumb||TH(song.videoId));
+  updPI(song.title, song.artist, song.thumb||TH(song.videoId));
   setPUI("loading");
 
+  // Track history
+  addToHistory(song);
+
+  // Layer 1: IndexedDB blob (oflayn, bütün brauzer)
   const cached = await ldb.downloads.where("videoId").equals(song.videoId).first().catch(()=>null)
               || await ldb.offline.where("videoId").equals(song.videoId).first().catch(()=>null);
-  if(cached&&cached.blob){
-    playFromBlob(cached,song);
+  if(cached && cached.blob){
+    playFromBlob(cached, song);
     if(FB&&S.user) fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});
     return;
   }
-  if(!navigator.onLine){toast("📵 İnternet yoxdur — əvvəlcə endir");setPUI("pause");return;}
-  toast(`▶ ${song.title}`);
+
+  if(!navigator.onLine){ toast("📵 İnternet yoxdur — ⬇ Endir ilə oflayn saxla"); setPUI("pause"); return; }
   if(FB&&S.user) fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});
-  if(!S.ytOk){toast("⏳ Player yüklənir...");setPUI("pause");return;}
-  S.ytp.loadVideoById({videoId:song.videoId,suggestedQuality:"small"});
+
+  // Layer 2: YouTube IFrame (Chrome/Edge)
+  if(S.ytOk && S.ytp){
+    try{
+      S.ytp.loadVideoById({videoId:song.videoId, suggestedQuality:"small"});
+      toast(`▶ ${song.title}`);
+      return;
+    }catch(e){ console.warn("[YT] loadVideoById xəta:", e); }
+  }
+
+  // Layer 3: /api/dl → native <audio> (Firefox/Safari/Opera)
+  toast(`▶ ${song.title}`);
+  await streamPlay(song);
 }
 
-/* ══ STREAM PLAY (fallback for browsers where YT embed is blocked) ══
-   Fetches an MP3 link via /api/dl and plays it with a native <Audio> element.
-   Works in Firefox, Safari, Opera — any browser that can play audio/mpeg.
-══════════════════════════════════════════════════════════════════════ */
-async function streamPlay(song){
-  if(S._streamPlaying){ return; } // prevent double-trigger
-  S._streamPlaying = true;
-  setPUI("loading");
-  // Check IndexedDB first — if already downloaded, use that
-  const cached = await ldb.downloads.where("videoId").equals(song.videoId).first().catch(()=>null)
-               || await ldb.offline.where("videoId").equals(song.videoId).first().catch(()=>null);
-  if(cached && cached.blob){
-    S._streamPlaying = false;
-    playFromBlob(cached, song);
-    return;
-  }
-  try{
-    const res = await fetch(`/api/dl?v=${song.videoId}`,{signal:AbortSignal.timeout(55000)});
-    if(!res.ok){ throw new Error("api "+res.status); }
-    const j = await res.json();
-    if(!j.ok || !j.link){ throw new Error(j.error||"link yoxdur"); }
-    // Update song title if API returned it
-    if(j.title && j.title !== song.videoId){
-      song.title = j.title;
-      updPI(j.title, song.artist, song.thumb||TH(song.videoId));
-    }
-    stopOffAudio();
-    S.offAudio = new Audio();
-    S.offAudio.crossOrigin = "anonymous";
-    S.offAudio.src = j.link;
-    S.offAudio.volume = S.vol / 100;
-    S.offAudio.onplay  = ()=>{ S.playing=true;  setPUI("play");  };
-    S.offAudio.onpause = ()=>{ S.playing=false; setPUI("pause"); };
-    S.offAudio.onended = ()=>{ S.playing=false; stopTimer(); S.repeat?(S.offAudio.currentTime=0,S.offAudio.play()):nextSong(); };
-    S.offAudio.onerror = ()=>{ toast("\u274C "+T("streamErr")); setPUI("pause"); };
-    S.offAudio.ontimeupdate = ()=>{
-      if(!S.offAudio)return;
-      const d=S.offAudio.duration, c=S.offAudio.currentTime;
-      if(!d||isNaN(d))return;
-      document.getElementById("pfill").style.width=(c/d*100)+"%";
-      document.getElementById("p-cur").textContent=fmt(c);
-      document.getElementById("p-dur").textContent=fmt(d);
-    };
-    await S.offAudio.play();
-    toast("\u25B6 "+song.title);
-  } catch(err){
-    console.warn("[streamPlay]", err.message);
-    setPUI("pause");
-    // Show a helpful cross-browser message
-    showBrowserWarning(song);
-  } finally {
-    S._streamPlaying = false;
-  }
-}
-
-function showBrowserWarning(song){
-  // Detect browser roughly
-  const ua = navigator.userAgent;
-  const isFirefox = ua.includes("Firefox");
-  const isSafari  = /^((?!chrome|android).)*safari/i.test(ua);
-  const isOpera   = ua.includes("OPR") || ua.includes("Opera");
-  const name = isFirefox?"Firefox":isSafari?"Safari":isOpera?"Opera":"Bu brauzer";
-  // Build a non-blocking banner below the player
-  let banner = document.getElementById("browser-warn-banner");
-  if(!banner){
-    banner = document.createElement("div");
-    banner.id = "browser-warn-banner";
-    banner.style.cssText = `position:fixed;bottom:calc(var(--pl) + 10px);left:50%;transform:translateX(-50%);`+
-      `background:var(--c1);border:1.5px solid var(--red);border-radius:14px;`+
-      `padding:12px 16px;display:flex;align-items:center;gap:10px;z-index:999;`+
-      `box-shadow:0 8px 28px rgba(240,48,80,.18);max-width:min(380px,calc(100vw - 24px));`+
-      `width:100%;animation:mop .22s ease;`;
-    document.body.appendChild(banner);
-  }
-  banner.innerHTML =
-    `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" flex-shrink="0">`+
-      `<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`+
-    `<div style="flex:1;min-width:0">`+
-      `<div style="font-family:var(--fh);font-weight:700;font-size:.82rem;color:var(--tx);margin-bottom:3px">`+
-        `${name} ${T("browserWarnTitle")}</div>`+
-      `<div style="font-size:.73rem;color:var(--t2);line-height:1.4">${T("browserWarnBody")}</div>`+
-    `</div>`+
-    `<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">`+
-      `<button onclick="startDownload(S.list[S.idx],null,null,()=>playSong(S.list[S.idx]),()=>{})" `+
-        `style="padding:6px 11px;border-radius:8px;background:var(--g);color:#000;font-size:.72rem;font-weight:700;border:none;cursor:pointer;white-space:nowrap">`+
-        `\u2B07 ${T("dosave")}</button>`+
-      `<button onclick="document.getElementById('browser-warn-banner').remove()" `+
-        `style="padding:5px 11px;border-radius:8px;background:var(--c3);color:var(--t2);font-size:.7rem;font-weight:600;border:1.5px solid var(--bd2);cursor:pointer">`+
-        `${T("cancel")}</button>`+
-    `</div>`;
-  // Auto-hide after 12 seconds
-  setTimeout(()=>{ banner?.remove(); }, 12000);
-}
-
-function playFromBlob(rec,song){
-  const blobMime=rec.mime||"audio/mpeg";
-  const url=URL.createObjectURL(new Blob([rec.blob],{type:blobMime}));
-  S.offAudio=new Audio(url); S.offAudio._blobUrl=url;
-  S.offAudio.volume=S.vol/100;
-  S.offAudio.onplay=()=>{S.playing=true;setPUI("play");};
-  S.offAudio.onpause=()=>{S.playing=false;setPUI("pause");};
-  S.offAudio.onended=()=>{S.playing=false;stopTimer();S.repeat?(S.offAudio.currentTime=0,S.offAudio.play()):nextSong();};
-  S.offAudio.ontimeupdate=()=>{if(!S.offAudio)return;const d=S.offAudio.duration,c=S.offAudio.currentTime;if(!d||isNaN(d))return;document.getElementById("pfill").style.width=(c/d*100)+"%";document.getElementById("p-cur").textContent=fmt(c);document.getElementById("p-dur").textContent=fmt(d);};
-  S.offAudio.play().catch(()=>toast("❌ Oflayn çalma xətası"));
+function playFromBlob(rec, song){
+  const blobMime = rec.mime || "audio/mpeg";
+  const url = URL.createObjectURL(new Blob([rec.blob],{type:blobMime}));
+  S.offAudio = new Audio(url); S.offAudio._blobUrl = url;
+  S.offAudio.volume = S.vol / 100;
+  S.offAudio.onplay    = ()=>{ S.playing=true;  setPUI("play"); };
+  S.offAudio.onpause   = ()=>{ S.playing=false; setPUI("pause"); };
+  S.offAudio.onended   = ()=>{ S.playing=false; stopTimer(); S.repeat?(S.offAudio.currentTime=0,S.offAudio.play()):nextSong(); };
+  S.offAudio.onerror   = ()=> toast("❌ Oflayn çalma xətası");
+  S.offAudio.ontimeupdate = ()=>{
+    if(!S.offAudio) return;
+    const d=S.offAudio.duration, c=S.offAudio.currentTime;
+    if(!d||isNaN(d)) return;
+    document.getElementById("pfill").style.width=(c/d*100)+"%";
+    document.getElementById("p-cur").textContent=fmt(c);
+    document.getElementById("p-dur").textContent=fmt(d);
+  };
+  // Build EQ graph for offline audio
+  S.offAudio.play().then(()=>{
+    buildAudioGraph(S.offAudio);
+  }).catch(e=>{ if(e.name==='NotAllowedError') toast("🔇 Oynat düyməsini basın"); else toast("❌ "+e.message); });
   toast(`📱 ${song.title}`);
 }
+
 function stopOffAudio(){
-  if(S.offAudio){const a=S.offAudio;S.offAudio=null;a.ontimeupdate=null;a.onplay=null;a.onpause=null;a.onended=null;a.onerror=null;a.pause();try{a.src='';}catch(_){}try{if(a._blobUrl)URL.revokeObjectURL(a._blobUrl);}catch(_){}}
+  if(S.offAudio){
+    const a=S.offAudio; S.offAudio=null;
+    a.ontimeupdate=null; a.onplay=null; a.onpause=null; a.onended=null; a.onerror=null;
+    try{ a.pause(); }catch(_){}
+    try{ a.src=''; }catch(_){}
+    try{ if(a._blobUrl) URL.revokeObjectURL(a._blobUrl); }catch(_){}
+  }
 }
 
 function updPI(title,artist,src){
@@ -1599,6 +1950,12 @@ function updPI(title,artist,src){
   document.getElementById("p-artist").textContent=artist||"—";
   const img=document.getElementById("p-img"),ico=document.getElementById("note-ico");
   if(src){img.src=src;img.onerror=()=>{img.style.display="none";ico.style.display="";};img.onload=()=>{img.style.display="block";ico.style.display="none";};}
+  // Now Playing Widget + Media Session
+  const song=S.list[S.idx];
+  if(song){
+    updateNPW(song);
+    updateMediaSession(song);
+  }
 }
 function setPUI(s){
   document.getElementById("ico-play").style.display=s==="play"||s==="loading"?"none":"block";
@@ -1667,6 +2024,9 @@ async function downloadAndSave(song,setProgress){
 async function startDownload(song,badgeEl,barEl,onDone,onFail){
   if(S.downloads.has(song.videoId)||S.offline.has(song.videoId)){toast(`📱 "${song.title}" artıq endirilmişdir`);onDone&&onDone();return;}
   if(S._downloading){toast("⏳ Başqa bir mahnı endirilir, gözləyin...");onFail&&onFail();return;}
+  // VIP download limit check
+  const canDL = await checkDLLimit();
+  if(!canDL){ onFail&&onFail(); return; }
   S._downloading=true;
   if(badgeEl){badgeEl.className="svbadge rec";badgeEl.textContent=T("rec_ing");}
   if(barEl)barEl.classList.add("show");
@@ -1688,6 +2048,7 @@ async function startDownload(song,badgeEl,barEl,onDone,onFail){
 function mkCard(song){
   const d=document.createElement("div");d.className="card";d.dataset.vid=song.videoId;
   const dl=S.downloads.has(song.videoId)||S.offline.has(song.videoId);
+  const liked=S.likes.has(song.videoId);
   d.innerHTML=`
 <div class="cimg">
   <img src="${song.thumb||PHO}" alt="${X(song.title)}" loading="lazy" onerror="this.onerror=null;this.src='${PHO}'"/>
@@ -1713,6 +2074,10 @@ function mkCard(song){
     await startDownload(song,null,null,()=>{sb.className="cb cb-save on";sb.textContent=T("saved");sb.disabled=false;},()=>{sb.disabled=false;sb.textContent=T("dosave");});
   });
   d.querySelector(".cb-pl").addEventListener("click", e=>{e.stopPropagation();openAddToPL(song);});
+  // Like button (appended after cbtns)
+  const likeBtn=mkLikeBtn(song);
+  likeBtn.style.cssText="position:absolute;top:7px;right:7px;width:28px;height:28px;padding:0;border-radius:50%;justify-content:center;background:rgba(0,0,0,.45);border:none";
+  d.querySelector(".cimg").appendChild(likeBtn);
   return d;
 }
 
@@ -1800,9 +2165,11 @@ async function renderPlaylists(){
 <div class="plico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg></div>
 <div class="plmeta"><div class="plname">${X(pl.name)}</div><div class="plcnt">${cnt} mahnı</div></div>
 <div class="placts">
+  <button class="act spl" title="Paylaş"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
   <button class="act opl"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></button>
   <button class="act danger dpl"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button>
 </div>`;
+    row.querySelector(".spl").addEventListener("click", e=>{e.stopPropagation();sharePlaylist(pl);});
     row.querySelector(".opl").addEventListener("click", e=>{e.stopPropagation();openPL(pl);});
     row.querySelector(".dpl").addEventListener("click", async e=>{e.stopPropagation();if(!confirm(`"${pl.name}" silinsin?`))return;await ldb.pl_songs.where("playlistId").equals(pl.id).delete().catch(()=>{});await ldb.playlists.delete(pl.id).catch(()=>{});toast(`🗑 "${pl.name}"`);renderPlaylists();});
     row.addEventListener("click", ()=>openPL(pl));
@@ -1827,7 +2194,9 @@ async function openPL(pl){
 
 window.playAllPL=async plId=>{const songs=await ldb.pl_songs.where("playlistId").equals(plId).toArray().catch(()=>[]);if(!songs.length){toast(T("plem"));return;}songs.forEach(s=>{if(!S.list.find(p=>p.videoId===s.videoId))S.list.push(s);});playSong(songs[0]);closeM("m-gen");};
 
-document.getElementById("newpl-btn").addEventListener("click", ()=>{
+document.getElementById("newpl-btn").addEventListener("click", async ()=>{
+  const canCreate = await checkPLLimit();
+  if(!canCreate) return;
   document.getElementById("m-gen-b").innerHTML=`<div class="mtit">${T("newpl")}</div><input class="mfi" id="pl-ni" type="text" placeholder="${T("plph")}"/><button class="mbg" onclick="createPL()">${T("create")}</button><button class="mbm" onclick="closeM('m-gen')">${T("cancel")}</button>`;
   openM("m-gen");setTimeout(()=>document.getElementById("pl-ni")?.focus(),100);
 });
@@ -1870,8 +2239,10 @@ if(FB){
   fbA.onAuthStateChanged(user=>{
     S.user=user;
     const av=document.getElementById("uav"),btn=document.getElementById("authbtn");
+    const wrap=document.getElementById("uav-wrap");
     if(user){
       av.src=user.photoURL||PHO;av.style.display="block";av.onclick=()=>showMyProfile();
+      if(wrap){ wrap.classList.add("show"); wrap.onclick=()=>showMyProfile(); }
       btn.innerHTML=`<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>${T("signout")}</span>`;
       fbD.ref(`users/${user.uid}`).update({uid:user.uid,name:user.displayName,email:user.email,photo:user.photoURL||"",online:true,lastSeen:Date.now()});
       fbD.ref(`users/${user.uid}/online`).onDisconnect().set(false);
@@ -1879,11 +2250,23 @@ if(FB){
       document.getElementById("login-wall").style.display="none";
       document.getElementById("soc-main").style.display="grid";
       initFriends();
+      loadVIPStatus();
+      // Notification badge
+      const notifBtn=document.getElementById("notif-btn");
+      if(notifBtn) notifBtn.style.display="flex";
+      fbD.ref(`notifications/${user.uid}`).orderByChild("read").equalTo(false).on("value",snap=>{
+        const cnt=snap?snap.numChildren():0;
+        const badge=document.getElementById("notif-badge");
+        if(badge){ badge.textContent=cnt||""; badge.classList.toggle("show",cnt>0); }
+      });
     } else {
       av.style.display="none";
+      if(wrap) wrap.classList.remove("show");
+      const notifBtn=document.getElementById("notif-btn"); if(notifBtn) notifBtn.style.display="none";
       btn.innerHTML=`<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg><span>${T("signin")}</span>`;
       document.getElementById("login-wall").style.display="block";
       document.getElementById("soc-main").style.display="none";
+      S.vip=false;
     }
     updateHamAuthBtn();
   });
@@ -2045,10 +2428,40 @@ document.getElementById("vpbtn").addEventListener("click", ()=>{if(S.chatTarget)
 function showMyProfile(){if(S.user)showProfile({uid:S.user.uid,name:S.user.displayName,email:S.user.email,photo:S.user.photoURL});}
 
 async function showProfile(u){
-  let np=null;if(FB&&fbD){const s=await fbD.ref(`users/${u.uid}/nowPlaying`).get().catch(()=>null);if(s?.exists())np=s.val();}
+  let np=null,uVip=false;
+  if(FB&&fbD){
+    const [npSnap,vipSnap]=await Promise.all([
+      fbD.ref(`users/${u.uid}/nowPlaying`).get().catch(()=>null),
+      fbD.ref(`users/${u.uid}/vip`).get().catch(()=>null)
+    ]);
+    if(npSnap?.exists()) np=npSnap.val();
+    uVip=vipSnap?.val()===true;
+  }
   const b=document.getElementById("m-prof-b");
   const e2=s=>String(s||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
-  b.innerHTML=`<div class="ptop">${u.photo?`<img class="ppic" src="${u.photo}" onerror="this.src='${PHO}'" alt=""/>`:`<div class="ppic-ph">${(u.name||"?")[0].toUpperCase()}</div>`}<div><div class="pname">${X(u.name||"Anonim")}</div><div class="pemail">${X(u.email||"")}</div>${np?`<div class="pnow"><svg width="10" height="10" viewBox="0 0 24 24" fill="var(--g)"><polygon points="5 3 19 12 5 21 5 3"/></svg>${T("nowpl")}: ${X(np.title)}</div>`:""}</div></div>${np?`<div class="sh" style="margin-bottom:10px"><span class="dot"></span>${T("nowpl")}</div><div class="psong" onclick="playSong({videoId:'${e2(np.videoId)}',title:'${e2(np.title)}',artist:'${e2(np.artist||"")}',thumb:'${e2(np.thumb||TH(np.videoId))}'});closeM('m-prof')"><img src="${np.thumb||PHO}" onerror="this.src='${PHO}'" alt=""/><div><div class="pst">${X(np.title)}</div><div class="psa">${X(np.artist||"")}</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="var(--g)"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>`:""} ${u.uid!==S.user?.uid&&S.friends[u.uid]?`<button class="dmbtn" onclick="closeM('m-prof');openDM(${JSON.stringify(u).replace(/"/g,'&quot;')})">💬 ${T("dmbtn")}</button>`:""}`;
+  const vipBadge=uVip?`<span class="vip-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 6l4 8 6-10 6 10 4-8-2 14H4L2 6z"/></svg>VIP</span>`:"";
+  const isSelf=u.uid===S.user?.uid;
+  b.innerHTML=`
+<div class="ptop">
+  ${u.photo?`<img class="ppic${uVip?" vip-user":""}" src="${u.photo}" onerror="this.src='${PHO}'" alt=""/>`:`<div class="ppic-ph">${(u.name||"?")[0].toUpperCase()}</div>`}
+  <div>
+    <div class="pname">${X(u.name||"Anonim")} ${vipBadge}</div>
+    <div class="pemail">${X(u.email||"")}</div>
+    ${np?`<div class="pnow"><svg width="10" height="10" viewBox="0 0 24 24" fill="var(--g)"><polygon points="5 3 19 12 5 21 5 3"/></svg>${T("nowpl")}: ${X(np.title)}</div>`:""}
+  </div>
+</div>
+<div id="prof-stats-wrap"></div>
+${np?`<div class="sh" style="margin:8px 0"><span class="dot"></span>${T("nowpl")}</div>
+<div class="psong" onclick="playSong({videoId:'${e2(np.videoId)}',title:'${e2(np.title)}',artist:'${e2(np.artist||"")}',thumb:'${e2(np.thumb||TH(np.videoId))}'});closeM('m-prof')">
+  <img src="${np.thumb||PHO}" onerror="this.src='${PHO}'" alt=""/>
+  <div><div class="pst">${X(np.title)}</div><div class="psa">${X(np.artist||"")}</div></div>
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--g)"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+</div>`:""}
+${!isSelf&&S.friends[u.uid]?`<button class="dmbtn" onclick="closeM('m-prof');openDM(${JSON.stringify(u).replace(/"/g,'&quot;')})">💬 ${T("dmbtn")}</button>`:""}
+${isSelf?`<button onclick="openVIPModal()" style="width:100%;margin-top:10px;padding:10px;border-radius:10px;background:${S.vip?"var(--vpd)":"linear-gradient(135deg,#f5c518,#e6b800)"};color:${S.vip?"var(--vip)":"#000"};font-weight:700;font-size:.83rem;border:none;cursor:pointer;font-family:var(--fh)">${S.vip?"👑 VIP Aktiv":"👑 VIP-ə Keç"}</button>`:""}`;
+  // Load stats async
+  const sw=document.getElementById("prof-stats-wrap");
+  if(sw) renderStatsInProfile(u.uid, sw);
   openM("m-prof");
 }
 
@@ -2056,7 +2469,366 @@ function addCL(fn){S.chatListeners.push(fn);}
 function clearCL(){S.chatListeners.forEach(fn=>{try{fn();}catch(e){}});S.chatListeners=[];}
 
 /* ══════════════════════════════
-   DEEP LINK SHARE SYSTEM
+   VIP SYSTEM
+══════════════════════════════ */
+const FREE_DL_LIMIT=20, FREE_PL_LIMIT=3;
+function isVIP(){ return S.vip; }
+
+async function loadVIPStatus(){
+  if(!FB||!fbD||!S.user){ S.vip=false; return; }
+  const snap=await fbD.ref(`users/${S.user.uid}/vip`).get().catch(()=>null);
+  S.vip=snap?.val()===true;
+  applyVIPUI();
+}
+
+function applyVIPUI(){
+  const wrap=document.getElementById("uav-wrap"),crown=document.getElementById("vip-crown"),av=document.getElementById("uav");
+  if(wrap) wrap.classList.toggle("show",!!S.user);
+  if(crown) crown.style.display=S.vip?"":"none";
+  if(av){ S.vip?av.classList.add("vip-user"):av.classList.remove("vip-user"); }
+  const notifBtn=document.getElementById("notif-btn");
+  if(notifBtn) notifBtn.style.display=S.user?"flex":"none";
+}
+
+async function checkDLLimit(){
+  if(isVIP()) return true;
+  const cnt=await ldb.downloads.count().catch(()=>0);
+  if(cnt>=FREE_DL_LIMIT){ showVIPWall("dl"); return false; }
+  return true;
+}
+async function checkPLLimit(){
+  if(isVIP()) return true;
+  const cnt=await ldb.playlists.count().catch(()=>0);
+  if(cnt>=FREE_PL_LIMIT){ showVIPWall("pl"); return false; }
+  return true;
+}
+
+function showVIPWall(reason){
+  const b=document.getElementById("m-vip-b");
+  const perk=r=>`<div class="vip-perk"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>${r}</div>`;
+  const dlCnt=S.downloads.size;
+  b.innerHTML=`<div class="vip-wall"><div class="vip-wall-ico">👑</div><h3>${T("vipTitle")}</h3><p>${T("vipSub")}</p>
+${reason==="dl"?`<div class="limit-bar-wrap"><div class="limit-bar-lbl"><span>${T("limitDl")}</span><span>${dlCnt}/${FREE_DL_LIMIT}</span></div><div class="limit-bar"><div class="limit-bar-fill full" style="width:100%"></div></div></div>`:""}
+<div class="vip-perks">${perk(T("vipPerk1"))}${perk(T("vipPerk2"))}${perk(T("vipPerk3"))}${perk(T("vipPerk4"))}${perk(T("vipPerk5"))}</div>
+<button class="vip-btn" onclick="contactForVIP()">${T("vipUpgrade")}</button>
+<button class="vip-btn-sec" onclick="closeM('m-vip')">${T("cancel")}</button></div>`;
+  openM("m-vip");
+}
+
+function openVIPModal(){
+  const b=document.getElementById("m-vip-b");
+  const perk=r=>`<div class="vip-perk"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>${r}</div>`;
+  if(isVIP()){
+    b.innerHTML=`<div class="vip-wall"><div class="vip-wall-ico">👑</div><h3>${T("vipActive")}</h3><p style="color:var(--t2);font-size:.84rem;line-height:1.6">${T("vipSub")}</p></div>`;
+  }else{
+    b.innerHTML=`<div class="vip-wall"><div class="vip-wall-ico">👑</div><h3>${T("vipTitle")}</h3><p>${T("vipSub")}</p><div class="vip-perks">${perk(T("vipPerk1"))}${perk(T("vipPerk2"))}${perk(T("vipPerk3"))}${perk(T("vipPerk4"))}${perk(T("vipPerk5"))}</div><button class="vip-btn" onclick="contactForVIP()">${T("vipUpgrade")}</button><button class="vip-btn-sec" onclick="closeM('m-vip')">${T("cancel")}</button></div>`;
+  }
+  openM("m-vip");
+}
+window.openVIPModal=openVIPModal;
+
+function contactForVIP(){
+  closeM("m-vip");
+  toast(`✉️ ${T("vipContact")}`);
+  try{ navigator.clipboard.writeText("admin@cahsmusic.com"); }catch(_){}
+}
+window.contactForVIP=contactForVIP;
+
+/* ══════════════════════════════
+   HISTORY
+══════════════════════════════ */
+async function addToHistory(song){
+  try{
+    await ldb.history.where("videoId").equals(song.videoId).delete();
+    await ldb.history.add({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId),playedAt:Date.now()});
+    const all=await ldb.history.orderBy("playedAt").toArray();
+    if(all.length>50){ await ldb.history.bulkDelete(all.slice(0,all.length-50).map(r=>r.id)); }
+    if(FB&&S.user){
+      fbD.ref(`stats/${S.user.uid}/songs/${song.videoId}`).transaction(cur=>({
+        title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId),
+        count:((cur&&cur.count)||0)+1,lastPlayed:Date.now()
+      })).catch(()=>{});
+    }
+  }catch(e){ console.warn("[history]",e); }
+}
+
+async function renderHistory(){
+  const list=document.getElementById("hist-list"),noH=document.getElementById("no-hist"),cnt=document.getElementById("hist-cnt");
+  if(!list) return;
+  list.innerHTML="";
+  const rows=await ldb.history.orderBy("playedAt").reverse().toArray().catch(()=>[]);
+  if(cnt) cnt.textContent=rows.length?`${rows.length} mahnı`:"";
+  if(!rows.length){ if(noH) noH.style.display="block"; return; }
+  if(noH) noH.style.display="none";
+  rows.forEach(r=>{
+    const row=document.createElement("div"); row.className="hist-row";
+    row.innerHTML=`<div class="hist-thumb"><img src="${r.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="hist-info"><div class="hist-tit">${X(r.title)}</div><div class="hist-art">${X(r.artist)}</div></div><span class="hist-time">${fmtAgo(r.playedAt)}</span>`;
+    row.addEventListener("click",()=>playSong({videoId:r.videoId,title:r.title,artist:r.artist,thumb:r.thumb}));
+    list.appendChild(row);
+  });
+}
+
+async function clearHistory(){
+  if(!confirm("Tarix silinsin?")) return;
+  await ldb.history.clear().catch(()=>{});
+  toast(T("histCleared")); renderHistory();
+}
+window.clearHistory=clearHistory;
+
+function fmtAgo(ts){
+  const d=Date.now()-ts,m=Math.floor(d/60000),h=Math.floor(d/3600000),dy=Math.floor(d/86400000);
+  if(m<1) return "indi"; if(m<60) return `${m}dq`; if(h<24) return `${h}s`; return `${dy}g`;
+}
+
+/* ══════════════════════════════
+   LIKES + ACTIVITY FEED
+══════════════════════════════ */
+async function toggleLike(song){
+  const vid=song.videoId, isLiked=S.likes.has(vid);
+  if(isLiked){
+    await ldb.likes.where("videoId").equals(vid).delete().catch(()=>{});
+    S.likes.delete(vid);
+    if(FB&&S.user) fbD.ref(`likes/${S.user.uid}/${vid}`).remove().catch(()=>{});
+    toast(T("likeRemoved"));
+  }else{
+    await ldb.likes.put({videoId:vid,title:song.title,artist:song.artist,thumb:song.thumb||TH(vid),likedAt:Date.now()}).catch(()=>{});
+    S.likes.add(vid);
+    if(FB&&S.user){
+      fbD.ref(`likes/${S.user.uid}/${vid}`).set({title:song.title,artist:song.artist,thumb:song.thumb||TH(vid),ts:Date.now()}).catch(()=>{});
+      fbD.ref(`feed/${S.user.uid}`).set({type:"like",uid:S.user.uid,name:S.user.displayName||"Anonim",photo:S.user.photoURL||"",videoId:vid,title:song.title,ts:Date.now()}).catch(()=>{});
+    }
+    toast(T("likeAdded"));
+  }
+  document.querySelectorAll(`.like-btn[data-vid="${vid}"]`).forEach(btn=>btn.classList.toggle("liked",S.likes.has(vid)));
+}
+
+function mkLikeBtn(song){
+  const btn=document.createElement("button");
+  btn.className="like-btn"+(S.likes.has(song.videoId)?" liked":"");
+  btn.dataset.vid=song.videoId;
+  btn.title=S.likes.has(song.videoId)?T("unlike"):T("like");
+  btn.innerHTML=`<svg viewBox="0 0 24 24" fill="${S.likes.has(song.videoId)?"currentColor":"none"}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+  btn.addEventListener("click",e=>{ e.stopPropagation(); toggleLike(song); });
+  return btn;
+}
+
+/* ══════════════════════════════
+   PLAY QUEUE
+══════════════════════════════ */
+let queueOpen=false;
+
+function toggleQueue(){
+  queueOpen=!queueOpen;
+  document.getElementById("queue-panel").classList.toggle("open",queueOpen);
+  if(queueOpen) renderQueue();
+}
+window.toggleQueue=toggleQueue;
+
+function addToQueue(song){
+  if(S.queue.find(s=>s.videoId===song.videoId)){ toast("Artıq növbədədir"); return; }
+  S.queue.push({...song});
+  toast(T("queueAdded")+": "+song.title);
+  if(queueOpen) renderQueue();
+}
+window.addToQueue=addToQueue;
+
+function addCurrentToQueue(){
+  const song=S.list[S.idx]; if(!song){ toast("Əvvəlcə mahnı seçin"); return; }
+  addToQueue(song);
+}
+window.addCurrentToQueue=addCurrentToQueue;
+
+function clearQueue(){ S.queue=[]; renderQueue(); toast(T("queueCleared")); }
+window.clearQueue=clearQueue;
+
+function renderQueue(){
+  const list=document.getElementById("queue-list"); if(!list) return;
+  list.innerHTML="";
+  if(!S.queue.length){ list.innerHTML=`<div style="text-align:center;padding:18px;color:var(--t3);font-size:.8rem">${T("queueEmpty")}</div>`; return; }
+  S.queue.forEach((song,i)=>{
+    const row=document.createElement("div"); row.className="q-row"+(S.list[S.idx]?.videoId===song.videoId?" q-now":"");
+    row.innerHTML=`<div class="q-drag"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></div><div class="q-thumb"><img src="${song.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="q-info"><div class="q-title">${X(song.title)}</div><div class="q-artist">${X(song.artist)}</div></div><button class="q-del"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+    row.addEventListener("click",e=>{ if(!e.target.closest(".q-del")) playSong(song); });
+    row.querySelector(".q-del").addEventListener("click",e=>{ e.stopPropagation(); S.queue.splice(i,1); renderQueue(); });
+    list.appendChild(row);
+  });
+}
+
+function nextSong(){
+  stopOffAudio(); stopStreamAudio();
+  if(S.queue.length){ const next=S.queue.shift(); if(queueOpen) renderQueue(); playSong(next); return; }
+  if(S.shuffle){ playSong(S.list[Math.floor(Math.random()*S.list.length)]); return; }
+  const n=S.idx<S.list.length-1?S.idx+1:0;
+  if(S.list[n]) playSong(S.list[n]);
+}
+
+/* ══════════════════════════════
+   NOW PLAYING WIDGET
+══════════════════════════════ */
+function updateNPW(song){
+  const npw=document.getElementById("npw"),img=document.getElementById("npw-img"),tit=document.getElementById("npw-title"),art=document.getElementById("npw-artist");
+  if(!npw) return;
+  if(!song){ npw.classList.remove("show"); return; }
+  if(img){ img.src=song.thumb||PHO; img.style.display="block"; }
+  if(tit) tit.textContent=song.title;
+  if(art) art.textContent=song.artist;
+  const active=document.querySelector(".page.on");
+  if(active&&active.id!=="page-discover") npw.classList.add("show");
+  else npw.classList.remove("show");
+}
+
+/* ══════════════════════════════
+   MEDIA SESSION API
+══════════════════════════════ */
+function updateMediaSession(song){
+  if(!("mediaSession" in navigator)) return;
+  try{
+    navigator.mediaSession.metadata=new MediaMetadata({
+      title:song.title||"Music Universe",artist:song.artist||"",album:"Music Universe",
+      artwork:[{src:song.thumb||TH(song.videoId),sizes:"320x180",type:"image/jpeg"}]
+    });
+    const pp=()=>document.getElementById("b-play").click();
+    navigator.mediaSession.setActionHandler("play",pp);
+    navigator.mediaSession.setActionHandler("pause",pp);
+    navigator.mediaSession.setActionHandler("previoustrack",()=>document.getElementById("b-prev").click());
+    navigator.mediaSession.setActionHandler("nexttrack",()=>document.getElementById("b-next").click());
+  }catch(e){}
+}
+
+/* ══════════════════════════════
+   STATISTICS
+══════════════════════════════ */
+async function renderStatsInProfile(uid,container){
+  if(!FB||!fbD) return;
+  const snap=await fbD.ref(`stats/${uid}/songs`).orderByChild("count").limitToLast(5).get().catch(()=>null);
+  const songs=[];
+  if(snap&&snap.exists()) snap.forEach(ch=>songs.push({...ch.val(),videoId:ch.key}));
+  songs.sort((a,b)=>b.count-a.count);
+  const totalPlays=songs.reduce((s,r)=>s+(r.count||0),0);
+  const totalMin=Math.round(totalPlays*3.5);
+  const dlCnt=uid===S.user?.uid?S.downloads.size:0;
+  let html=`<div class="stats-grid"><div class="stat-card"><div class="stat-num">${totalPlays}</div><div class="stat-lbl">Oynatma</div></div><div class="stat-card"><div class="stat-num">${totalMin}</div><div class="stat-lbl">Dəqiqə</div></div><div class="stat-card"><div class="stat-num">${dlCnt}</div><div class="stat-lbl">Endirilmiş</div></div></div>`;
+  if(songs.length){
+    html+=`<div class="sh" style="margin:6px 0 8px"><span class="dot"></span>Top Mahnılar</div><div class="top-songs">`;
+    songs.slice(0,5).forEach((s,i)=>{
+      const e2=v=>String(v||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+      html+=`<div class="top-song-row" onclick="playSong({videoId:'${e2(s.videoId)}',title:'${e2(s.title)}',artist:'${e2(s.artist||"")}',thumb:'${e2(s.thumb||TH(s.videoId))}'})"><span class="top-rank${i===0?" gold":""}">${i+1}</span><div class="top-thumb"><img src="${s.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="top-info"><div class="top-tit">${X(s.title)}</div><div class="top-cnt">${s.count} oynatma</div></div></div>`;
+    });
+    html+="</div>";
+  }
+  container.insertAdjacentHTML("beforeend",html);
+}
+
+/* ══════════════════════════════
+   SETTINGS — CROSSFADE + EQ
+══════════════════════════════ */
+function openSettings(){
+  const b=document.getElementById("m-settings-b"),cf=S.crossfade,eq=S.eq;
+  b.innerHTML=`<div class="mtit">⚙️ ${T("settings")}</div>
+<div class="settings-row">
+  <div><div class="settings-lbl">🔈 ${T("crossfadeSet")}</div><div class="settings-sub">Mahnılar arası hamar keçid</div></div>
+  <div style="display:flex;align-items:center;gap:7px"><input type="range" class="range-sm" id="cf-range" min="0" max="8" step="1" value="${cf}" oninput="updateCF(this.value)"/><span class="settings-val" id="cf-val">${cf}s</span></div>
+</div>
+<div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+  <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+    <div><div class="settings-lbl">🎚️ ${T("eqSet")}</div><div class="settings-sub">Oflayn audio üçün</div></div>
+    <button onclick="resetEQ()" style="font-size:.71rem;font-weight:700;color:var(--t2);padding:4px 10px;border-radius:7px;background:var(--c3);border:1.5px solid var(--bd2);cursor:pointer">${T("eqReset")}</button>
+  </div>
+  <div class="eq-bands">
+    <div class="eq-band"><input type="range" id="eq-bass" min="-12" max="12" step="1" value="${eq.bass}" oninput="updateEQ('bass',this.value)"/><span id="eq-bass-v">${eq.bass>0?"+":""}${eq.bass}dB</span><label>${T("eqBass")}</label></div>
+    <div class="eq-band"><input type="range" id="eq-mid" min="-12" max="12" step="1" value="${eq.mid}" oninput="updateEQ('mid',this.value)"/><span id="eq-mid-v">${eq.mid>0?"+":""}${eq.mid}dB</span><label>${T("eqMid")}</label></div>
+    <div class="eq-band"><input type="range" id="eq-treble" min="-12" max="12" step="1" value="${eq.treble}" oninput="updateEQ('treble',this.value)"/><span id="eq-treble-v">${eq.treble>0?"+":""}${eq.treble}dB</span><label>${T("eqTreble")}</label></div>
+  </div>
+</div>
+<div class="settings-row">
+  <div><div class="settings-lbl">👑 VIP</div><div class="settings-sub">${isVIP()?"VIP aktiv":"Premium xüsusiyyətlər"}</div></div>
+  <button onclick="closeM('m-settings');openVIPModal()" style="padding:6px 13px;border-radius:8px;background:${isVIP()?"var(--vpd)":"var(--g)"};color:${isVIP()?"var(--vip)":"#000"};font-size:.75rem;font-weight:700;border:none;cursor:pointer">${isVIP()?"👑 VIP":"VIP-ə Keç"}</button>
+</div>`;
+  openM("m-settings");
+}
+window.openSettings=openSettings;
+
+function updateCF(v){ S.crossfade=parseInt(v); localStorage.setItem("mu_crossfade",v); const el=document.getElementById("cf-val"); if(el) el.textContent=v+"s"; }
+window.updateCF=updateCF;
+
+function updateEQ(band,val){
+  S.eq[band]=parseInt(val); localStorage.setItem("mu_eq",JSON.stringify(S.eq));
+  const el=document.getElementById(`eq-${band}-v`); if(el) el.textContent=(parseInt(val)>0?"+":"")+val+"dB";
+  applyEQToAudio();
+}
+window.updateEQ=updateEQ;
+
+function resetEQ(){
+  S.eq={bass:0,mid:0,treble:0}; localStorage.setItem("mu_eq","{}");
+  ["bass","mid","treble"].forEach(b=>{ const r=document.getElementById(`eq-${b}`); if(r) r.value=0; const v=document.getElementById(`eq-${b}-v`); if(v) v.textContent="0dB"; });
+  applyEQToAudio();
+}
+window.resetEQ=resetEQ;
+
+function buildAudioGraph(audioEl){
+  try{
+    if(!S.audioCtx) S.audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    const ctx=S.audioCtx;
+    const src=ctx.createMediaElementSource(audioEl);
+    const bass=ctx.createBiquadFilter(); bass.type="lowshelf"; bass.frequency.value=200;
+    const mid=ctx.createBiquadFilter(); mid.type="peaking"; mid.frequency.value=1000; mid.Q.value=1;
+    const treble=ctx.createBiquadFilter(); treble.type="highshelf"; treble.frequency.value=3000;
+    src.connect(bass); bass.connect(mid); mid.connect(treble); treble.connect(ctx.destination);
+    S.eqNodes={bass,mid,treble}; applyEQToAudio(); return true;
+  }catch(e){ console.warn("[EQ]",e); return false; }
+}
+
+function applyEQToAudio(){ if(!S.eqNodes) return; S.eqNodes.bass.gain.value=S.eq.bass; S.eqNodes.mid.gain.value=S.eq.mid; S.eqNodes.treble.gain.value=S.eq.treble; }
+
+/* ══════════════════════════════
+   PUSH NOTIFICATIONS
+══════════════════════════════ */
+async function requestNotifPermission(){
+  if(!("Notification" in window)){ toast("Bu brauzerdə bildiriş dəstəklənmir"); return; }
+  const p=await Notification.requestPermission();
+  if(p==="granted"){ toast("✅ Bildirişlər aktiv"); if(FB&&S.user) fbD.ref(`users/${S.user.uid}/notifEnabled`).set(true).catch(()=>{}); }
+  else toast("⚠ İcazə verilmədi");
+}
+window.requestNotifPermission=requestNotifPermission;
+
+function openNotifications(){
+  const b=document.getElementById("m-notif-b");
+  b.innerHTML=`<div class="mtit">🔔 ${T("notifTitle")}</div><div id="notif-list"><p style="color:var(--t3);text-align:center;padding:16px;font-size:.8rem">${FB&&S.user?"Yüklənir...":T("notifEmpty")}</p></div><button class="mbg" style="margin-top:12px" onclick="requestNotifPermission()">${T("notifAllow")}</button>`;
+  if(FB&&S.user){
+    fbD.ref(`notifications/${S.user.uid}`).orderByChild("ts").limitToLast(20).get().then(snap=>{
+      const nl=document.getElementById("notif-list"); if(!nl) return;
+      if(!snap||!snap.exists()){ nl.innerHTML=`<p style="color:var(--t3);text-align:center;padding:16px;font-size:.8rem">${T("notifEmpty")}</p>`; return; }
+      const items=[]; snap.forEach(ch=>items.push({id:ch.key,...ch.val()})); items.reverse();
+      nl.innerHTML=items.map(n=>`<div class="notif-row ${n.read?"":"unread"}"><div class="notif-ico">${n.type==="friend"?"👥":n.type==="like"?"❤️":"💬"}</div><div class="notif-body"><div class="notif-text"><strong>${X(n.fromName||"")}</strong> ${n.type==="friend"?"dost istəyi göndərdi":n.type==="like"?"mahnını bəyəndi":"mesaj yazdı"}</div><div class="notif-time">${fmtAgo(n.ts)}</div></div></div>`).join("");
+      items.forEach(n=>{ if(!n.read) fbD.ref(`notifications/${S.user.uid}/${n.id}/read`).set(true).catch(()=>{}); });
+    }).catch(()=>{ const nl=document.getElementById("notif-list"); if(nl) nl.innerHTML=`<p style="color:var(--t3);text-align:center;padding:16px;font-size:.8rem">${T("notifEmpty")}</p>`; });
+  }
+  const badge=document.getElementById("notif-badge"); if(badge){ badge.classList.remove("show"); badge.textContent=""; }
+  openM("m-notif");
+}
+window.openNotifications=openNotifications;
+
+/* ══════════════════════════════
+   PUBLIC PLAYLIST SHARING
+══════════════════════════════ */
+async function sharePlaylist(pl){
+  const url=buildShareUrl("pl_"+pl.id);
+  if(navigator.share){ try{ await navigator.share({title:pl.name,url}); return; }catch(e){ if(e.name==="AbortError") return; } }
+  try{ await navigator.clipboard.writeText(url); toast(T("pubPlShare")); }catch(_){ prompt(T("pubPlShare"),url); }
+}
+window.sharePlaylist=sharePlaylist;
+
+/* ══ Meatball menu — new entries ══ */
+document.getElementById("pem-queue").addEventListener("click",()=>{ closeMeatball(); toggleQueue(); });
+document.getElementById("pem-settings").addEventListener("click",()=>{ closeMeatball(); openSettings(); });
+document.getElementById("notif-btn").addEventListener("click", openNotifications);
+
+/* ══ Close queue on outside click ══ */
+document.addEventListener("click",e=>{
+  if(queueOpen&&!e.target.closest("#queue-panel")&&!e.target.closest("#pem-queue")) toggleQueue();
+});
+
+
    Share URL format: https://cahsmusic.vercel.app/s/VIDEO_ID
    • buildShareUrl(videoId)  → constructs the app link
    • shareSong(song)         → Web Share API → clipboard fallback
@@ -2119,13 +2891,22 @@ function handleDeepLink(){
     (await ldb.saved.toArray()).forEach(s=>S.saved.add(s.videoId));
     (await ldb.offline.toArray()).forEach(s=>S.offline.add(s.videoId));
     (await ldb.downloads.toArray()).forEach(s=>{S.downloads.add(s.videoId);S.offline.add(s.videoId);});
+    (await ldb.likes.toArray().catch(()=>[])).forEach(s=>S.likes.add(s.videoId));
   }catch(e){console.warn("IndexedDB:",e);}
+  // Load saved settings
+  const savedCF = localStorage.getItem("mu_crossfade");
+  if(savedCF) S.crossfade = parseInt(savedCF)||0;
+  try{ const savedEQ=localStorage.getItem("mu_eq"); if(savedEQ) S.eq={...S.eq,...JSON.parse(savedEQ)}; }catch(_){}
   applyLang();applyTheme();renderDefault();
   document.getElementById("vfill").style.width=S.vol+"%";
   syncHamActive("discover");
   updateHamTheme();
   updateHamAuthBtn();
   handleDeepLink();
+  // Show NPW on page switches
+  document.querySelectorAll(".pill").forEach(b=>b.addEventListener("click",()=>{
+    setTimeout(()=>updateNPW(S.list[S.idx]),150);
+  }));
 })();
 
 /* ══ SERVICE WORKER + PWA ══ */
