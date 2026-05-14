@@ -2876,11 +2876,6 @@ document.addEventListener("click",e=>{
 });
 
 
-   Share URL format: https://cahsmusic.vercel.app/s/VIDEO_ID
-   • buildShareUrl(videoId)  → constructs the app link
-   • shareSong(song)         → Web Share API → clipboard fallback
-   • handleDeepLink()        → runs on load, parses /s/VIDEO_ID from path
-══════════════════════════════ */
 const APP_ORIGIN = "https://cahsmusic.vercel.app";
 
 function buildShareUrl(videoId){
