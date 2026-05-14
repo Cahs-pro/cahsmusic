@@ -628,7 +628,7 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
 .range-sm{width:90px;accent-color:var(--g);flex-shrink:0}
 .eq-bands{display:flex;gap:8px;margin-top:10px;padding:12px;background:var(--c2);border-radius:12px;justify-content:center}
 .eq-band{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;max-width:50px}
-.eq-band input[type=range]{-webkit-appearance:slider-vertical;appearance:slider-vertical;writing-mode:vertical-lr;direction:rtl;width:20px;height:65px;accent-color:var(--g);cursor:pointer}
+.eq-band input[type=range]{writing-mode:vertical-lr;direction:rtl;width:20px;height:65px;accent-color:var(--g);cursor:pointer;-webkit-appearance:none;appearance:none}
 .eq-band label{font-size:.6rem;color:var(--t3);font-weight:700;text-align:center}
 .eq-band span{font-size:.6rem;color:var(--g);font-weight:700;min-width:26px;text-align:center}
 
@@ -1711,6 +1711,15 @@ document.querySelectorAll(".lopt").forEach(o => o.addEventListener("click", () =
 document.addEventListener("click", e => {
   if(!e.target.closest(".lw")) document.getElementById("ldrop").classList.remove("open");
 });
+
+/* ══ VIEW TRANSITIONS ══ */
+function withViewTransition(fn){
+  if(document.startViewTransition){
+    document.startViewTransition(fn);
+  } else {
+    fn();
+  }
+}
 
 /* ══ PAGE SWITCHING ══ */
 function switchPage(pg){
@@ -2876,6 +2885,13 @@ document.addEventListener("click",e=>{
 });
 
 
+/* ══════════════════════════════
+   DEEP LINK SHARE SYSTEM
+   Share URL format: https://cahsmusic.vercel.app/s/VIDEO_ID
+   • buildShareUrl(videoId)  → constructs the app link
+   • shareSong(song)         → Web Share API → clipboard fallback
+   • handleDeepLink()        → runs on load, parses /s/VIDEO_ID from path
+══════════════════════════════ */
 const APP_ORIGIN = "https://cahsmusic.vercel.app";
 
 function buildShareUrl(videoId){
