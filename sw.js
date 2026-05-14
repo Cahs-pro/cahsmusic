@@ -1,9 +1,9 @@
-const CACHE_NAME  = 'mu-v22';
-const THUMB_CACHE = 'mu-thumb-v22';
-const FONT_CACHE  = 'mu-font-v22';
-const CDN_CACHE   = 'mu-cdn-v22';
+const CACHE_NAME  = 'mu-v17';
+const THUMB_CACHE = 'mu-thumb-v17';
+const FONT_CACHE  = 'mu-font-v17';
+const CDN_CACHE   = 'mu-cdn-v17';
 
-const SHELL = ['/', '/index.html', '/icon.png', '/manifest.json', '/icon-192.png', '/icon-512.png'];
+const SHELL = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -29,7 +29,6 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   if (!url.protocol.startsWith('http')) return;
 
-  // Firebase / Google APIs — keç
   if (url.hostname.includes('firebaseio.com') ||
       url.hostname.includes('firebase.google.com') ||
       url.hostname.includes('googleapis.com') ||
@@ -37,34 +36,27 @@ self.addEventListener('fetch', e => {
       url.hostname.includes('doubleclick.net') ||
       url.hostname.includes('googleadservices.com')) return;
 
-  // YouTube video stream — keç (IndexedDB-dən çalınır)
   if (url.hostname.includes('googlevideo.com') ||
       (url.hostname.includes('youtube.com') && url.pathname.includes('/videoplayback'))) return;
 
-  // RapidAPI / kendi API — keç
   if (url.hostname.includes('rapidapi.com') || url.pathname.startsWith('/api/')) return;
 
-  // YouTube thumbnailer — cache-first + SVG fallback
   if (url.hostname === 'i.ytimg.com' || url.hostname === 'img.youtube.com') {
     e.respondWith(thumbFirst(req)); return;
   }
 
-  // Google Fonts — cache-first
   if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {
     e.respondWith(cacheFirst(req, FONT_CACHE)); return;
   }
 
-  // CDN — cache-first
   if (url.hostname.includes('jsdelivr.net') || url.hostname.includes('cdnjs.cloudflare.com')) {
     e.respondWith(cacheFirst(req, CDN_CACHE)); return;
   }
 
-  // YouTube skriptləri — network-first
   if (url.hostname.includes('youtube.com') || url.hostname.includes('ytimg.com')) {
     e.respondWith(netFirst(req, CDN_CACHE)); return;
   }
 
-  // Öz origin — stale-while-revalidate
   if (url.origin === self.location.origin) {
     e.respondWith(swr(req)); return;
   }

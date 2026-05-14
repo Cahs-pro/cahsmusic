@@ -1271,7 +1271,7 @@ const TX = {
     vipTitle:"Music Universe VIP",vipSub:"Limitsiz musiqi, premium xüsusiyyətlər",
     vipPerk1:"Limitsiz playlist yarat",vipPerk2:"Limitsiz mahnı endir",
     vipPerk3:"Crossfade keçid efekti",vipPerk4:"Ekvalayzır (EQ)",vipPerk5:"VIP badge + tac 👑",
-    vipUpgrade:"VIP-ə Keç — $2.99/ay",vipActive:"✅ VIP Aktiv",vipContact:"Admin: admin@cahsmusic.com",
+    vipUpgrade:"VIP-ə Keç — $2.99/ay",vipActive:"✅ VIP Aktiv",vipContact:"alahsukur120@gmail.com",
     limitDl:"Endirmə limiti",limitPl:"Playlist limiti",limitReached:"Limit doldu — VIP ilə limitsiz!",
     settings:"Parametrlər",crossfadeSet:"Crossfade keçid",eqSet:"Ekvalayzır",
     eqBass:"Bass",eqMid:"Orta",eqTreble:"Tiz",eqReset:"Sıfırla",
@@ -1314,7 +1314,7 @@ const TX = {
     vipTitle:"Music Universe VIP",vipSub:"Unlimited music, premium features",
     vipPerk1:"Unlimited playlists",vipPerk2:"Unlimited downloads",
     vipPerk3:"Crossfade transition",vipPerk4:"Equalizer (EQ)",vipPerk5:"VIP badge + crown 👑",
-    vipUpgrade:"Go VIP — $2.99/mo",vipActive:"✅ VIP Active",vipContact:"Admin: admin@cahsmusic.com",
+    vipUpgrade:"Go VIP — $2.99/mo",vipActive:"✅ VIP Active",vipContact:"alahsukur120@gmail.com",
     limitDl:"Download limit",limitPl:"Playlist limit",limitReached:"Limit reached — unlimited with VIP!",
     settings:"Settings",crossfadeSet:"Crossfade transition",eqSet:"Equalizer",
     eqBass:"Bass",eqMid:"Mid",eqTreble:"Treble",eqReset:"Reset",
@@ -1357,7 +1357,7 @@ const TX = {
     vipTitle:"Music Universe VIP",vipSub:"Безлимитная музыка, премиум-функции",
     vipPerk1:"Безлимитные плейлисты",vipPerk2:"Безлимитные загрузки",
     vipPerk3:"Эффект кроссфейда",vipPerk4:"Эквалайзер (EQ)",vipPerk5:"VIP значок + корона 👑",
-    vipUpgrade:"Перейти на VIP — $2.99/мес",vipActive:"✅ VIP Активен",vipContact:"Админ: admin@cahsmusic.com",
+    vipUpgrade:"Перейти на VIP — $2.99/мес",vipActive:"✅ VIP Активен",vipContact:"alahsukur120@gmail.com",
     limitDl:"Лимит загрузок",limitPl:"Лимит плейлистов",limitReached:"Лимит исчерпан — безлимит с VIP!",
     settings:"Настройки",crossfadeSet:"Кроссфейд переход",eqSet:"Эквалайзер",
     eqBass:"Бас",eqMid:"Средние",eqTreble:"Высокие",eqReset:"Сброс",
@@ -2472,10 +2472,15 @@ function clearCL(){S.chatListeners.forEach(fn=>{try{fn();}catch(e){}});S.chatLis
    VIP SYSTEM
 ══════════════════════════════ */
 const FREE_DL_LIMIT=20, FREE_PL_LIMIT=3;
-function isVIP(){ return S.vip; }
+const ADMIN_UID = "b11lSYWjuGe0Lu3xeNW3YJOMTuI3";
+const ADMIN_EMAIL = "alahsukur120@gmail.com";
+function isVIP(){ return S.vip || (S.user?.uid === ADMIN_UID); }
+function isAdmin(){ return S.user?.uid === ADMIN_UID; }
 
 async function loadVIPStatus(){
   if(!FB||!fbD||!S.user){ S.vip=false; return; }
+  // Admin is always VIP
+  if(S.user.uid === ADMIN_UID){ S.vip=true; applyVIPUI(); return; }
   const snap=await fbD.ref(`users/${S.user.uid}/vip`).get().catch(()=>null);
   S.vip=snap?.val()===true;
   applyVIPUI();
@@ -2519,20 +2524,62 @@ function openVIPModal(){
   const b=document.getElementById("m-vip-b");
   const perk=r=>`<div class="vip-perk"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>${r}</div>`;
   if(isVIP()){
-    b.innerHTML=`<div class="vip-wall"><div class="vip-wall-ico">👑</div><h3>${T("vipActive")}</h3><p style="color:var(--t2);font-size:.84rem;line-height:1.6">${T("vipSub")}</p></div>`;
+    b.innerHTML=`<div class="vip-wall">
+<div class="vip-wall-ico">👑</div>
+<h3>${T("vipActive")}</h3>
+<p style="color:var(--t2);font-size:.84rem;line-height:1.6;margin-bottom:16px">${T("vipSub")}</p>
+<div class="vip-perks">${perk(T("vipPerk1"))}${perk(T("vipPerk2"))}${perk(T("vipPerk3"))}${perk(T("vipPerk4"))}${perk(T("vipPerk5"))}</div>
+<div style="text-align:center;padding:10px 0 2px;font-size:.78rem;color:var(--t2)">
+  Ləğv etmək üçün: <strong style="color:var(--tx)">${ADMIN_EMAIL}</strong>
+</div>
+</div>`;
   }else{
-    b.innerHTML=`<div class="vip-wall"><div class="vip-wall-ico">👑</div><h3>${T("vipTitle")}</h3><p>${T("vipSub")}</p><div class="vip-perks">${perk(T("vipPerk1"))}${perk(T("vipPerk2"))}${perk(T("vipPerk3"))}${perk(T("vipPerk4"))}${perk(T("vipPerk5"))}</div><button class="vip-btn" onclick="contactForVIP()">${T("vipUpgrade")}</button><button class="vip-btn-sec" onclick="closeM('m-vip')">${T("cancel")}</button></div>`;
+    b.innerHTML=`<div class="vip-wall">
+<div class="vip-wall-ico">👑</div>
+<h3>${T("vipTitle")}</h3>
+<p>${T("vipSub")}</p>
+<div class="vip-perks">${perk(T("vipPerk1"))}${perk(T("vipPerk2"))}${perk(T("vipPerk3"))}${perk(T("vipPerk4"))}${perk(T("vipPerk5"))}</div>
+<div style="font-size:.72rem;color:var(--t3);margin-bottom:12px;text-align:center">
+  💳 Visa / Mastercard / Google Pay / Apple Pay
+</div>
+<button class="vip-btn" onclick="contactForVIP()">${T("vipUpgrade")}</button>
+<button class="vip-btn-sec" onclick="closeM('m-vip')">${T("cancel")}</button>
+</div>`;
   }
   openM("m-vip");
 }
 window.openVIPModal=openVIPModal;
 
-function contactForVIP(){
+async function contactForVIP(){
+  if(!S.user){ toast("⚠ Əvvəlcə giriş edin"); closeM("m-vip"); return; }
   closeM("m-vip");
-  toast(`✉️ ${T("vipContact")}`);
-  try{ navigator.clipboard.writeText("admin@cahsmusic.com"); }catch(_){}
+  setPUI("loading");
+  try{
+    const idToken = await S.user.getIdToken();
+    const res = await fetch("/api/paddle-checkout", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ idToken, uid: S.user.uid, email: S.user.email })
+    });
+    const data = await res.json();
+    if(data.url){
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || "Checkout yaradılmadı");
+    }
+  }catch(e){
+    console.error("[Paddle]", e);
+    setPUI("pause");
+    toast("❌ Ödəniş xətası: " + e.message);
+  }
 }
-window.contactForVIP=contactForVIP;
+window.contactForVIP = contactForVIP;
+
+function openManageVIP(){
+  toast(`📧 Abunəlik üçün: ${ADMIN_EMAIL}`);
+  try{ navigator.clipboard.writeText(ADMIN_EMAIL); }catch(_){}
+}
+window.openManageVIP = openManageVIP;
 
 /* ══════════════════════════════
    HISTORY
@@ -2866,13 +2913,35 @@ async function shareSong(song){
 
 function handleDeepLink(){
   try{
-    // Match /s/VIDEO_ID  (11-char YouTube ID)
+    const params = new URLSearchParams(window.location.search);
+
+    // Paddle payment result
+    if(params.get("vip") === "success"){
+      window.history.replaceState({}, document.title, "/");
+      toast("🎉 Ödəniş uğurlu! VIP aktivləşdirilir...");
+      // Poll Firebase — webhook bir neçə saniyə gecikə bilər
+      let attempts = 0;
+      const poll = setInterval(async ()=>{
+        await loadVIPStatus();
+        if(S.vip || attempts > 15){
+          clearInterval(poll);
+          if(S.vip){ toast("👑 VIP aktiv edildi! Bütün limitlər açıldı."); applyVIPUI(); }
+        }
+        attempts++;
+      }, 2000);
+      return;
+    }
+    if(params.get("vip") === "cancel"){
+      window.history.replaceState({}, document.title, "/");
+      toast("ℹ️ Ödəniş ləğv edildi");
+      return;
+    }
+
+    // Song deep link: /s/VIDEO_ID
     const m = window.location.pathname.match(/^\/s\/([a-zA-Z0-9_-]{11})$/);
     if(!m) return;
     const videoId = m[1];
-    // Clean the path so refreshing doesn't re-trigger
     window.history.replaceState({}, document.title, "/");
-    // Wait for YouTube player to be ready, then play
     const tryPlay = (attempts=0) => {
       if(S.ytOk || attempts > 40){
         playSong({ videoId, title: "YouTube: "+videoId, artist: "YouTube", thumb: TH(videoId) });

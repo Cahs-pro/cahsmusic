@@ -1,31 +1,27 @@
 {
   "version": 2,
   "rewrites": [
+    { "source": "/terms",   "destination": "/terms.html"   },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/refund",  "destination": "/refund.html"  },
+    { "source": "/s/:videoId", "destination": "/index.html" },
     {
-      "source": "/s/:videoId",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/((?!api/)(?!icon\\.png)(?!icon-192\\.png)(?!icon-512\\.png)(?!manifest\\.json)(?!sw\\.js)(?!favicon\\.ico).*)",
+      "source": "/((?!api/)(?!icon\\.png)(?!icon-192\\.png)(?!icon-512\\.png)(?!manifest\\.json)(?!sw\\.js)(?!favicon\\.ico)(?!terms\\.html)(?!privacy\\.html)(?!refund\\.html).*)",
       "destination": "/index.html"
     }
   ],
   "functions": {
-    "api/dl.js": { "maxDuration": 60 }
+    "api/dl.js":               { "maxDuration": 60 },
+    "api/paddle-checkout.js":  { "maxDuration": 15 },
+    "api/paddle-webhook.js":   { "maxDuration": 30 },
+    "api/admin-vip.js":        { "maxDuration": 10 }
   },
   "headers": [
     {
       "source": "/sw.js",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache" },
+        { "key": "Cache-Control",          "value": "no-cache" },
         { "key": "Service-Worker-Allowed", "value": "/" }
-      ]
-    },
-    {
-      "source": "/icon.png",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=86400" },
-        { "key": "Content-Type", "value": "image/png" }
       ]
     },
     {
@@ -38,7 +34,7 @@
       "source": "/(.*)",
       "headers": [
         { "key": "Cross-Origin-Embedder-Policy", "value": "unsafe-none" },
-        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin-allow-popups" }
+        { "key": "Cross-Origin-Opener-Policy",   "value": "same-origin-allow-popups" }
       ]
     }
   ]
