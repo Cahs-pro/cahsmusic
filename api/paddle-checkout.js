@@ -4,15 +4,12 @@
  * POST /api/paddle-checkout
  * Body: { idToken: string, uid: string, email: string }
  *
- * Paddle Checkout session yaradır, URL qaytarır.
- * İstifadəçi həmin URL-ə yönləndirilir → Visa/Mastercard/Google Pay/Apple Pay ilə ödəyir.
- *
- * Env vars (Vercel Dashboard → Settings → Environment Variables):
- *   PADDLE_API_KEY          — Paddle Dashboard → Developer Tools → Authentication → API key
- *   PADDLE_PRICE_ID         — Paddle Dashboard → Catalog → Prices → price_XXXXXXXX
- *   PADDLE_WEBHOOK_SECRET   — Paddle Dashboard → Developer Tools → Notifications → secret
+ * Env vars:
+ *   PADDLE_API_KEY           — pro_... (live) or ctm_... (sandbox)
+ *   PADDLE_PRICE_ID          — pri_...
+ *   PADDLE_SANDBOX           — "true" for sandbox, omit for live
  *   FIREBASE_SERVICE_ACCOUNT — Firebase service account JSON string
- *   APP_URL                 — https://cahsmusic.vercel.app
+ *   APP_URL                  — https://cahsmusic.vercel.app
  */
 
 const admin = require("firebase-admin");
@@ -51,62 +48,71 @@ module.exports = async function handler(req, res){
   const db = admin.database();
   const vipSnap = await db.ref(`users/${uid}/vip`).get().catch(()=>null);
   if(vipSnap?.val() === true){
-    return res.status(400).json({ error: "already_vip" });
+    return res.status(400).json({ error: "already_vip", message: "Artıq VIP-siniz" });
   }
 
   const appUrl     = process.env.APP_URL || "https://cahsmusic.vercel.app";
-  const PADDLE_KEY = process.env.PADDLE_API_KEY;
-  const PRICE_ID   = process.env.PADDLE_PRICE_ID;
+  const PADDLE_KEY = (process.env.PADDLE_API_KEY || "").trim();
+  const PRICE_ID   = (process.env.PADDLE_PRICE_ID || "").trim();
+  const isSandbox  = process.env.PADDLE_SANDBOX === "true";
 
   if(!PADDLE_KEY || !PRICE_ID){
     return res.status(500).json({ error: "Paddle env vars missing" });
   }
 
-  // 3. Create Paddle Checkout session via Paddle API v2
-  // Paddle Billing API: https://developer.paddle.com/api-reference/transactions/create-transaction
-  const paddleRes = await fetch("https://api.paddle.com/transactions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${PADDLE_KEY}`,
-      "Content-Type":  "application/json",
-    },
-    body: JSON.stringify({
-      items: [{
-        price_id:  PRICE_ID,
-        quantity:  1,
-      }],
-      customer: {
-        email: email || decoded.email || "",
-      },
-      custom_data: {
-        firebase_uid: uid,
-      },
-      checkout: {
-        url: `${appUrl}/?vip=success`,
-      },
-      success_url: `${appUrl}/?vip=success`,
-      // Paddle handles cancel — user just closes the tab
-    }),
-  });
+  // Paddle API base URL — sandbox vs live
+  const PADDLE_BASE = isSandbox
+    ? "https://sandbox-api.paddle.com"
+    : "https://api.paddle.com";
 
-  const paddleData = await paddleRes.json();
+  const customerEmail = email || decoded.email || "";
 
-  if(!paddleRes.ok || !paddleData.data){
-    console.error("[Paddle] API error:", JSON.stringify(paddleData));
-    return res.status(500).json({
-      error: paddleData?.error?.detail || "Paddle checkout yaradılmadı"
-    });
+  // 3. Create Paddle transaction (Paddle Billing API v1)
+  const body = {
+    items: [{ price_id: PRICE_ID, quantity: 1 }],
+    custom_data: { firebase_uid: uid },
+    checkout: { url: `${appUrl}/?vip=success` },
+  };
+
+  // Only add customer email if we have one
+  if(customerEmail){
+    body.customer = { email: customerEmail };
   }
 
-  // The checkout URL is in paddleData.data.checkout.url
-  const checkoutUrl = paddleData.data?.checkout?.url;
+  let paddleData;
+  try{
+    const paddleRes = await fetch(`${PADDLE_BASE}/transactions`, {
+      method:  "POST",
+      headers: {
+        "Authorization": `Bearer ${PADDLE_KEY}`,
+        "Content-Type":  "application/json",
+        "Paddle-Version": "1",
+      },
+      body: JSON.stringify(body),
+    });
+
+    paddleData = await paddleRes.json();
+
+    if(!paddleRes.ok){
+      console.error("[Paddle] API error:", JSON.stringify(paddleData));
+      const errMsg = paddleData?.error?.detail
+                  || paddleData?.error?.code
+                  || `HTTP ${paddleRes.status}`;
+      return res.status(500).json({ error: errMsg });
+    }
+  }catch(e){
+    console.error("[Paddle] fetch error:", e.message);
+    return res.status(500).json({ error: "Paddle API əlaqə xətası: " + e.message });
+  }
+
+  const checkoutUrl = paddleData?.data?.checkout?.url;
   if(!checkoutUrl){
-    console.error("[Paddle] No checkout URL in response:", JSON.stringify(paddleData));
+    console.error("[Paddle] No checkout URL:", JSON.stringify(paddleData));
     return res.status(500).json({ error: "Checkout URL alınmadı" });
   }
 
-  // Save pending transaction reference
-  await db.ref(`users/${uid}/paddlePendingTxn`).set(paddleData.data.id);
+  // Save pending txn reference
+  await db.ref(`users/${uid}/paddlePendingTxn`).set(paddleData.data.id).catch(()=>{});
 
   return res.status(200).json({ url: checkoutUrl });
 };
