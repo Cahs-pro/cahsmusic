@@ -11,10 +11,8 @@
     }
   ],
   "functions": {
-    "api/dl.js":               { "maxDuration": 60 },
-    "api/paddle-checkout.js":  { "maxDuration": 15 },
-    "api/paddle-webhook.js":   { "maxDuration": 30 },
-    "api/admin-vip.js":        { "maxDuration": 10 }
+    "api/dl.js":        { "maxDuration": 60 },
+    "api/admin-vip.js": { "maxDuration": 10 }
   },
   "headers": [
     {

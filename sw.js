@@ -1,14 +1,33 @@
-const CACHE_NAME  = 'mu-v28';
-const THUMB_CACHE = 'mu-thumb-v28';
-const FONT_CACHE  = 'mu-font-v28';
-const CDN_CACHE   = 'mu-cdn-v28';
+const CACHE_NAME  = 'mu-v29';
+const THUMB_CACHE = 'mu-thumb-v29';
+const FONT_CACHE  = 'mu-font-v29';
+const CDN_CACHE   = 'mu-cdn-v29';
 
 const SHELL = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
+
+// index.html bu skriptlərsiz işləmir (Dexie = yerli baza, Firebase = giriş/sosial).
+// Oflayn açılışda yüklənməsələr əsas skript yarıda dayanır və səhifələr arası keçid işləmir.
+const CDN_LIBS = [
+  'https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js',
+  'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js',
+  'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js',
+  'https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js'
+];
+
+async function precacheLibs() {
+  const cache = await caches.open(CDN_CACHE);
+  await Promise.allSettled(CDN_LIBS.map(async u => {
+    if (await cache.match(u)) return;
+    const res = await fetch(u, { mode: 'cors' });
+    if (res.ok) await cache.put(u, res);
+  }));
+}
 
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => Promise.allSettled(SHELL.map(u => cache.add(u).catch(err => console.warn('[SW]', u, err.message)))))
+      .then(() => precacheLibs())
       .then(() => self.skipWaiting())
   );
 });
@@ -29,6 +48,10 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   if (!url.protocol.startsWith('http')) return;
 
+  if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {
+    e.respondWith(cacheFirst(req, FONT_CACHE)); return;
+  }
+
   if (url.hostname.includes('firebaseio.com') ||
       url.hostname.includes('firebase.google.com') ||
       url.hostname.includes('googleapis.com') ||
@@ -45,11 +68,8 @@ self.addEventListener('fetch', e => {
     e.respondWith(thumbFirst(req)); return;
   }
 
-  if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {
-    e.respondWith(cacheFirst(req, FONT_CACHE)); return;
-  }
-
-  if (url.hostname.includes('jsdelivr.net') || url.hostname.includes('cdnjs.cloudflare.com')) {
+  if (url.hostname.includes('jsdelivr.net') || url.hostname.includes('cdnjs.cloudflare.com') ||
+      url.hostname === 'www.gstatic.com') {
     e.respondWith(cacheFirst(req, CDN_CACHE)); return;
   }
 
@@ -83,7 +103,7 @@ async function cacheFirst(req, cacheName = CACHE_NAME) {
   if (cached) return cached;
   try {
     const res = await fetch(req);
-    if (res.ok) cache.put(req, res.clone());
+    if (res.ok || res.type === 'opaque') cache.put(req, res.clone());
     return res;
   } catch { return new Response('', { status: 503 }); }
 }

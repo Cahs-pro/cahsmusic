@@ -1,7 +1,7 @@
 {
   "name": "music-universe",
   "version": "5.2.0",
-  "description": "Music Universe — YouTube music PWA with Paddle VIP subscriptions",
+  "description": "Music Universe — YouTube music PWA",
   "engines": { "node": ">=18" },
   "dependencies": {
     "firebase-admin": "^12.1.0"

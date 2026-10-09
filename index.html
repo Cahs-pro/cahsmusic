@@ -1229,7 +1229,7 @@ const FB_CFG = {
   appId: "1:105457176344:web:a625889e4025be61c5d86d",
   measurementId: "G-9Y6MXJFEBZ"
 };
-const FB = !!FB_CFG.apiKey;
+const FB = !!FB_CFG.apiKey && typeof firebase !== "undefined";
 if (FB) firebase.initializeApp(FB_CFG);
 const fbA = FB ? firebase.auth()     : null;
 const fbD = FB ? firebase.database() : null;
@@ -2548,9 +2548,6 @@ function openVIPModal(){
 <h3>${T("vipTitle")}</h3>
 <p>${T("vipSub")}</p>
 <div class="vip-perks">${perk(T("vipPerk1"))}${perk(T("vipPerk2"))}${perk(T("vipPerk3"))}${perk(T("vipPerk4"))}${perk(T("vipPerk5"))}</div>
-<div style="font-size:.72rem;color:var(--t3);margin-bottom:12px;text-align:center">
-  💳 Visa / Mastercard / Google Pay / Apple Pay
-</div>
 <button class="vip-btn" onclick="contactForVIP()">${T("vipUpgrade")}</button>
 <button class="vip-btn-sec" onclick="closeM('m-vip')">${T("cancel")}</button>
 </div>`;
@@ -2559,28 +2556,10 @@ function openVIPModal(){
 }
 window.openVIPModal=openVIPModal;
 
-async function contactForVIP(){
-  if(!S.user){ toast("⚠ Əvvəlcə giriş edin"); closeM("m-vip"); return; }
+function contactForVIP(){
   closeM("m-vip");
-  setPUI("loading");
-  try{
-    const idToken = await S.user.getIdToken();
-    const res = await fetch("/api/paddle-checkout", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ idToken, uid: S.user.uid, email: S.user.email })
-    });
-    const data = await res.json();
-    if(data.url){
-      window.location.href = data.url;
-    } else {
-      throw new Error(data.error || "Checkout yaradılmadı");
-    }
-  }catch(e){
-    console.error("[Paddle]", e);
-    setPUI("pause");
-    toast("❌ Ödəniş xətası: " + e.message);
-  }
+  toast(`📧 VIP üçün yazın: ${ADMIN_EMAIL}`);
+  try{ navigator.clipboard.writeText(ADMIN_EMAIL); }catch(_){}
 }
 window.contactForVIP = contactForVIP;
 
@@ -2926,27 +2905,6 @@ function handleDeepLink(){
   try{
     const params = new URLSearchParams(window.location.search);
 
-    // Paddle payment result
-    if(params.get("vip") === "success"){
-      window.history.replaceState({}, document.title, "/");
-      toast("🎉 Ödəniş uğurlu! VIP aktivləşdirilir...");
-      // Poll Firebase — webhook bir neçə saniyə gecikə bilər
-      let attempts = 0;
-      const poll = setInterval(async ()=>{
-        await loadVIPStatus();
-        if(S.vip || attempts > 15){
-          clearInterval(poll);
-          if(S.vip){ toast("👑 VIP aktiv edildi! Bütün limitlər açıldı."); applyVIPUI(); }
-        }
-        attempts++;
-      }, 2000);
-      return;
-    }
-    if(params.get("vip") === "cancel"){
-      window.history.replaceState({}, document.title, "/");
-      toast("ℹ️ Ödəniş ləğv edildi");
-      return;
-    }
 
     // Song deep link: /s/VIDEO_ID
     const m = window.location.pathname.match(/^\/s\/([a-zA-Z0-9_-]{11})$/);
