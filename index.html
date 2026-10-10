@@ -2060,7 +2060,7 @@ function mkCard(song){
   const liked=S.likes.has(song.videoId);
   d.innerHTML=`
 <div class="cimg">
-  <img src="${song.thumb||PHO}" alt="${X(song.title)}" loading="lazy" onerror="this.onerror=null;this.src='${PHO}'"/>
+  <img src="${X(song.thumb||PHO)}"  alt="${X(song.title)}" loading="lazy" onerror="this.onerror=null;this.src='${PHO}'"/>
   <div class="covl"><div class="pring"><svg width="19" height="19" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
   <div class="eqbar"><span></span><span></span><span></span><span></span></div>
 </div>
@@ -2141,7 +2141,7 @@ async function renderDownloads(){
   songs.forEach(song=>{
     const row=document.createElement("div");row.className="svrow";
     row.innerHTML=`
-<div class="svthumb"><img src="${song.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div>
+<div class="svthumb"><img src="${X(song.thumb||PHO)}"  onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div>
 <div class="svinfo"><div class="svtit">${X(song.title)}</div><div class="svart">${X(song.artist)}</div>
 <div class="recbar" id="rb-${song.videoId}"><div class="recbar-fill"></div><div class="recbar-pulse"></div></div></div>
 <span class="svbadge offline" id="bd-${song.videoId}">✓ Endirildi</span>
@@ -2193,7 +2193,7 @@ async function openPL(pl){
   const sc=b.querySelector("#pl-sc");
   songs.forEach(s=>{
     const row=document.createElement("div");row.className="svrow";
-    row.innerHTML=`<div class="svthumb"><img src="${s.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="svinfo"><div class="svtit">${X(s.title)}</div><div class="svart">${X(s.artist)}</div></div><div class="svacts"><button class="act"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button><button class="act danger"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div>`;
+    row.innerHTML=`<div class="svthumb"><img src="${X(s.thumb||PHO)}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="svinfo"><div class="svtit">${X(s.title)}</div><div class="svart">${X(s.artist)}</div></div><div class="svacts"><button class="act"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button><button class="act danger"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div>`;
     row.querySelectorAll(".act")[0].addEventListener("click", ()=>playSong({videoId:s.videoId,title:s.title,artist:s.artist,thumb:s.thumb}));
     row.querySelectorAll(".act")[1].addEventListener("click", async()=>{await ldb.pl_songs.delete(s.id).catch(()=>{});toast("🗑");openPL(pl);});
     sc.appendChild(row);
@@ -2214,7 +2214,7 @@ window.createPL=async()=>{const name=document.getElementById("pl-ni")?.value.tri
 async function openAddToPL(song){
   const pls=await ldb.playlists.toArray().catch(()=>[]);
   const b=document.getElementById("m-addpl-b");
-  const e2=s=>String(s||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+  const e2=s=>X(String(s||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/[\r\n]+/g," "));
   if(!pls.length){b.innerHTML=`<div class="mtit">📋 ${T("addpl")}</div><p style="color:var(--t2);font-size:.85rem;margin-bottom:13px">${T("nopl")}</p><button class="mbg" onclick="closeM('m-addpl');document.querySelector('.pill[data-pg=playlists]').click();document.getElementById('newpl-btn').click()">${T("newpl")}</button>`;}
   else{b.innerHTML=`<div class="mtit">📋 ${T("addpl")}</div><p style="color:var(--t2);font-size:.77rem;margin-bottom:13px">${X(song.title)}</p><div class="plwrap">${pls.map(pl=>`<div class="plrow" onclick="addToP(${pl.id},'${e2(song.videoId)}','${e2(song.title)}','${e2(song.artist)}','${e2(song.thumb||TH(song.videoId))}')"><div class="plico" style="width:36px;height:36px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/></svg></div><div class="plmeta"><div class="plname">${X(pl.name)}</div></div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></div>`).join("")}</div>`;}
   openM("m-addpl");
@@ -2314,7 +2314,7 @@ function renderFrList(){
   friends.forEach(f=>{
     const row=document.createElement("div");row.className="frrow"+(S.chatUid===f.uid?" on":"");row.dataset.uid=f.uid;
     const np=f.nowPlaying;
-    row.innerHTML=`${f.photo?`<img class="frav" src="${f.photo}" onerror="this.src='${PHO}'" alt=""/>`:`<div class="frav-ph">${(f.name||"?")[0].toUpperCase()}</div>`}<div class="frinf"><div class="frname">${X(f.name||"Anonim")}</div>${np?`<div class="frnp">🎵 ${X(np.title||"")}</div>`:`<div class="frsub" style="color:${f.online?"var(--g)":"var(--t3)"}">${f.online?T("online"):"offline"}</div>`}</div>${f.online?`<div class="ondot"></div>`:""}`;
+    row.innerHTML=`${f.photo?`<img class="frav" src="${X(f.photo)}" onerror="this.src='${PHO}'" alt=""/>`:`<div class="frav-ph">${(f.name||"?")[0].toUpperCase()}</div>`}<div class="frinf"><div class="frname">${X(f.name||"Anonim")}</div>${np?`<div class="frnp">🎵 ${X(np.title||"")}</div>`:`<div class="frsub" style="color:${f.online?"var(--g)":"var(--t3)"}">${f.online?T("online"):"offline"}</div>`}</div>${f.online?`<div class="ondot"></div>`:""}`;
     row.addEventListener("click", ()=>openDM(f));
     list.appendChild(row);
   });
@@ -2325,7 +2325,7 @@ function renderReqs(reqs){
   if(!reqs.length){list.innerHTML=`<p style="color:var(--t3);font-size:.79rem;padding:12px;text-align:center">Gözləyən istək yoxdur.</p>`;return;}
   reqs.forEach(req=>{
     const row=document.createElement("div");row.className="rqrow";
-    row.innerHTML=`${req.fromPhoto?`<img class="frav" src="${req.fromPhoto}" onerror="this.src='${PHO}'" alt=""/>`:`<div class="frav-ph">${(req.fromName||"?")[0].toUpperCase()}</div>`}<div class="frinf"><div class="frname">${X(req.fromName||"Anonim")}</div><div class="frsub">${X(req.fromEmail||"")}</div></div><div class="rqbtns"><button class="rqacc">${T("acc")}</button><button class="rqrej">${T("rej")}</button></div>`;
+    row.innerHTML=`${req.fromPhoto?`<img class="frav" src="${X(req.fromPhoto)}" onerror="this.src='${PHO}'" alt=""/>`:`<div class="frav-ph">${X((req.fromName||"?")[0].toUpperCase())}</div>`}<div class="frinf"><div class="frname">${X(req.fromName||"Anonim")}</div><div class="frsub">${X(req.fromEmail||"")}</div></div><div class="rqbtns"><button class="rqacc">${T("acc")}</button><button class="rqrej">${T("rej")}</button></div>`;
     row.querySelector(".rqacc").addEventListener("click", ()=>acceptFr(req));
     row.querySelector(".rqrej").addEventListener("click", ()=>rejectFr(req.key));
     list.appendChild(row);
@@ -2447,12 +2447,12 @@ async function showProfile(u){
     uVip=vipSnap?.val()===true;
   }
   const b=document.getElementById("m-prof-b");
-  const e2=s=>String(s||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+  const e2=s=>X(String(s||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/[\r\n]+/g," "));
   const vipBadge=uVip?`<span class="vip-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 6l4 8 6-10 6 10 4-8-2 14H4L2 6z"/></svg>VIP</span>`:"";
   const isSelf=u.uid===S.user?.uid;
   b.innerHTML=`
 <div class="ptop">
-  ${u.photo?`<img class="ppic${uVip?" vip-user":""}" src="${u.photo}" onerror="this.src='${PHO}'" alt=""/>`:`<div class="ppic-ph">${(u.name||"?")[0].toUpperCase()}</div>`}
+  ${u.photo?`<img class="ppic${uVip?" vip-user":""}" src="${X(u.photo)}"onerror="this.src='${PHO}'" alt=""/>`:`<div class="ppic-ph">${X((u.name||"?")[0].toUpperCase())}</div>`}
   <div>
     <div class="pname">${X(u.name||"Anonim")} ${vipBadge}</div>
     <div class="pemail">${X(u.email||"")}</div>
@@ -2462,7 +2462,7 @@ async function showProfile(u){
 <div id="prof-stats-wrap"></div>
 ${np?`<div class="sh" style="margin:8px 0"><span class="dot"></span>${T("nowpl")}</div>
 <div class="psong" onclick="playSong({videoId:'${e2(np.videoId)}',title:'${e2(np.title)}',artist:'${e2(np.artist||"")}',thumb:'${e2(np.thumb||TH(np.videoId))}'});closeM('m-prof')">
-  <img src="${np.thumb||PHO}" onerror="this.src='${PHO}'" alt=""/>
+  <img src="${X(np.thumb||PHO)}"onerror="this.src='${PHO}'" alt=""/>
   <div><div class="pst">${X(np.title)}</div><div class="psa">${X(np.artist||"")}</div></div>
   <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--g)"><polygon points="5 3 19 12 5 21 5 3"/></svg>
 </div>`:""}
@@ -2597,7 +2597,7 @@ async function renderHistory(){
   if(noH) noH.style.display="none";
   rows.forEach(r=>{
     const row=document.createElement("div"); row.className="hist-row";
-    row.innerHTML=`<div class="hist-thumb"><img src="${r.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="hist-info"><div class="hist-tit">${X(r.title)}</div><div class="hist-art">${X(r.artist)}</div></div><span class="hist-time">${fmtAgo(r.playedAt)}</span>`;
+    row.innerHTML=`<div class="hist-thumb"><img src="${X(r.thumb||PHO)}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="hist-info"><div class="hist-tit">${X(r.title)}</div><div class="hist-art">${X(r.artist)}</div></div><span class="hist-time">${fmtAgo(r.playedAt)}</span>`;
     row.addEventListener("click",()=>playSong({videoId:r.videoId,title:r.title,artist:r.artist,thumb:r.thumb}));
     list.appendChild(row);
   });
@@ -2682,7 +2682,7 @@ function renderQueue(){
   if(!S.queue.length){ list.innerHTML=`<div style="text-align:center;padding:18px;color:var(--t3);font-size:.8rem">${T("queueEmpty")}</div>`; return; }
   S.queue.forEach((song,i)=>{
     const row=document.createElement("div"); row.className="q-row"+(S.list[S.idx]?.videoId===song.videoId?" q-now":"");
-    row.innerHTML=`<div class="q-drag"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></div><div class="q-thumb"><img src="${song.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="q-info"><div class="q-title">${X(song.title)}</div><div class="q-artist">${X(song.artist)}</div></div><button class="q-del"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+    row.innerHTML=`<div class="q-drag"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></div><div class="q-thumb"><img src="${X(song.thumb||PHO)}"  onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="q-info"><div class="q-title">${X(song.title)}</div><div class="q-artist">${X(song.artist)}</div></div><button class="q-del"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
     row.addEventListener("click",e=>{ if(!e.target.closest(".q-del")) playSong(song); });
     row.querySelector(".q-del").addEventListener("click",e=>{ e.stopPropagation(); S.queue.splice(i,1); renderQueue(); });
     list.appendChild(row);
@@ -2747,7 +2747,7 @@ async function renderStatsInProfile(uid,container){
     html+=`<div class="sh" style="margin:6px 0 8px"><span class="dot"></span>Top Mahnılar</div><div class="top-songs">`;
     songs.slice(0,5).forEach((s,i)=>{
       const e2=v=>String(v||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
-      html+=`<div class="top-song-row" onclick="playSong({videoId:'${e2(s.videoId)}',title:'${e2(s.title)}',artist:'${e2(s.artist||"")}',thumb:'${e2(s.thumb||TH(s.videoId))}'})"><span class="top-rank${i===0?" gold":""}">${i+1}</span><div class="top-thumb"><img src="${s.thumb||PHO}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="top-info"><div class="top-tit">${X(s.title)}</div><div class="top-cnt">${s.count} oynatma</div></div></div>`;
+      html+=`<div class="top-song-row" onclick="playSong({videoId:'${e2(s.videoId)}',title:'${e2(s.title)}',artist:'${e2(s.artist||"")}',thumb:'${e2(s.thumb||TH(s.videoId))}'})"><span class="top-rank${i===0?" gold":""}">${i+1}</span><div class="top-thumb"><img src="${X(s.thumb||PHO)}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="top-info"><div class="top-tit">${X(s.title)}</div><div class="top-cnt">${s.count} oynatma</div></div></div>`;
     });
     html+="</div>";
   }

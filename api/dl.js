@@ -4,21 +4,47 @@
  * → RapidAPI youtube-mp36-dən MP3 link alır, JSON cavab verir
  * Client özü həmin linkdən endirir (stream yox, redirect)
  *
- * KVOTA QORUMASI: uğurlu cavab keşlənir (brauzer 10 dəq, Vercel CDN 30 dəq).
- * Eyni mahnı bu müddətdə təkrar istənəndə RapidAPI-yə sorğu getmir.
+ * KVOTA QORUMASI:
+ *  1) Uğurlu cavab keşlənir (brauzer 10 dəq, Vercel CDN 30 dəq) — eyni mahnı təkrar xərc yaratmır.
+ *  2) Başqa saytdan gələn sorğular rədd edilir (Sec-Fetch-Site / Origin / Referer).
+ *  3) ID düz 11 simvol olmalıdır və RapidAPI-yə getməzdən əvvəl pulsuz oEmbed ilə
+ *     videonun mövcudluğu yoxlanır — uydurma ID-lər kvotanı yeməsin.
  * Link tez ölürsə, CACHE_BROWSER / CACHE_CDN rəqəmlərini azalt.
  */
 const CACHE_BROWSER = 600;   // saniyə
 const CACHE_CDN     = 1800;  // saniyə
 
+// Sorğu bizim öz saytımızdan gəlirmi? (Brauzer Sec-Fetch-Site göndərir; köhnə brauzerlərdə Origin/Referer-ə baxırıq)
+function sameSite(req) {
+  const site = req.headers["sec-fetch-site"];
+  if (site) return site === "same-origin" || site === "same-site" || site === "none";
+  const ref = req.headers.origin || req.headers.referer;
+  if (!ref) return true;                              // başlıq yoxdur (çox köhnə brauzer) — keç
+  try { return new URL(ref).host === req.headers.host; } catch (_) { return false; }
+}
+
+// YouTube-da belə video varmı? Yalnız "tapılmadı" (404/400) rədd edilir; şəbəkə xətasında keçirik.
+async function videoExists(id) {
+  try {
+    const r = await fetch(
+      "https://www.youtube.com/oembed?format=json&url=" + encodeURIComponent("https://www.youtube.com/watch?v=" + id),
+      { signal: AbortSignal.timeout(4000) }
+    );
+    return r.status !== 404 && r.status !== 400;
+  } catch (_) { return true; }
+}
+
 module.exports = async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  if (req.method === "OPTIONS") { res.status(200).end(); return; }
-  if (req.method !== "GET")    { res.status(405).json({ error: "GET only" }); return; }
+  if (req.method !== "GET") { res.status(405).json({ error: "GET only" }); return; }
+
+  if (!sameSite(req)) {
+    res.setHeader("Cache-Control", "no-store");
+    res.status(403).json({ error: "Bu sorğu yalnız Music Universe saytından qəbul olunur" });
+    return;
+  }
 
   const videoId = (req.query.v || "").trim();
-  if (!videoId || !/^[a-zA-Z0-9_-]{6,15}$/.test(videoId)) {
+  if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
     res.status(400).json({ error: "Yanlış video ID" });
     return;
   }
@@ -26,6 +52,12 @@ module.exports = async function handler(req, res) {
   const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
   if (!RAPIDAPI_KEY) {
     res.status(500).json({ error: "RAPIDAPI_KEY təyin edilməyib" });
+    return;
+  }
+
+  if (!(await videoExists(videoId))) {
+    res.setHeader("Cache-Control", "no-store");
+    res.status(404).json({ error: "Video tapılmadı" });
     return;
   }
 

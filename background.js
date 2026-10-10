@@ -25,6 +25,8 @@
   /* ══ DİLLƏR ══ */
   const I18N = {
     az: {
+      bgDesk: "Bu cihaz kompüterdir: brauzer fonda özü oxumağa davam edir, bu rejim yalnız telefon/planşet üçündür.",
+      bgEq: "ℹ Ekvalayzer aktivdir, telefonda fonda səs kəsilə bilər. Parametrlərdə «Sıfırla» bas",
       bg: "Fon rejimi", bgSub: "Proqramdan çıxanda mahnı bildiriş panelində oxumağa davam etsin",
       bgOff: "Söndür", bgSave: "Qənaət", bgFull: "Tam",
       bgHelp1: "Qənaət: yalnız ⬇ endirilmiş mahnılar fonda oxuyur. API xərci yoxdur.",
@@ -36,6 +38,8 @@
       bgHint: "ℹ Fon rejimi (Qənaət): bu mahnı endirilməyib, ona görə fonda dayandı. ⬇ Endir və ya Parametrlərdə «Tam» seç"
     },
     en: {
+      bgDesk: "This is a computer: the browser keeps playing in the background by itself. This mode is for phones/tablets only.",
+      bgEq: "ℹ The equalizer is on, so sound may cut out in the background on phones. Press “Reset” in Settings",
       bg: "Background play", bgSub: "Keep playing in the notification bar when you leave the app",
       bgOff: "Off", bgSave: "Saver", bgFull: "Full",
       bgHelp1: "Saver: only ⬇ downloaded songs keep playing in the background. No API cost.",
@@ -47,6 +51,8 @@
       bgHint: "ℹ Background (Saver): this song isn't downloaded, so it stopped. ⬇ Download it or choose “Full” in Settings"
     },
     ru: {
+      bgDesk: "Это компьютер: браузер сам продолжает играть в фоне. Режим нужен только для телефона/планшета.",
+      bgEq: "ℹ Эквалайзер включён, на телефоне звук в фоне может пропадать. Нажмите «Сбросить» в настройках",
       bg: "Фоновый режим", bgSub: "Продолжать играть в шторке уведомлений при выходе из приложения",
       bgOff: "Выкл", bgSave: "Экономия", bgFull: "Полный",
       bgHelp1: "Экономия: в фоне играют только ⬇ загруженные песни. Без расхода API.",
@@ -81,6 +87,34 @@
   }
   function bgSpend() { try { localStorage.setItem("mu_bg_cnt", JSON.stringify({ d: dayKey(), n: bgUsed() + 1 })); } catch (_) {} }
   const bgCanStream = () => bgMode() === 2 && bgUsed() < BG_DAILY_CAP;
+
+  /* Fon məntiqi yalnız telefon/planşetdə lazımdır: orada YouTube iframe fonda dayanır.
+     Kompüterdə brauzer başqa tabda özü oxumağa davam edir — heç nəyə toxunmuruq.
+     (Kompüterdə sınamaq üçün konsolda: localStorage.mu_bg_force = "1") */
+  const isTouch = () => {
+    try {
+      if (localStorage.getItem("mu_bg_force") === "1") return true;
+      const ua = navigator.userAgent || "";
+      return /Android|iPhone|iPad|iPod|Mobile/i.test(ua) ||
+        (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ||
+        matchMedia("(hover: none) and (pointer: coarse)").matches;
+    } catch (_) { return false; }
+  };
+  const bgActive = () => bgMode() !== 0 && isTouch();
+
+  /* ENDİRİLMİŞ MAHNILAR FONDA NİYƏ OXUMURDU:
+     əsas skript HƏR endirilmiş mahnını Web Audio qrafindən (ekvalayzer) keçirir —
+     ekvalayzer 0 dB olanda belə. Telefonda Web Audio çıxışı proqramdan çıxanda
+     susdurulur. Telefonda ekvalayzer sıfırdırsa qrafı qurmuruq: <audio> birbaşa
+     çıxır, fonda və bildiriş panelində davam edir. */
+  const eqFlat = () => { const e = S.eq || {}; return !e.bass && !e.mid && !e.treble; };
+  if (typeof window.buildAudioGraph === "function") {
+    const _bag = window.buildAudioGraph;
+    window.buildAudioGraph = function () {
+      try { if (isTouch() && eqFlat()) return false; } catch (_) {}
+      return _bag.apply(this, arguments);
+    };
+  }
 
   const curRate = () => { const r = parseFloat(localStorage.getItem("mu_rate")); return r > 0 ? r : 1; };
   const curAudio = () => S.offAudio || S.streamAudio || null;
@@ -180,12 +214,12 @@
      • Qənaət rejimində fonda axın ümumiyyətlə başlamır
      • Fonda "sonrakı" yalnız ⬇ endirilmiş mahnılara keçir
   ════════════════════════════════════════════ */
-  let _hint = "";                                   // geri qayıdanda göstəriləcək mesaj: "save" | "cap" | "fail"
+  let _hint = "";                                   // geri qayıdanda göstəriləcək mesaj: "save" | "cap" | "fail" | "eq"
 
   if (typeof window.streamPlay === "function") {
     const _sp = window.streamPlay;
     window.streamPlay = function () {
-      if (document.hidden && bgMode() !== 0) {
+      if (document.hidden && bgActive()) {
         if (!bgCanStream()) {
           if (bgMode() === 2) _hint = "cap";
           S.playing = false; try { setPUI("pause"); } catch (_) {}
@@ -210,7 +244,7 @@
   if (typeof window.nextSong === "function") {
     const _next = window.nextSong;
     window.nextSong = function () {
-      if (document.hidden && bgMode() !== 0 && !bgCanStream()) {
+      if (document.hidden && bgActive() && !bgCanStream()) {
         const i = nextDownloaded();
         if (i >= 0) { playSong(S.list[i]); }
         else { S.playing = false; try { setPUI("pause"); } catch (_) {} }
@@ -270,7 +304,8 @@
 
   function onHide() {
     clearTimeout(_hidT);
-    if (bgMode() === 0) return;
+    try { if (isTouch() && S.eqNodes && S.offAudio && S.playing && !_hint) _hint = "eq"; } catch (_) {}
+    if (!bgActive()) return;
     try { if (S.audioCtx && S.audioCtx.state === "suspended") S.audioCtx.resume(); } catch (_) {}
     const song = S.list[S.idx];
     const ytWas = !!(S.ytOk && S.ytp && !S.offAudio && !S.streamAudio && S.playing);
@@ -285,7 +320,8 @@
     const a = curAudio();
     if (a) { S.playing = !a.paused; try { setPUI(a.paused ? "pause" : "play"); } catch (_) {} }   // pleyerin vəziyyətini sinxronla
     const h = _hint; _hint = "";
-    if (h === "fail") say(L("bgFail"), 6000);
+    if (h === "eq") say(L("bgEq"), 7000);
+    else if (h === "fail") say(L("bgFail"), 6000);
     else if (h === "cap") say(L("bgCap", { cap: BG_DAILY_CAP }), 6000);
     else if (h === "save") {                                    // sessiyada bir dəfə
       try { if (sessionStorage.getItem("mu_bg_hint")) return; sessionStorage.setItem("mu_bg_hint", "1"); } catch (_) {}
@@ -326,6 +362,7 @@
       '<div><div class="settings-lbl">🎧 ' + esc(L("bg")) + '</div><div class="settings-sub">' + esc(L("bgSub")) + '</div></div>' +
       '<div class="bg-chips">' + chip(0, "bgOff") + chip(1, "bgSave") + chip(2, "bgFull") + '</div>' +
       '<div class="settings-sub" id="mu-bg-help">' + esc(helpText(m)) + '</div>' +
+      (isTouch() ? '' : '<div class="settings-sub" id="mu-bg-desk" style="color:var(--g)">' + esc(L("bgDesk")) + '</div>') +
       '<div class="settings-sub" id="mu-bg-used"' + (m === 2 ? "" : ' style="display:none"') + '>' + esc(usedText()) + '</div>' +
       '</div>';
   }
