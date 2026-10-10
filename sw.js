@@ -1,7 +1,7 @@
-const CACHE_NAME  = 'mu-v30';
-const THUMB_CACHE = 'mu-thumb-v30';
-const FONT_CACHE  = 'mu-font-v30';
-const CDN_CACHE   = 'mu-cdn-v30';
+const CACHE_NAME  = 'mu-v31';
+const THUMB_CACHE = 'mu-thumb-v31';
+const FONT_CACHE  = 'mu-font-v31';
+const CDN_CACHE   = 'mu-cdn-v31';
 
 const SHELL = ['/', '/index.html', '/features.js', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
@@ -82,7 +82,7 @@ self.addEventListener('fetch', e => {
   }
 });
 
-const SVG_FALLBACK = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 180'><rect width='320' height='180' fill='%230e1521'/><text x='160' y='105' font-size='56' text-anchor='middle' fill='%23283858'>♪</text></svg>`;
+const SVG_FALLBACK = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 180'><rect width='320' height='180' fill='#0e1521'/><text x='160' y='105' font-size='56' text-anchor='middle' fill='#283858'>♪</text></svg>`;
 
 async function thumbFirst(req) {
   const cache = await caches.open(THUMB_CACHE);

@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════
    Music Universe — əlavə xüsusiyyətlər (features.js)
    1) Tempo  2) Oflayn zolaq  3) İxrac/İdxal
-   4) Paylaşma kartı  5) Xülasə (ən çox dinlədiklərin)
+   4) Paylaşma kartı  5) Xülasə  6) Mahnı adları + ⚙ düyməsi
    index.html-in ƏSAS skriptindən SONRA yüklənir.
 ═══════════════════════════════════════════════════════════ */
 (function () {
@@ -27,6 +27,7 @@
   /* ══ DİLLƏR ══ */
   const I18N = {
     az: {
+      settingsBtn: "Parametrlər",
       tempo: "Tempo", tempoSub: "Mahnının sürəti (səs tonu dəyişmir)",
       offline: "📵 Oflayn rejim — yalnız endirilmiş mahnılar", offGo: "Endirilənlər ›",
       offEmpty: "Oflayn rejimdə göstəriləcək endirilmiş mahnı yoxdur. İnternet olanda ⬇ Endir ilə saxla.",
@@ -41,6 +42,7 @@
       plays: "DİNLƏMƏ", mins: "DƏQİQƏ", noData: "Hələ kifayət qədər dinləmə yoxdur", open: "Aç"
     },
     en: {
+      settingsBtn: "Settings",
       tempo: "Speed", tempoSub: "Playback speed (pitch stays the same)",
       offline: "📵 Offline mode — downloaded songs only", offGo: "Downloads ›",
       offEmpty: "No downloaded songs to show offline. Use ⬇ Download while online.",
@@ -55,6 +57,7 @@
       plays: "PLAYS", mins: "MINUTES", noData: "Not enough listening data yet", open: "Open"
     },
     ru: {
+      settingsBtn: "Настройки",
       tempo: "Скорость", tempoSub: "Скорость воспроизведения (тон не меняется)",
       offline: "📵 Офлайн — только загруженные песни", offGo: "Загрузки ›",
       offEmpty: "Нет загруженных песен для офлайна. Загрузите их при наличии интернета.",
@@ -94,6 +97,8 @@
 body.mu-off #main{padding-top:calc(var(--nav) + 46px)}
 body.mu-off #npw{top:calc(var(--nav) + 38px)}
 #mu-off-empty{display:none;text-align:center;padding:30px 18px;color:var(--t2);font-size:.85rem;line-height:1.7}
+#mu-set-btn{display:none}
+@media(min-width:900px){#mu-set-btn{display:flex}}
 #m-mucard .mu-prev{width:100%;max-height:62vh;object-fit:contain;border-radius:14px;background:#000;display:block}
 `;
   document.head.appendChild(css);
@@ -470,9 +475,7 @@ body.mu-off #npw{top:calc(var(--nav) + 38px)}
 
   const toPng = cv => new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error("png")), "image/png"));
 
-  function cleanTitle(t) {
-    return String(t || "").replace(/\s*[\(\[][^\)\]]*(official|video|audio|lyric|klip|clip|\bhd\b|4k|visualizer)[^\)\]]*[\)\]]/ig, "").replace(/\s{2,}/g, " ").trim();
-  }
+  function cleanTitle(t) { return stripNoise(t); }
 
   /* ── 4) Mahnı kartı ── */
   async function makeSongCard(song) {
@@ -661,11 +664,13 @@ body.mu-off #npw{top:calc(var(--nav) + 38px)}
     } catch (_) {}
   }
 
+  let _histP = Promise.resolve();
   if (typeof window.addToHistory === "function") {
     const _add = window.addToHistory;
     window.addToHistory = function (song) {
       try { trackPlay(song).catch(() => {}); } catch (_) {}
-      return _add.apply(this, arguments);
+      _histP = Promise.resolve(_add.apply(this, arguments));
+      return _histP;
     };
   }
 
@@ -704,6 +709,166 @@ body.mu-off #npw{top:calc(var(--nav) + 38px)}
   }
 
   /* ════════════════════════════════════════════
+     6) MAHNI ADLARI — təmizləmə + API ilə tamamlama
+  ════════════════════════════════════════════ */
+  const NOISE_WORDS = "official|video|videoclip|music video|lyric video|lyrics?|audio|klip|clip|rəsmi|hd|hq|4k|8k|1080p|720p|mv|m\\/v|visuali[sz]er|full video|клип|официальн\\p{L}*|текст";
+  const NOISE_RE = new RegExp("(?:^|[^\\p{L}\\p{N}])(?:" + NOISE_WORDS + ")(?=$|[^\\p{L}\\p{N}])", "iu");
+  const NOISE_ALL = new RegExp(NOISE_RE.source, "giu");
+  const isNoiseOnly = seg => !String(seg).replace(NOISE_ALL, " ").replace(/[^\p{L}\p{N}]/gu, "");
+  const norm = x => String(x == null ? "" : x).toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+
+  // "(Official Video)", "[HD]", "- Official Audio", "| Lyrics" kimi artıqları silir
+  function stripNoise(t) {
+    t = String(t == null ? "" : t);
+    t = t.replace(/[\(\[【][^\)\]】]*[\)\]】]/g, m => NOISE_RE.test(m) ? "" : m);
+    t = t.replace(/\s+/g, " ").trim();
+    for (let i = 0; i < 4; i++) {
+      const m = t.match(/^(.*\S)\s+[-–—|]\s+([^-–—|]*)$/);
+      if (m && isNoiseOnly(m[2])) t = m[1]; else break;
+    }
+    return t.replace(/[\s\-–—|:]+$/, "").replace(/\s{2,}/g, " ").trim();
+  }
+
+  // "EdSheeranVEVO" → "Ed Sheeran", "Adele - Topic" → "Adele", "YouTube" → ""
+  function cleanChannel(c) {
+    c = String(c == null ? "" : c).trim();
+    if (!c || /^youtube$/i.test(c)) return "";
+    const vevo = /vevo$/i.test(c);
+    c = c.replace(/\s*-\s*topic$/i, "").replace(/\s*vevo$/i, "").replace(/\s+official(\s+channel)?$/i, "").trim();
+    if (vevo && !/\s/.test(c)) c = c.replace(/(\p{Ll})(\p{Lu})/gu, "$1 $2");
+    return c;
+  }
+
+  // Xam YouTube başlığı + kanal adı → { title, artist }
+  function cleanMeta(rawTitle, channel) {
+    const ch = cleanChannel(channel);
+    const t = stripNoise(rawTitle);
+    let title = t, artist = ch;
+    const parts = t.split(/\s+[-–—|]\s+/).map(x => x.trim()).filter(Boolean);
+    if (parts.length >= 2) {
+      const first = parts[0], rest = parts.slice(1).join(" - "), nc = norm(ch);
+      if (nc && norm(rest).includes(nc) && !norm(first).includes(nc) && norm(rest).length <= nc.length + 12) { title = first; artist = rest; }
+      else if (first.length <= 60) { artist = first; title = rest; }
+    }
+    title = title.replace(/^["'“”‘’«»]+|["'“”‘’«»]+$/g, "").replace(/\s+/g, " ").trim() || String(rawTitle || "").trim();
+    return { title: clip(title, 200), artist: clip(String(artist).trim(), 120) };
+  }
+  window.MU_FEAT = { cleanMeta, stripNoise };
+
+  const PH = /^(?:YouTube: |Video )[A-Za-z0-9_-]{11}$/;
+  const isPh = o => !!o && typeof o.title === "string" && (PH.test(o.title) || o.title === o.videoId);
+  // Kataloqdakı əl ilə yazılmış adlar həmişə qalır (YouTube-un xam adı onları pozmasın)
+  const CATALOG = new Map((S.list || []).map(s => [s.videoId, { title: s.title, artist: s.artist }]));
+
+  const metaCache = new Map();
+  async function getMeta(ids) {
+    const need = [...new Set(ids)].filter(i => VID.test(i) && !metaCache.has(i)).slice(0, 20);
+    if (need.length && navigator.onLine) {
+      try {
+        const r = await fetch("/api/yt-meta?ids=" + need.join(","), { signal: AbortSignal.timeout(9000) });
+        if (r.ok) {
+          const j = await r.json();
+          Object.keys(j || {}).forEach(k => {
+            const v = j[k];
+            if (VID.test(k) && v && typeof v.title === "string" && v.title) metaCache.set(k, cleanMeta(v.title, v.author));
+          });
+        }
+      } catch (_) {}
+    }
+    const out = {};
+    ids.forEach(i => { if (metaCache.has(i)) out[i] = metaCache.get(i); });
+    return out;
+  }
+
+  // Yaddaşdakı siyahıda və pleyerdə adı yenilə
+  function applyMeta(id, m) {
+    if (CATALOG.has(id)) return;
+    S.list.forEach(x => { if (x.videoId === id) { x.title = m.title; x.artist = m.artist || x.artist; x._src = "api"; } });
+    const cur = S.list[S.idx];
+    if (cur && cur.videoId === id) { try { window.updPI(cur.title, cur.artist, null); } catch (_) {} }
+  }
+
+  // Bazadakı yer tutucu adları (YouTube: ID / Video ID) əsl adla əvəz et
+  async function persistMeta(id, m) {
+    const patch = r => { if (isPh(r)) { r.title = m.title; r.artist = m.artist || r.artist; } };
+    for (const t of ["history", "likes", "pl_songs", "downloads", "saved", "offline"]) {
+      try { if (ldb[t]) await ldb[t].where("videoId").equals(id).modify(patch); } catch (_) {}
+    }
+    try {
+      if (featDb) {
+        const r = await featDb.plays.get(id);
+        if (r && isPh(r)) await featDb.plays.put({ ...r, title: m.title, artist: m.artist || r.artist });
+      }
+    } catch (_) {}
+    try {
+      if (typeof FB !== "undefined" && FB && typeof fbD !== "undefined" && fbD && S.user && navigator.onLine) {
+        fbD.ref("stats/" + S.user.uid + "/songs/" + id).transaction(cur => (cur && PH.test(cur.title || ""))
+          ? Object.assign(cur, { title: m.title, artist: m.artist || cur.artist }) : undefined).catch(() => {});
+      }
+    } catch (_) {}
+  }
+
+  async function resolvePlaceholder(id) {
+    try { await _histP; } catch (_) {}
+    const m = (await getMeta([id]))[id];
+    if (!m) return;
+    applyMeta(id, m);
+    await persistMeta(id, m);
+  }
+
+  // Yeni mahnı başlayanda: yer tutucu adı varsa API-dən əsl adı al
+  if (typeof window.playSong === "function") {
+    const _play = window.playSong;
+    window.playSong = function (song) {
+      const r = _play.apply(this, arguments);               // klik hadisəsi itmir
+      try { if (song && VID.test(song.videoId || "") && isPh(song) && !CATALOG.has(song.videoId)) resolvePlaceholder(song.videoId); } catch (_) {}
+      return r;
+    };
+  }
+
+  // Pleyerdəki ad: kataloq adı qalır; yapışdırılan linklər üçün xam ad təmizlənir
+  if (typeof window.updPI === "function") {
+    const _upd = window.updPI;
+    window.updPI = function (title, artist, src) {
+      try {
+        const cur = S.list[S.idx];
+        const cat = cur && CATALOG.get(cur.videoId);
+        if (cat) {
+          cur.title = cat.title; cur.artist = cat.artist;
+          title = cat.title; artist = cat.artist;
+        } else if (cur) {
+          if (cur._src === "api") { title = cur.title; artist = cur.artist; }
+          else if ((isPh(cur) || cur._src === "yt") && title && !PH.test(title) && title !== cur.videoId) {
+            const m = cleanMeta(title, artist);
+            cur.title = m.title; cur.artist = m.artist || cur.artist; cur._src = "yt";
+            title = cur.title; artist = cur.artist;
+          }
+        }
+      } catch (_) {}
+      return _upd.call(this, title, artist, src);
+    };
+  }
+
+  // Köhnə yer tutucu adları bir dəfəyə düzəlt (internet olanda)
+  let _migrating = false;
+  async function migratePlaceholders() {
+    if (_migrating || !navigator.onLine) return;
+    _migrating = true;
+    try {
+      const ids = new Set();
+      for (const t of ["history", "likes", "pl_songs", "downloads", "saved", "offline"]) {
+        try { (await ldb[t].filter(isPh).toArray()).forEach(r => { if (VID.test(r.videoId || "")) ids.add(r.videoId); }); } catch (_) {}
+      }
+      const list = [...ids].filter(i => !CATALOG.has(i)).slice(0, 100);
+      for (let i = 0; i < list.length; i += 20) {
+        const got = await getMeta(list.slice(i, i + 20));
+        for (const id of Object.keys(got)) { applyMeta(id, got[id]); await persistMeta(id, got[id]); }
+      }
+    } catch (_) {} finally { _migrating = false; }
+  }
+  window.addEventListener("online", () => { setTimeout(migratePlaceholders, 1500); });
+
+  /* ════════════════════════════════════════════
      UI QOŞULMASI
   ════════════════════════════════════════════ */
   function injectCardButtons() {
@@ -727,6 +892,18 @@ body.mu-off #npw{top:calc(var(--nav) + 38px)}
     const l = $("pem-card-lbl"); if (l) l.textContent = L("card");
     const t = $("b-bar-card"); if (t) t.title = L("card");
   }
+
+  function injectSettingsButton() {
+    const end = document.querySelector(".bar-end");
+    if (!end || $("mu-set-btn")) return;
+    const b = document.createElement("button");
+    b.className = "ibtn"; b.id = "mu-set-btn";
+    b.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>';
+    b.addEventListener("click", () => { try { openSettings(); } catch (e) { console.warn(e); } });
+    end.insertBefore(b, $("thbtn") || end.firstChild);
+    refreshSettingsBtn();
+  }
+  function refreshSettingsBtn() { const b = $("mu-set-btn"); if (b) b.title = L("settingsBtn"); }
 
   function injectHistoryButton() {
     const cnt = $("hist-cnt");
@@ -781,7 +958,7 @@ body.mu-off #npw{top:calc(var(--nav) + 38px)}
     const _al = window.applyLang;
     window.applyLang = function () {
       const r = _al.apply(this, arguments);
-      try { refreshTempoUI(); refreshOfflineText(); refreshHistoryButton(); injectCardButtons(); } catch (_) {}
+      try { refreshTempoUI(); refreshOfflineText(); refreshHistoryButton(); refreshSettingsBtn(); injectCardButtons(); } catch (_) {}
       return r;
     };
   }
@@ -791,12 +968,14 @@ body.mu-off #npw{top:calc(var(--nav) + 38px)}
     injectTempoUI();
     injectCardButtons();
     injectHistoryButton();
+    injectSettingsButton();
     injectOfflineUI();
     watchGrids();
     applyOfflineFilter();
     seedPlays();
     setTimeout(offlineStartup, 900);
     setTimeout(applyOfflineFilter, 1200);   // əsas skript kartları sonra çəkə bilər
+    setTimeout(migratePlaceholders, 2500);  // köhnə "YouTube: ID" adlarını düzəlt
   } catch (e) {
     console.warn("[features] başlanğıc xətası:", e);
   }
