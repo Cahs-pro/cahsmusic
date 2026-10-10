@@ -1,9 +1,9 @@
-const CACHE_NAME  = 'mu-v29';
-const THUMB_CACHE = 'mu-thumb-v29';
-const FONT_CACHE  = 'mu-font-v29';
-const CDN_CACHE   = 'mu-cdn-v29';
+const CACHE_NAME  = 'mu-v30';
+const THUMB_CACHE = 'mu-thumb-v30';
+const FONT_CACHE  = 'mu-font-v30';
+const CDN_CACHE   = 'mu-cdn-v30';
 
-const SHELL = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
+const SHELL = ['/', '/index.html', '/features.js', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
 // index.html bu skriptlərsiz işləmir (Dexie = yerli baza, Firebase = giriş/sosial).
 // Oflayn açılışda yüklənməsələr əsas skript yarıda dayanır və səhifələr arası keçid işləmir.
