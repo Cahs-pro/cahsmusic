@@ -1,7 +1,7 @@
-const CACHE_NAME  = 'mu-v32';
-const THUMB_CACHE = 'mu-thumb-v32';
-const FONT_CACHE  = 'mu-font-v32';
-const CDN_CACHE   = 'mu-cdn-v32';
+const CACHE_NAME  = 'mu-v33';
+const THUMB_CACHE = 'mu-thumb-v33';
+const FONT_CACHE  = 'mu-font-v33';
+const CDN_CACHE   = 'mu-cdn-v33';
 
 const SHELL = ['/', '/index.html', '/features.js', '/background.js', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 // index.html bu skriptlərsiz işləmir (Dexie = yerli baza, Firebase = giriş/sosial).

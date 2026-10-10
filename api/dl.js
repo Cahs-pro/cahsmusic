@@ -3,7 +3,13 @@
  * GET /api/dl?v=VIDEO_ID
  * → RapidAPI youtube-mp36-dən MP3 link alır, JSON cavab verir
  * Client özü həmin linkdən endirir (stream yox, redirect)
+ *
+ * KVOTA QORUMASI: uğurlu cavab keşlənir (brauzer 10 dəq, Vercel CDN 30 dəq).
+ * Eyni mahnı bu müddətdə təkrar istənəndə RapidAPI-yə sorğu getmir.
+ * Link tez ölürsə, CACHE_BROWSER / CACHE_CDN rəqəmlərini azalt.
  */
+const CACHE_BROWSER = 600;   // saniyə
+const CACHE_CDN     = 1800;  // saniyə
 
 module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -59,10 +65,12 @@ module.exports = async function handler(req, res) {
     if (!link) throw new Error("MP3 hazırlanmadı, yenidən cəhd edin");
 
     // Linki JSON kimi qaytar — client özü endirir
+    res.setHeader("Cache-Control", `public, max-age=${CACHE_BROWSER}, s-maxage=${CACHE_CDN}`);
     res.status(200).json({ ok: true, link, title });
 
   } catch (err) {
     console.error("[dl] xəta:", err.message);
+    res.setHeader("Cache-Control", "no-store");      // xəta heç vaxt keşlənmir
     res.status(500).json({ error: err.message });
   }
 };
