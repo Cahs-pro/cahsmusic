@@ -6,7 +6,7 @@
     { "source": "/refund",  "destination": "/refund.html"  },
     { "source": "/s/:videoId", "destination": "/index.html" },
     {
-      "source": "/((?!api/)(?!icon\\.png)(?!icon-192\\.png)(?!icon-512\\.png)(?!manifest\\.json)(?!sw\\.js)(?!features\\.js)(?!background\\.js)(?!favicon\\.ico)(?!terms\\.html)(?!privacy\\.html)(?!refund\\.html).*)",
+      "source": "/((?!api/)(?!icon\\.png)(?!icon-192\\.png)(?!icon-512\\.png)(?!manifest\\.json)(?!sw\\.js)(?!features\\.js)(?!background\\.js)(?!jamendo\\.js)(?!stats\\.js)(?!favicon\\.ico)(?!terms\\.html)(?!privacy\\.html)(?!refund\\.html).*)",
       "destination": "/index.html"
     }
   ],

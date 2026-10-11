@@ -761,26 +761,31 @@ body.mu-off #npw{top:calc(var(--nav) + 38px)}
   const CATALOG = new Map((S.list || []).map(s => [s.videoId, { title: s.title, artist: s.artist }]));
 
   const metaCache = new Map();
+  const inflight = new Map();                                    // id -> davam edən sorğu (eyni ID iki dəfə soruşulmasın)
   async function getMeta(ids) {
     const need = [...new Set(ids)].filter(i => VID.test(i) && !metaCache.has(i)).slice(0, 20);
-    if (need.length && navigator.onLine) {
-      try {
-        const r = await fetch("/api/yt-meta?ids=" + need.join(","), { signal: AbortSignal.timeout(9000) });
-        if (r.ok) {
-          const j = await r.json();
-          Object.keys(j || {}).forEach(k => {
-            const v = j[k];
-            if (VID.test(k) && v && typeof v.title === "string" && v.title) metaCache.set(k, cleanMeta(v.title, v.author));
-          });
-        }
-      } catch (_) {}
+    const mine = need.filter(i => !inflight.has(i));
+    if (mine.length && navigator.onLine) {
+      const job = (async () => {
+        try {
+          const r = await fetch("/api/yt-meta?ids=" + mine.join(","), { signal: AbortSignal.timeout(9000) });
+          if (r.ok) {
+            const j = await r.json();
+            Object.keys(j || {}).forEach(k => {
+              const v = j[k];
+              if (VID.test(k) && v && typeof v.title === "string" && v.title) metaCache.set(k, cleanMeta(v.title, v.author));
+            });
+          }
+        } catch (_) {}
+      })();
+      mine.forEach(i => inflight.set(i, job));
+      try { await job; } finally { mine.forEach(i => inflight.delete(i)); }
     }
+    await Promise.all(need.filter(i => !mine.includes(i)).map(i => inflight.get(i)).filter(Boolean));   // başqasının sorğusunu gözlə
     const out = {};
     ids.forEach(i => { if (metaCache.has(i)) out[i] = metaCache.get(i); });
     return out;
   }
-
-  // Yaddaşdakı siyahıda və pleyerdə adı yenilə
   function applyMeta(id, m) {
     if (CATALOG.has(id)) return;
     S.list.forEach(x => { if (x.videoId === id) { x.title = m.title; x.artist = m.artist || x.artist; x._src = "api"; } });

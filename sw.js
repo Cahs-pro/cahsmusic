@@ -1,10 +1,9 @@
-const CACHE_NAME  = 'mu-v34';
-const THUMB_CACHE = 'mu-thumb-v34';
-const FONT_CACHE  = 'mu-font-v34';
-const CDN_CACHE   = 'mu-cdn-v34';
+const CACHE_NAME  = 'mu-v36';
+const THUMB_CACHE = 'mu-thumb-v36';
+const FONT_CACHE  = 'mu-font-v36';
+const CDN_CACHE   = 'mu-cdn-v36';
 
-const SHELL = ['/', '/index.html', '/features.js', '/background.js', '/manifest.json', '/icon-192.png', '/icon-512.png'];
-// index.html bu skriptlərsiz işləmir (Dexie = yerli baza, Firebase = giriş/sosial).
+const SHELL = ['/', '/index.html', '/features.js', '/background.js', '/jamendo.js', '/stats.js', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 // Oflayn açılışda yüklənməsələr əsas skript yarıda dayanır və səhifələr arası keçid işləmir.
 const CDN_LIBS = [
   'https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js',

@@ -2746,8 +2746,8 @@ async function renderStatsInProfile(uid,container){
   if(songs.length){
     html+=`<div class="sh" style="margin:6px 0 8px"><span class="dot"></span>Top Mahnılar</div><div class="top-songs">`;
     songs.slice(0,5).forEach((s,i)=>{
-      const e2=v=>String(v||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
-      html+=`<div class="top-song-row" onclick="playSong({videoId:'${e2(s.videoId)}',title:'${e2(s.title)}',artist:'${e2(s.artist||"")}',thumb:'${e2(s.thumb||TH(s.videoId))}'})"><span class="top-rank${i===0?" gold":""}">${i+1}</span><div class="top-thumb"><img src="${X(s.thumb||PHO)}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="top-info"><div class="top-tit">${X(s.title)}</div><div class="top-cnt">${s.count} oynatma</div></div></div>`;
+      const e2=v=>X(String(v||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/[\r\n]+/g," "));
+      html+=`<div class="top-song-row" onclick="playSong({videoId:'${e2(s.videoId)}',title:'${e2(s.title)}',artist:'${e2(s.artist||"")}',thumb:'${e2(s.thumb||TH(s.videoId))}'})"><span class="top-rank${i===0?" gold":""}">${i+1}</span><div class="top-thumb"><img src="${X(s.thumb||PHO)}" onerror="this.onerror=null;this.src='${PHO}'" alt=""/></div><div class="top-info"><div class="top-tit">${X(s.title)}</div><div class="top-cnt">${+s.count||0} oynatma</div></div></div>`;
     });
     html+="</div>";
   }
@@ -3015,5 +3015,7 @@ function handleDeepLink(){
 </script>
 <script src="/features.js"></script>
 <script src="/background.js"></script>
+<script src="/jamendo.js"></script>
+<script src="/stats.js"></script>
 </body>
 </html>
