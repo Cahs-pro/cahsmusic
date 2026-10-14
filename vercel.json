@@ -3,10 +3,10 @@
   "rewrites": [
     { "source": "/terms",   "destination": "/terms.html"   },
     { "source": "/privacy", "destination": "/privacy.html" },
-    { "source": "/refund",  "destination": "/refund.html"  },
+    { "source": "/copyright", "destination": "/copyright.html" },
     { "source": "/s/:videoId", "destination": "/index.html" },
     {
-      "source": "/((?!api/)(?!icon\\.png)(?!icon-192\\.png)(?!icon-512\\.png)(?!manifest\\.json)(?!sw\\.js)(?!features\\.js)(?!background\\.js)(?!stats\\.js)(?!favicon\\.ico)(?!terms\\.html)(?!privacy\\.html)(?!refund\\.html).*)",
+      "source": "/((?!api/)(?!icon\\.png)(?!icon-192\\.png)(?!icon-512\\.png)(?!icon-maskable-)(?!manifest\\.json)(?!sw\\.js)(?!features\\.js)(?!background\\.js)(?!stats\\.js)(?!favicon\\.ico)(?!terms\\.html)(?!privacy\\.html)(?!copyright\\.html).*)",
       "destination": "/index.html"
     }
   ],

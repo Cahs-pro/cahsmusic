@@ -4,11 +4,15 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Məxfilik Siyasəti — Music Universe</title>
+<meta name="robots" content="index,follow"/>
+<link rel="icon" href="/icon-192.png" type="image/png"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#080c12;color:#eef2ff;line-height:1.7;padding:0 0 60px}
 .nav{background:#0e1521;border-bottom:1px solid rgba(100,140,255,.1);padding:16px 24px;display:flex;align-items:center;gap:12px}
 .logo{color:#1ed760;font-weight:800;font-size:1.1rem;text-decoration:none}
+.back{color:#7b90b5;font-size:.85rem;text-decoration:none}
+.back:hover{color:#eef2ff}
 .wrap{max-width:720px;margin:0 auto;padding:40px 24px}
 h1{font-size:1.8rem;font-weight:800;color:#eef2ff;margin-bottom:8px}
 .date{color:#7b90b5;font-size:.85rem;margin-bottom:36px}
@@ -19,57 +23,75 @@ ul li{margin-bottom:6px}
 a{color:#1ed760;text-decoration:none}
 a:hover{text-decoration:underline}
 .box{background:#0e1521;border:1px solid rgba(100,140,255,.1);border-radius:12px;padding:20px 24px;margin:20px 0}
+.foot{margin-top:40px;padding-top:18px;border-top:1px solid rgba(100,140,255,.1);font-size:.82rem;color:#7b90b5}
+.foot a{color:#7b90b5;text-decoration:underline}
 </style>
 </head>
 <body>
 <nav class="nav">
   <a class="logo" href="/">🎵 Music Universe</a>
   <span style="color:#3d5070">›</span>
-  <span style="color:#7b90b5;font-size:.85rem">Məxfilik Siyasəti</span>
+  <span class="back">Məxfilik Siyasəti</span>
 </nav>
 <div class="wrap">
   <h1>Məxfilik Siyasəti</h1>
-  <p class="date">Son yeniləmə: May 2025</p>
+  <p class="date">Son yeniləmə: Oktyabr 2026</p>
 
   <div class="box">
-    <p>Məxfiliyiniz bizim üçün vacibdir. Bu siyasət hansı məlumatları topladığımızı və onlardan necə istifadə etdiyimizi izah edir.</p>
+    <p><strong>Qısaca:</strong> reklam göstərmirik, məlumatlarınızı satmırıq və ödəniş məlumatı toplamırıq. Playlistləriniz, sevimliləriniz və oflayn nüsxələriniz yalnız cihazınızda qalır.</p>
   </div>
 
   <h2>1. Topladığımız Məlumatlar</h2>
-  <p><strong style="color:#eef2ff">Google hesabı məlumatları:</strong> Giriş etdikdə adınız, e-mail ünvanınız və profil şəkliniz alınır.</p>
-  <p><strong style="color:#eef2ff">İstifadə məlumatları:</strong> Hansı mahnıları dinlədiyiniz, bəyənmələriniz, playlist-ləriniz cihazınızda (IndexedDB) saxlanılır.</p>
-
-  <h2>2. Məlumatların İstifadəsi</h2>
+  <p>Google hesabı ilə daxil olduqda Firebase Authentication vasitəsilə aşağıdakılar alınır: ad, e-poçt ünvanı, profil şəkli və unikal istifadəçi identifikatoru. Sosial funksiyalar üçün Firebase Realtime Database-də bunlar saxlanır:</p>
   <ul>
-    <li>Hesab yaratmaq və idarə etmək</li>
-    <li>Dostlarla musiqi paylaşım funksiyaları</li>
-    <li>Xidmətin yaxşılaşdırılması</li>
+    <li>Profil: ad, şəkil, e-poçt, VIP statusu, onlayn olma və sonuncu görünmə vaxtı</li>
+    <li>“İndi çalınır”: dinlədiyiniz mahnının adı, ifaçısı və şəkli</li>
+    <li>Dostlar və dost sorğuları, söhbət mesajları, bildiriş seçimi</li>
+    <li>Statistika: oynatma sayı, dəqiqə, cihazda saxlanan mahnı sayı və ən çox dinlədiyiniz mahnılar</li>
   </ul>
 
-  <h2>3. Firebase (Google)</h2>
-  <p>İstifadəçi məlumatları Firebase Realtime Database-də saxlanılır. Firebase Google-un məhsuludur və öz məxfilik siyasətinə tabedir: <a href="https://firebase.google.com/support/privacy" target="_blank">firebase.google.com/support/privacy</a></p>
+  <h2>2. Dostlara Nələr Görünür</h2>
+  <p>Dostlarınız profilinizdə adınızı, şəklinizi, e-poçtunuzu, “indi çalınır” mahnını və statistikanızı görə bilər.</p>
 
-  <h2>5. Üçüncü Tərəflərlə Paylaşım</h2>
-  <p>Şəxsi məlumatlarınız heç vaxt üçüncü tərəflərə satılmır. Yalnız xidmətin təqdim edilməsi üçün zəruri olan tərəflərlə (Firebase, Paddle) paylaşılır.</p>
+  <h2>3. Yalnız Cihazınızda Saxlananlar</h2>
+  <ul>
+    <li>Playlistlər, sevimlilər, dinləmə tarixçəsi və oflayn nüsxələr (brauzerin IndexedDB yaddaşı)</li>
+    <li>Parametrlər: dil, tema, ekvalayzer, crossfade, tempo, fon rejimi (localStorage)</li>
+    <li>Səhifə faylları və şəkillərin keşi (service worker)</li>
+  </ul>
+  <p>Bunlar serverlərimizə göndərilmir.</p>
 
-  <h2>6. Cihazda Saxlanan Məlumatlar</h2>
-  <p>Endirdiğiniz mahnılar, tarix, bəyənmələr cihazınızda (IndexedDB) saxlanılır. Bu məlumatlar serverə göndərilmir. İstənilən vaxt brauzer parametrlərindən silinə bilər.</p>
+  <h2>4. Üçüncü Tərəflər</h2>
+  <ul>
+    <li><strong>YouTube / Google:</strong> musiqi YouTube-un yerləşdirilmiş pleyeri ilə göstərilir. Pleyer öz kukilərini qoya və IP ünvanınızı Google ilə bölüşə bilər. Bax: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google Məxfilik Siyasəti</a> və <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer">YouTube Xidmət Şərtləri</a>.</li>
+    <li><strong>Firebase (Google):</strong> giriş və sosial məlumatların saxlanması.</li>
+    <li><strong>Vercel:</strong> saytın yerləşdirilməsi; standart server qeydlərində IP ünvanı ola bilər.</li>
+    <li>Mahnı adlarını göstərmək üçün serverimiz YouTube-dan açıq video məlumatını (ad, kanal) alır; şəxsi məlumat göndərilmir.</li>
+  </ul>
+  <!-- Oflayn saxlama və fonda axın funksiyalarını söndürsən, aşağıdakı abzası sil -->
+  <p>Oflayn saxlama və fonda axın üçün videonun identifikatoru audio çevirmə xidmətinə (RapidAPI üzərindən) göndərilir. Bu zaman şəxsi məlumatlarınız göndərilmir.</p>
 
-  <h2>7. Uşaqların Məxfiliyi</h2>
-  <p>Xidmət 13 yaşdan kiçik uşaqlara yönəlməmişdir. Belə istifadəçilərin məlumatlarını bilərəkdən toplamırıq.</p>
+  <h2>5. Kukilər və İzləmə</h2>
+  <p>Reklam və izləmə kukiləri istifadə etmirik. YouTube pleyeri və Google ilə giriş öz kukilərini qoya bilər.</p>
 
-  <h2>8. Cookie-lər</h2>
-  <p>Yalnız Firebase autentifikasiyası üçün zəruri session cookie-ləri istifadə edilir. Reklam cookie-ləri yoxdur.</p>
+  <h2>6. Saxlama və Silmə</h2>
+  <p>Hesab məlumatları hesabınız mövcud olduğu müddətdə saxlanır. Silinməsini istəsəniz, <a href="mailto:alahsukur120@gmail.com">alahsukur120@gmail.com</a> ünvanına yazın. Cihazdakı məlumatları brauzerin “sayt məlumatlarını sil” seçimi ilə silə bilərsiniz.</p>
+
+  <h2>7. Təhlükəsizlik</h2>
+  <p>Əlaqə HTTPS ilə qorunur, verilənlər bazası giriş qaydaları ilə məhdudlaşdırılır. Heç bir sistem tam təhlükəsiz deyil, ona görə mütləq təhlükəsizliyə zəmanət verə bilmərik.</p>
+
+  <h2>8. Uşaqlar</h2>
+  <p>Xidmət 13 yaşdan kiçik uşaqlar üçün nəzərdə tutulmayıb. Belə istifadəçi aşkar etsək, məlumatlarını sileriz.</p>
 
   <h2>9. Hüquqlarınız</h2>
-  <ul>
-    <li>Məlumatlarınıza giriş tələb edə bilərsiniz</li>
-    <li>Hesabınızı və məlumatlarınızı silə bilərsiniz</li>
-    <li>Məlumatların portativliyini tələb edə bilərsiniz</li>
-  </ul>
+  <p>Azərbaycan Respublikasının şəxsi məlumatlar haqqında qanunvericiliyinə uyğun olaraq məlumatlarınıza baxmaq, düzəltdirmək və silinməsini tələb etmək hüququnuz var. Müraciət üçün aşağıdakı e-poçtdan istifadə edin.</p>
 
-  <h2>10. Əlaqə</h2>
+  <h2>10. Dəyişikliklər</h2>
+  <p>Bu siyasət yenilənə bilər. Əhəmiyyətli dəyişikliklər bu səhifədə “Son yeniləmə” tarixi ilə göstərilir.</p>
+
+  <h2>11. Əlaqə</h2>
   <p>Suallarınız üçün: <a href="mailto:alahsukur120@gmail.com">alahsukur120@gmail.com</a></p>
+  <div class="foot"><a href="/">← Music Universe</a> · <a href="/terms">İstifadə Şərtləri</a> · <a href="/copyright">Müəllif Hüquqları</a></div>
 </div>
 </body>
 </html>
