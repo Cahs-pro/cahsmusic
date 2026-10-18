@@ -359,7 +359,7 @@ body.mu-off #npw{top:calc(var(--nav) + 38px)}
   /* ════════════════════════════════════════════
      ŞƏKİL KARTLARI (4 + 5 üçün ortaq)
   ════════════════════════════════════════════ */
-  const FONT = '"Plus Jakarta Sans",system-ui,sans-serif';
+  const FONT = '"Poppins","Plus Jakarta Sans",system-ui,sans-serif';
 
   async function loadCover(videoId, small) {
     const names = small ? ["hqdefault"] : ["maxresdefault", "hqdefault"];
@@ -466,7 +466,7 @@ body.mu-off #npw{top:calc(var(--nav) + 38px)}
     try {
       if (document.fonts && document.fonts.load) {
         await Promise.race([
-          Promise.all([document.fonts.load("800 60px 'Plus Jakarta Sans'"), document.fonts.load("600 30px 'Plus Jakarta Sans'")]),
+          Promise.all([document.fonts.load("800 60px Poppins"), document.fonts.load("600 30px 'Plus Jakarta Sans'")]),
           sleep(900)
         ]);
       }
