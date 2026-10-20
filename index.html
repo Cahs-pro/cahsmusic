@@ -1805,7 +1805,7 @@ function onYTS(e){
   if(e.data===P.PLAYING){ S.playing=true; setPUI("play"); startTimer(); const d=S.ytp.getVideoData?.(); if(d?.title) updPI(d.title,d.author||"",null); }
   else if(e.data===P.PAUSED){ S.playing=false; setPUI("pause"); stopTimer(); }
   else if(e.data===P.BUFFERING){ setPUI("loading"); }
-  else if(e.data===P.ENDED){ S.playing=false; stopTimer(); S.repeat?(S.ytp.seekTo(0),S.ytp.playVideo()):nextSong(); }
+  else if(e.data===P.ENDED){ S.playing=false; stopTimer(); if(S.repeat){S.ytp.seekTo(0);S.ytp.playVideo();} else if(!(window.MU_SONG_ENDED&&window.MU_SONG_ENDED())) nextSong(); }
 }
 
 function onYTE(e){
@@ -1864,7 +1864,7 @@ async function streamPlay(song){
     audio.onpause   = ()=>{ S.playing=false; setPUI("pause");   };
     audio.onwaiting = ()=> setPUI("loading");
     audio.onplaying = ()=> setPUI("play");
-    audio.onended   = ()=>{ S.playing=false; S.repeat?(audio.currentTime=0,audio.play()):nextSong(); };
+    audio.onended   = ()=>{ S.playing=false; if(S.repeat){audio.currentTime=0;audio.play();} else if(!(window.MU_SONG_ENDED&&window.MU_SONG_ENDED())) nextSong(); };
     audio.onerror   = ()=>{ toast("❌ Stream xətası"); setPUI("pause"); showBrowserHint(song); };
     audio.ontimeupdate = ()=>{
       const c=audio.currentTime, d=audio.duration;
@@ -1974,7 +1974,7 @@ function playFromBlob(rec, song){
   S.offAudio.volume = S.vol / 100;
   S.offAudio.onplay    = ()=>{ S.playing=true;  setPUI("play"); };
   S.offAudio.onpause   = ()=>{ S.playing=false; setPUI("pause"); };
-  S.offAudio.onended   = ()=>{ S.playing=false; stopTimer(); S.repeat?(S.offAudio.currentTime=0,S.offAudio.play()):nextSong(); };
+  S.offAudio.onended   = ()=>{ S.playing=false; stopTimer(); if(S.repeat){S.offAudio.currentTime=0;S.offAudio.play();} else if(!(window.MU_SONG_ENDED&&window.MU_SONG_ENDED())) nextSong(); };
   S.offAudio.onerror   = ()=> toast("❌ Oflayn çalma xətası");
   S.offAudio.ontimeupdate = ()=>{
     if(!S.offAudio) return;
@@ -3097,6 +3097,7 @@ function handleDeepLink(){
 <script src="/background.js"></script>
 <script src="/stats.js"></script>
 <script src="/plus.js"></script>
+<script src="/extras.js"></script>
 <!--MilliNet --> <script type="text/javascript" src="https://millinet.az/banner.js?id=612"></script>
 </body>
 </html>

@@ -692,6 +692,8 @@ ${st && st.videoId ? `<div class="mu-note" style="margin-bottom:4px">${esc(L("ro
     $("mu-room-invite").addEventListener("click", copyInvite);
     $("mu-room-copy").addEventListener("click", copyInvite);
     $("mu-room-leave").addEventListener("click", leaveRoom);
+    // extras.js (reaksiyalar) öz panelini buraya qura bilər
+    try { (window.MU_ROOM_EXTRA || []).forEach(fn => fn(b)); } catch (_) {}
   }
 
   function openRoomModal() { renderRoomModal(); openM("m-room"); }
@@ -1115,5 +1117,5 @@ ${r.topArtists.length ? `<div class="rep-sect">🎤 ${esc(L("repTopArtists"))}</
   }
 
   // Sınaq və xarici istifadə üçün
-  window.MU_PLUS = { openDataCenter, openRoomModal, openReport, openKeysModal, joinRoom, leaveRoom, setPrivacy };
+  window.MU_PLUS = { openDataCenter, openRoomModal, openReport, openKeysModal, joinRoom, leaveRoom, setPrivacy, roomId: () => ROOM.id };
 })();

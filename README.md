@@ -17,6 +17,12 @@
 - **YouTube-dan paylaş → tətbiqdə aç:** PWA-nın share_target-i ilə YouTube-dan paylaşılan link birbaşa Music Universe-də çalınır
 - **Şəxsi dinləmə hesabatı:** son 7 günün qrafiki, saat üzrə dinləmə, ən çox dinlənən ifaçılar, ardıcıl gün seriyası
 - **Əlçatanlıq:** tam klaviatura idarəetməsi (?, Space, ←→, ↑↓, N, P, M, S, R), ekran oxuyucu etiketləri, yüksək kontrast və böyük mətn rejimləri
+- **Mahnı sözləri:** cari mahnının sözləri playerdən bir kliklə (LRCLIB)
+- **Radio / ağıllı mix:** mahnı bitəndə oxşar mahnılar avtomatik çalınır
+- **Otaq reaksiyaları:** birlikdə dinləyərkən ❤️🔥👏😂🎉 üzən emoji ilə
+- **Həftəlik liderlik:** dostlar arasında bu həftənin dinləmə sıralaması
+- **Ortaq playlistlər:** link ilə dostları dəvət et, hamı mahnı əlavə etsin
+- **Nişanlar:** ardıcıl gün seriyası (🔥3–👑100) və dinləmə mərhələləri (🎧50–🏆1000) profildə görünür
 - **PWA:** oflayn rejim, quraşdırma, 3 dil (AZ, EN, RU)
 
 ## Texnologiyalar
@@ -29,6 +35,10 @@ features.js         tempo, oflayn zolaq, ixrac/idxal, paylaşma kartı, xülasə
 background.js       bildiriş paneli və fon rejimi
 stats.js            profil statistikası
 plus.js             məlumatlarım mərkəzi, dinləmə otağı, dinləmə hesabatı, əlçatanlıq
+extras.js           sözlər, radio, otaq reaksiyaları, liderlik, ortaq playlistlər, nişanlar
+api/lyrics.js       mahnı sözləri (LRCLIB)
+api/related.js      oxşar mahnılar (radio rejimi)
+database.rules.json Firebase Realtime Database qaydaları (rooms + collab daxil)
 sw.js               service worker (oflayn işləmə)
 manifest.json       PWA parametrləri
 api/dl.js           oflayn saxlama / axın üçün audio linki (istəyə bağlı)
@@ -50,7 +60,7 @@ Firebase konfiqurasiyası `index.html`-dədir (veb açarları açıq olmaq üç�
 
 ### ⚠️ Birlikdə dinləmə otağı üçün qayda yeniləməsi (məcburi)
 
-Otaqlar `/rooms` düyünündə saxlanır. `permission_denied` xətası alırsınızsa, qaydalara `rooms` bloku əlavə olunmayıb:
+Otaqlar `/rooms`, ortaq playlistlər `/collab` düyünündə saxlanır. `permission_denied` xətası alırsınızsa, qaydalara `rooms` bloku əlavə olunmayıb:
 
 1. Firebase Console → layihə → **Realtime Database → Rules**
 2. `database.rules.json` faylındakı **`rooms`** blokunu mövcud qaydalarınıza köçürün (və ya bütün faylı tətbiq edin)
