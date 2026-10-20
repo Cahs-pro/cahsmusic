@@ -1,4 +1,4 @@
-const CACHE_NAME  = 'mu-v43';
+const CACHE_NAME  = 'mu-v44';
 const THUMB_CACHE = 'mu-thumb-v41';
 const FONT_CACHE  = 'mu-font-v41';
 const CDN_CACHE   = 'mu-cdn-v41';

@@ -159,6 +159,7 @@
   async function openLyrics() {
     const s = curSong();
     if (!s) { say(L("lyNoSong")); return; }
+    cntInc("lyrics");
     ensureOverlay("m-lyrics", 430);
     const b = $("m-lyrics-b");
     b.innerHTML = `<div class="mtit">📝 ${esc(L("lyrics"))}</div>
@@ -205,6 +206,7 @@
   const relCache = {};   // videoId -> [id...]
 
   function setRadio(on) {
+    if (on && !radioOn) cntInc("radio");
     radioOn = !!on;
     try { localStorage.setItem("mu_radio", on ? "1" : "0"); } catch (_) {}
     document.querySelectorAll(".mu-radio-btn").forEach(b => b.classList.toggle("on", radioOn));
@@ -290,6 +292,7 @@
   function sendReaction(emoji) {
     const rid = (window.MU_PLUS && MU_PLUS.roomId) ? MU_PLUS.roomId() : null;
     if (!rid || !hasFB() || !me()) return;
+    cntInc("react");
     fbD.ref(`rooms/${rid}/reactions`).push({
       emoji, by: me().uid, name: me().displayName || "Anonim", at: Date.now()
     }).catch(() => {});
@@ -483,6 +486,7 @@
         title: clip(s.title, 200), artist: clip(s.artist, 120), thumb: s.thumb || thumbOf(s.videoId),
         by: me().uid, byName: me().displayName || "Anonim", at: Date.now()
       }).catch(() => {});
+      cntInc("collabAdd");
       say(L("collabAdded"));
     });
     b.querySelectorAll(".mu-csong").forEach(row => {
@@ -570,93 +574,367 @@
   }
 
   /* ════════════════════════════════════════════
-     6) NİŞANLAR (seriya + dinləmə mərhələləri)
-     MUreport bazasından hesablanır; qazanılanlar profilə yazılır.
+     6) NİŞANLAR — 21 kateqoriya, 100+ nişan
+     Mənbələr: MUreport hadisələri, IndexedDB sayları,
+     Firebase sosial məlumatlar, lokal fəaliyyət sayğacları.
   ════════════════════════════════════════════ */
-  const BADGES = [
-    { id: "st3",   e: "🔥", type: "streak", need: 3 },
-    { id: "st7",   e: "⚡", type: "streak", need: 7 },
-    { id: "st14",  e: "💫", type: "streak", need: 14 },
-    { id: "st30",  e: "🌟", type: "streak", need: 30 },
-    { id: "st60",  e: "🚀", type: "streak", need: 60 },
-    { id: "st100", e: "👑", type: "streak", need: 100 },
-    { id: "pl50",   e: "🎧", type: "plays", need: 50 },
-    { id: "pl200",  e: "💿", type: "plays", need: 200 },
-    { id: "pl500",  e: "📀", type: "plays", need: 500 },
-    { id: "pl1000", e: "🏆", type: "plays", need: 1000 }
+  const I18NX = {
+    az: { cats: { streak: "Seriya", plays: "Dinləmə", week: "Həftəlik", day: "Gündəlik", artists: "İfaçılar",
+        songs: "Mahnılar", night: "Gecə quşu", early: "Səhər quşu", friends: "Dostlar", msg: "Söhbət",
+        rooms: "Otaq", react: "Reaksiya", pl: "Playlist", likes: "Sevimli", dl: "Endirmə",
+        plsongs: "Playlist mahnıları", share: "Paylaşım", age: "Veteran", radio: "Radio", lyrics: "Sözlər", collab: "Ortaq" },
+      units: { streak: "gün seriya", plays: "dinləmə", week: "həftəlik", day: "gündəlik", artists: "ifaçı",
+        songs: "mahnı", night: "gecə", early: "səhər", friends: "dost", msg: "mesaj", rooms: "otaq",
+        react: "reaksiya", pl: "playlist", likes: "sevimli", dl: "endirmə", plsongs: "mahnı",
+        share: "paylaşım", age: "gün", radio: "radio", lyrics: "sözlər", collab: "mahnı" },
+      earned: "qazanıldı", lockedB: "açılmayıb", allBadges: "🏅 Bütün nişanlar",
+      compat: "Zövq uyğunluğu", commonSongs: "ortaq mahnı", hiddenSt: "gizlədilib",
+      stDays: "gün", since: "İlk dinləmə", topHour: "Ən aktiv saat", topDay: "Ən aktiv gün",
+      totPlays: "Ümumi dinləmə", totMins: "Dəqiqə", uArtists: "İfaçı", uSongs: "Mahnı",
+      curStreak: "Cari seriya", badgeCnt: "Nişan" },
+    en: { cats: { streak: "Streak", plays: "Listening", week: "Weekly", day: "Daily", artists: "Artists",
+        songs: "Songs", night: "Night owl", early: "Early bird", friends: "Friends", msg: "Chat",
+        rooms: "Rooms", react: "Reactions", pl: "Playlists", likes: "Likes", dl: "Downloads",
+        plsongs: "Playlist songs", share: "Shares", age: "Veteran", radio: "Radio", lyrics: "Lyrics", collab: "Collab" },
+      units: { streak: "day streak", plays: "plays", week: "weekly", day: "daily", artists: "artists",
+        songs: "songs", night: "nights", early: "mornings", friends: "friends", msg: "messages", rooms: "rooms",
+        react: "reactions", pl: "playlists", likes: "likes", dl: "downloads", plsongs: "songs",
+        share: "shares", age: "days", radio: "radio", lyrics: "lyrics", collab: "songs" },
+      earned: "earned", lockedB: "locked", allBadges: "🏅 All badges",
+      compat: "Taste match", commonSongs: "songs in common", hiddenSt: "hidden",
+      stDays: "days", since: "Listening since", topHour: "Most active hour", topDay: "Most active day",
+      totPlays: "Total plays", totMins: "Minutes", uArtists: "Artists", uSongs: "Songs",
+      curStreak: "Current streak", badgeCnt: "Badges" },
+    ru: { cats: { streak: "Серия", plays: "Прослушивания", week: "За неделю", day: "За день", artists: "Исполнители",
+        songs: "Песни", night: "Ночной слушатель", early: "Ранняя пташка", friends: "Друзья", msg: "Чат",
+        rooms: "Комнаты", react: "Реакции", pl: "Плейлисты", likes: "Лайки", dl: "Загрузки",
+        plsongs: "Песни в плейлистах", share: "Репосты", age: "Ветеран", radio: "Радио", lyrics: "Тексты", collab: "Вместе" },
+      units: { streak: "дней подряд", plays: "прослушиваний", week: "за неделю", day: "за день", artists: "исполнителей",
+        songs: "песен", night: "ночей", early: "утра", friends: "друзей", msg: "сообщений", rooms: "комнат",
+        react: "реакций", pl: "плейлистов", likes: "лайков", dl: "загрузок", plsongs: "песен",
+        share: "репостов", age: "дней", radio: "радио", lyrics: "текстов", collab: "песен" },
+      earned: "получен", lockedB: "закрыт", allBadges: "🏅 Все значки",
+      compat: "Совпадение вкуса", commonSongs: "общих песен", hiddenSt: "скрыто",
+      stDays: "дней", since: "Слушает с", topHour: "Самый активный час", topDay: "Самый активный день",
+      totPlays: "Всего прослушиваний", totMins: "Минут", uArtists: "Исполнителей", uSongs: "Песен",
+      curStreak: "Текущая серия", badgeCnt: "Значков" }
+  };
+  const LX = (g, k) => (I18NX[curLang()] || I18NX.az)[g][k] ?? I18NX.az[g][k] ?? k;
+
+  /* [tip, emoji, [eşiklər]] — cəmi 103 nişan */
+  const BADGE_CATS = [
+    ["streak",  "🔥", [2, 3, 5, 7, 10, 14, 21, 30, 45, 60, 75, 100, 150, 200, 365]],
+    ["plays",   "🎧", [10, 25, 50, 100, 200, 350, 500, 750, 1000, 1500, 2500, 5000, 10000]],
+    ["week",    "📅", [10, 25, 50, 100, 200]],
+    ["day",     "☀️", [10, 20, 30, 50, 100]],
+    ["artists", "🎤", [5, 10, 25, 50, 100, 200]],
+    ["songs",   "🎵", [10, 25, 50, 100, 250, 500]],
+    ["night",   "🌙", [1, 10, 50]],
+    ["early",   "🌅", [1, 10, 50]],
+    ["friends", "👥", [1, 3, 5, 10, 25]],
+    ["msg",     "💬", [1, 10, 50, 100, 500]],
+    ["rooms",   "🪩", [1, 5, 10, 25]],
+    ["react",   "❤️", [1, 10, 50, 100]],
+    ["pl",      "📂", [1, 3, 5, 10]],
+    ["likes",   "💖", [1, 10, 25, 50, 100]],
+    ["dl",      "⬇️", [1, 10, 25, 50]],
+    ["plsongs", "📜", [10, 50, 100]],
+    ["share",   "🔗", [1, 5, 10, 25]],
+    ["age",     "🗓️", [7, 30, 100, 365]],
+    ["radio",   "📻", [1, 10, 50]],
+    ["lyrics",  "📝", [1, 10, 50]],
+    ["collab",  "🤝", [1, 5, 10]]
   ];
-  const badgeLabel = bd => bd.e + " " + bd.need + " " + L(bd.type === "streak" ? "streakB" : "playsB");
+  const ALL_BADGES = [];
+  BADGE_CATS.forEach(([type, icon, needs]) =>
+    needs.forEach(need => ALL_BADGES.push({ id: type + need, type, icon, need })));
+
+  const badgeLabel = bd => bd.icon + " " + bd.need + " " + LX("units", bd.type);
+
+  /* ── Fəaliyyət sayğacları (lokal) ── */
+  function cntGet() { try { return JSON.parse(localStorage.getItem("mu_counts") || "{}"); } catch (_) { return {}; } }
+  function cntInc(k) {
+    try { const c = cntGet(); c[k] = (c[k] | 0) + 1; localStorage.setItem("mu_counts", JSON.stringify(c)); } catch (_) {}
+    scheduleBadgeCheck();
+  }
+  let _badgeT = 0;
+  function scheduleBadgeCheck() {
+    clearTimeout(_badgeT);
+    _badgeT = setTimeout(() => { checkNewBadges().catch(() => {}); }, 4000);
+  }
 
   const repDb2 = (typeof Dexie !== "undefined") ? new Dexie("MUreport") : null;
   if (repDb2) repDb2.version(1).stores({ events: "++id, ts, videoId" });
 
   const dayKey = ts => { const d = new Date(ts); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
 
-  async function myStats() {
-    if (!repDb2) return { streak: 0, plays: 0 };
-    const ev = await repDb2.events.toArray().catch(() => []);
-    const days = new Set(ev.map(e => dayKey(e.ts)));
-    const DAY = 86400000, now = Date.now();
-    let streak = 0;
-    let cursor = days.has(dayKey(now)) ? now : now - DAY;
-    while (days.has(dayKey(cursor))) { streak++; cursor -= DAY; }
-    return { streak, plays: ev.length };
+  /* ── Bütün statistik göstəricilər ── */
+  async function computeBadgeStats() {
+    const out = { streak: 0, plays: 0, week: 0, day: 0, artists: 0, songs: 0, night: 0, early: 0,
+      friends: 0, msg: 0, rooms: 0, react: 0, pl: 0, likes: 0, dl: 0, plsongs: 0, share: 0,
+      age: 0, radio: 0, lyrics: 0, collab: 0 };
+
+    const ev = repDb2 ? await repDb2.events.toArray().catch(() => []) : [];
+    out.plays = ev.length;
+    if (ev.length) {
+      const days = new Set(ev.map(e => dayKey(e.ts)));
+      const DAY = 86400000, now = Date.now();
+      let cursor = days.has(dayKey(now)) ? now : now - DAY;
+      while (days.has(dayKey(cursor))) { out.streak++; cursor -= DAY; }
+      const artists = new Set(), songs = new Set(), byDay = {};
+      const wk = weekKey();
+      ev.forEach(e => {
+        const a = (e.artist || "").trim(); if (a) artists.add(a);
+        songs.add(e.videoId);
+        const h = new Date(e.ts).getHours();
+        if (h >= 0 && h < 5) out.night++;
+        if (h >= 5 && h < 9) out.early++;
+        const dk = dayKey(e.ts);
+        byDay[dk] = (byDay[dk] || 0) + 1;
+        if (isoWeekOf(new Date(e.ts)) === wk) out.week++;
+      });
+      out.artists = artists.size;
+      out.songs = songs.size;
+      out.day = Math.max(0, ...Object.values(byDay));
+      out.age = Math.max(0, Math.floor((now - Math.min(...ev.map(e => e.ts))) / DAY));
+    }
+
+    const c = cntGet();
+    out.msg = c.msg | 0; out.rooms = c.rooms | 0; out.react = c.react | 0;
+    out.share = c.share | 0; out.radio = c.radio | 0; out.lyrics = c.lyrics | 0; out.collab = c.collab | 0;
+    out.friends = Object.keys(S.friends || {}).length;
+    out.dl = S.downloads ? S.downloads.size : 0;
+    try { out.pl = await ldb.playlists.count(); } catch (_) {}
+    try { out.likes = await ldb.likes.count(); } catch (_) {}
+    try { out.plsongs = await ldb.pl_songs.count(); } catch (_) {}
+    return out;
+  }
+  function isoWeekOf(d) {
+    const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const dayNum = (t.getUTCDay() + 6) % 7;
+    t.setUTCDate(t.getUTCDate() - dayNum + 3);
+    const firstThu = new Date(Date.UTC(t.getUTCFullYear(), 0, 4));
+    const week = 1 + Math.round(((t - firstThu) / 86400000 - 3 + ((firstThu.getUTCDay() + 6) % 7)) / 7);
+    return t.getUTCFullYear() + "-W" + String(week).padStart(2, "0");
   }
 
-  function earnedBadges(st) {
-    return BADGES.filter(b => (b.type === "streak" ? st.streak : st.plays) >= b.need);
+  const earnedBadgeList = st => ALL_BADGES.filter(b => (st[b.type] | 0) >= b.need);
+
+  /* ── Yeni nişan bildirişi (toast + sistem bildirişi) ── */
+  function notifyBadge(text) {
+    say("🏅 " + L("badgeNew") + text, 5000);
+    try {
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("Music Universe — 🏅", { body: text, icon: "/icon-192.png" });
+      }
+    } catch (_) {}
   }
 
   async function checkNewBadges() {
     if (!repDb2) return;
-    const st = await myStats();
-    const earned = earnedBadges(st).map(b => b.id);
+    const st = await computeBadgeStats();
+    const earned = earnedBadgeList(st);
     let known;
     try { known = JSON.parse(localStorage.getItem("mu_badges") || "[]"); } catch (_) { known = []; }
-    const fresh = earned.filter(id => !known.includes(id));
+    const fresh = earned.filter(b => !known.includes(b.id));
     if (!fresh.length) return;
-    try { localStorage.setItem("mu_badges", JSON.stringify([...new Set([...known, ...earned])])); } catch (_) {}
-    fresh.forEach(id => {
-      const bd = BADGES.find(b => b.id === id);
-      if (bd) say(L("badgeNew") + badgeLabel(bd), 5000);
+    try { localStorage.setItem("mu_badges", JSON.stringify([...new Set([...known, ...earned.map(b => b.id)])])); } catch (_) {}
+    fresh.forEach(bd => {
+      notifyBadge(badgeLabel(bd));
       if (hasFB() && me() && privStats()) {
-        fbD.ref(`users/${me().uid}/badges/${id}`).set(Date.now()).catch(() => {});
+        fbD.ref(`users/${me().uid}/badges/${bd.id}`).set(Date.now()).catch(() => {});
       }
     });
   }
 
-  // Profilə nişanlar bölməsi əlavə et
+  /* ── Nişanlar modalı (hamısı + progress) ── */
+  async function openBadges() {
+    ensureOverlay("m-badges", 430);
+    const b = $("m-badges-b");
+    b.innerHTML = `<div class="mtit">🏅 ${esc(L("badges"))}</div><div class="mu-note">…</div>`;
+    openM("m-badges");
+    const st = await computeBadgeStats();
+    const earned = new Set(earnedBadgeList(st).map(x => x.id));
+    b.innerHTML = `<div class="mtit">🏅 ${esc(L("badges"))} <span style="color:var(--g)">${earned.size}/${ALL_BADGES.length}</span></div>` +
+      BADGE_CATS.map(([type, icon]) => {
+        const items = ALL_BADGES.filter(x => x.type === type);
+        const val = st[type] | 0;
+        return `<div class="mu-sect">${icon} ${esc(LX("cats", type))} <span style="color:var(--t3);font-weight:600">(${val})</span></div>
+        <div class="mu-badges">` + items.map(bd => {
+          const has = earned.has(bd.id);
+          return `<span class="mu-badge${has ? "" : " off"}" title="${has ? esc(LX("cats", type)) : esc(LX("units", bd.type))}: ${Math.min(val, bd.need)}/${bd.need}">${esc(badgeLabel(bd))}${has ? "" : ` <small style="opacity:.8">${Math.min(val, bd.need)}/${bd.need}</small>`}</span>`;
+        }).join("") + `</div>`;
+      }).join("");
+  }
+
+  /* ── Profilə əlavə məlumatlar ── */
   if (typeof window.renderStatsInProfile === "function") {
     const _rs = window.renderStatsInProfile;
     window.renderStatsInProfile = function (uid, container) {
       const r = _rs.apply(this, arguments);
-      try { renderProfileBadges(uid, container); } catch (_) {}
+      try { renderProfileExtras(uid, container); } catch (_) {}
       return r;
     };
   }
 
-  async function renderProfileBadges(uid, container) {
+  async function renderProfileExtras(uid, container) {
     if (!container) return;
-    await Promise.resolve();   // əsas statistika əvvəl düşsün
-    let html = "";
-    if (me() && uid === me().uid) {
-      const st = await myStats();
-      const earned = new Set(earnedBadges(st).map(b => b.id));
-      if (!earned.size) return;
-      html = `<div class="sh" style="margin:10px 0 6px"><span class="dot"></span>🏅 ${esc(L("badges"))}</div><div class="mu-badges">` +
-        BADGES.filter(b => earned.has(b.id)).map(b => `<span class="mu-badge">${esc(badgeLabel(b))}</span>`).join("") +
-        `</div>`;
+    await Promise.resolve();
+    const isSelf = me() && uid === me().uid;
+
+    if (isSelf) {
+      const st = await computeBadgeStats();
+      const earned = earnedBadgeList(st);
+      const ev = repDb2 ? await repDb2.events.toArray().catch(() => []) : [];
+      let extra = "";
+      if (ev.length) {
+        const hours = new Array(24).fill(0), byDay = {};
+        ev.forEach(e => { const d = new Date(e.ts); hours[d.getHours()]++; const k = dayKey(e.ts); byDay[k] = (byDay[k] || 0) + 1; });
+        const bestHour = hours.indexOf(Math.max(...hours));
+        const bestDay = Object.entries(byDay).sort((a, c) => c[1] - a[1])[0][0];
+        const first = new Date(Math.min(...ev.map(e => e.ts)));
+        const cell = (n, l) => `<div class="stat-card"><div class="stat-num">${n}</div><div class="stat-lbl">${esc(l)}</div></div>`;
+        extra = `<div class="stats-grid" style="margin-top:7px">` +
+          cell(st.songs, "🎵 " + LX("cats", "songs")) +
+          cell(st.artists, "🎤 " + LX("cats", "artists")) +
+          cell(st.streak + " 🔥", LX("cats", "streak")) +
+          `</div>
+          <div class="mu-note" style="margin-top:6px">🕐 ${esc(bestHour + ":00")} · 📅 ${esc(bestDay)} · 🗓 ${esc(first.toLocaleDateString())}</div>`;
+      }
+      const badgeHtml = earned.length
+        ? `<div class="sh" style="margin:10px 0 6px"><span class="dot"></span>🏅 ${esc(L("badges"))} (${earned.length}/${ALL_BADGES.length})</div>
+           <div class="mu-badges">${earned.slice(0, 14).map(bd => `<span class="mu-badge">${esc(badgeLabel(bd))}</span>`).join("")}</div>
+           ${earned.length > 14 ? `<button class="mu-ghost-btn" onclick="MU_EXTRAS.openBadges()">🏅 ${esc(L("badges"))} →</button>` : ""}`
+        : "";
+      container.insertAdjacentHTML("beforeend", extra + badgeHtml);
     } else if (hasFB()) {
-      const snap = await fbD.ref(`users/${uid}/badges`).get().catch(() => null);
-      if (!snap || !snap.exists()) return;
-      const ids = Object.keys(snap.val() || {});
-      const list = BADGES.filter(b => ids.includes(b.id));
-      if (!list.length) return;
-      html = `<div class="sh" style="margin:10px 0 6px"><span class="dot"></span>🏅 ${esc(L("badges"))}</div><div class="mu-badges">` +
-        list.map(b => `<span class="mu-badge">${esc(badgeLabel(b))}</span>`).join("") +
-        `</div>`;
+      // Dostun profili: nişanlar + zövq uyğunluğu
+      const [snap, compat] = await Promise.all([
+        fbD.ref(`users/${uid}/badges`).get().catch(() => null),
+        compatWith(uid).catch(() => null)
+      ]);
+      let html = "";
+      if (compat && compat.pct != null) {
+        html += `<div class="mu-note" style="margin-top:8px">🎧 ${esc(compatText())}: <strong style="color:var(--g)">${compat.pct}%</strong> · ${compat.common} ${esc(LX("cats","songs").toLowerCase())}</div>`;
+      }
+      if (snap && snap.exists()) {
+        const ids = Object.keys(snap.val() || {});
+        const list = ALL_BADGES.filter(b => ids.includes(b.id));
+        if (list.length) {
+          html += `<div class="sh" style="margin:10px 0 6px"><span class="dot"></span>🏅 ${esc(L("badges"))} (${list.length})</div>
+          <div class="mu-badges">${list.map(bd => `<span class="mu-badge">${esc(badgeLabel(bd))}</span>`).join("")}</div>`;
+        }
+      }
+      if (html) container.insertAdjacentHTML("beforeend", html);
     }
-    if (html) container.insertAdjacentHTML("beforeend", html);
+  }
+  function compatText() { return curLang() === "en" ? "Taste match" : curLang() === "ru" ? "Совпадение вкуса" : "Zövq uyğunluğu"; }
+
+  /* ════════════════════════════════════════════
+     7) DOST SERİYASI + ZÖVQ UYĞUNLUĞU
+     Dost sətrində: 🔥N (ardıcıl DM günləri) · 🎧N% (ortaq mahnılar)
+  ════════════════════════════════════════════ */
+  const frCache = {};   // uid -> {at, streak, pct, common, hidden}
+  const FR_TTL = 5 * 60 * 1000;
+
+  async function friendStreak(uid) {
+    if (!me()) return 0;
+    const room = [me().uid, uid].sort().join("_");
+    const snap = await fbD.ref("dms/" + room).orderByChild("ts").limitToLast(400).get().catch(() => null);
+    if (!snap || !snap.exists()) return 0;
+    const days = new Set();
+    snap.forEach(ch => { const ts = (ch.val() || {}).ts; if (ts) days.add(dayKey(ts)); });
+    const DAY = 86400000, now = Date.now();
+    let streak = 0;
+    let cursor = days.has(dayKey(now)) ? now : now - DAY;
+    while (days.has(dayKey(cursor))) { streak++; cursor -= DAY; }
+    return streak;
+  }
+
+  let _mySongsCache = null;
+  async function mySongSet() {
+    if (_mySongsCache && Date.now() - _mySongsCache.at < FR_TTL) return _mySongsCache.set;
+    const ev = repDb2 ? await repDb2.events.toArray().catch(() => []) : [];
+    const set = new Set(ev.map(e => e.videoId));
+    _mySongsCache = { at: Date.now(), set };
+    return set;
+  }
+
+  async function compatWith(uid) {
+    if (!hasFB() || !me()) return null;
+    // Dostun məxfilik seçiminə hörmət et
+    const pv = await fbD.ref(`users/${uid}/privacy`).get().catch(() => null);
+    if (pv && pv.exists() && pv.val() && pv.val().stats === false) return { hidden: true };
+    const snap = await fbD.ref(`stats/${uid}/songs`).orderByChild("count").limitToLast(200).get().catch(() => null);
+    if (!snap || !snap.exists()) return null;
+    const friendSet = new Set();
+    snap.forEach(ch => { if (VID.test(ch.key || "")) friendSet.add(ch.key); });
+    if (!friendSet.size) return null;
+    const mine = await mySongSet();
+    if (!mine.size) return null;
+    let common = 0;
+    friendSet.forEach(v => { if (mine.has(v)) common++; });
+    const pct = Math.round(common / Math.min(mine.size, friendSet.size) * 100);
+    return { pct, common };
+  }
+
+  async function friendExtras(uid) {
+    const c = frCache[uid];
+    if (c && Date.now() - c.at < FR_TTL) return c;
+    const out = { at: Date.now(), streak: 0, pct: null, common: 0 };
+    try { out.streak = await friendStreak(uid); } catch (_) {}
+    try { const cp = await compatWith(uid); if (cp) { out.pct = cp.hidden ? null : cp.pct; out.common = cp.common || 0; } } catch (_) {}
+    frCache[uid] = out;
+    return out;
+  }
+
+  function decorateFriendRows() {
+    const list = $("fr-list");
+    if (!list || !me()) return;
+    list.querySelectorAll(".frrow").forEach(row => {
+      const uid = row.dataset.uid;
+      if (!uid) return;
+      const cached = frCache[uid];
+      const render = d => {
+        const inf = row.querySelector(".frinf");
+        if (!inf || !row.isConnected) return;
+        inf.querySelector(".mu-frx") && inf.querySelector(".mu-frx").remove();
+        const parts = [];
+        if (d.streak >= 2) parts.push(`🔥${d.streak}`);
+        if (d.pct != null && d.pct >= 5) parts.push(`🎧${d.pct}%`);
+        if (!parts.length) return;
+        const span = document.createElement("div");
+        span.className = "mu-frx";
+        span.style.cssText = "font-size:.66rem;color:var(--g);font-weight:800;margin-top:1px";
+        span.textContent = parts.join(" · ");
+        inf.appendChild(span);
+      };
+      if (cached && Date.now() - cached.at < FR_TTL) render(cached);
+      else friendExtras(uid).then(render).catch(() => {});
+    });
+  }
+
+  if (typeof window.renderFrList === "function") {
+    const _rfl = window.renderFrList;
+    window.renderFrList = function () {
+      const r = _rfl.apply(this, arguments);
+      try { decorateFriendRows(); } catch (_) {}
+      return r;
+    };
+  }
+
+  /* ── Sosial fəaliyyət sayğacları (hook-lar) ── */
+  if (typeof window.sendMsg === "function") {
+    const _sm = window.sendMsg;
+    window.sendMsg = function () { cntInc("msg"); return _sm.apply(this, arguments); };
+  }
+  if (typeof window.shareSong === "function") {
+    const _sh = window.shareSong;
+    window.shareSong = function () { cntInc("share"); return _sh.apply(this, arguments); };
+  }
+  if (window.MU_PLUS && typeof MU_PLUS.joinRoom === "function") {
+    const _jr = MU_PLUS.joinRoom;
+    MU_PLUS.joinRoom = function () { cntInc("rooms"); return _jr.apply(this, arguments); };
   }
 
   /* ════════════════════════════════════════════
@@ -760,5 +1038,5 @@
     console.warn("[extras] başlanğıc xətası:", e);
   }
 
-  window.MU_EXTRAS = { openLyrics, openBoard, setRadio, openCollab, joinCollab };
+  window.MU_EXTRAS = { openLyrics, openBoard, setRadio, openCollab, joinCollab, openBadges };
 })();

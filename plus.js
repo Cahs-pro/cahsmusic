@@ -65,6 +65,7 @@
       kSpace: "Oynat / Dayandır", kSeek: "10 san. geri / irəli", kVol: "Səsi azalt / artır",
       kNext: "Növbəti mahnı", kPrev: "Əvvəlki mahnı", kMute: "Səsi söndür / aç",
       kShuf: "Qarışdırma aç / bağla", kRep: "Təkrar aç / bağla", kSearch: "Axtarışa keç", kHelp: "Bu pəncərəni aç",
+      kLyrics: "Mahnı sözləri", kRadio: "Radio aç / bağla", kRoom: "Dinləmə otağı", kBoard: "Liderlik", kBadges: "Nişanlar",
     },
     en: {
       myData: "My Data", myDataSub: "Export, privacy, account deletion",
@@ -103,6 +104,7 @@
       kSpace: "Play / Pause", kSeek: "Seek 10s back / forward", kVol: "Volume down / up",
       kNext: "Next song", kPrev: "Previous song", kMute: "Mute / unmute",
       kShuf: "Toggle shuffle", kRep: "Toggle repeat", kSearch: "Go to search", kHelp: "Open this panel",
+      kLyrics: "Song lyrics", kRadio: "Toggle radio", kRoom: "Listening room", kBoard: "Leaderboard", kBadges: "Badges",
     },
     ru: {
       myData: "Мои данные", myDataSub: "Экспорт, приватность, удаление аккаунта",
@@ -141,6 +143,7 @@
       kSpace: "Играть / Пауза", kSeek: "10 сек назад / вперёд", kVol: "Громкость",
       kNext: "Следующая песня", kPrev: "Предыдущая песня", kMute: "Без звука",
       kShuf: "Перемешать", kRep: "Повтор", kSearch: "К поиску", kHelp: "Открыть эту панель",
+      kLyrics: "Текст песни", kRadio: "Радио вкл/выкл", kRoom: "Комната", kBoard: "Лидеры", kBadges: "Значки",
     }
   };
   const curLang = () => { try { return I18N[LANG] ? LANG : "az"; } catch (_) { return "az"; } };
@@ -956,6 +959,16 @@ ${r.topArtists.length ? `<div class="rep-sect">🎤 ${esc(L("repTopArtists"))}</
         click("b-shuf"); break;
       case "r": case "R":
         click("b-rep"); break;
+      case "y": case "Y":
+        if (window.MU_EXTRAS) MU_EXTRAS.openLyrics(); break;
+      case "a": case "A":
+        if (window.MU_EXTRAS) MU_EXTRAS.setRadio(localStorage.getItem("mu_radio") !== "1"); break;
+      case "o": case "O":
+        openRoomModal(); break;
+      case "b": case "B":
+        if (window.MU_EXTRAS) MU_EXTRAS.openBoard(); break;
+      case "g": case "G":
+        if (window.MU_EXTRAS && MU_EXTRAS.openBadges) MU_EXTRAS.openBadges(); break;
       case "/":
         e.preventDefault(); { const s = $("sinp"); if (s) { s.focus(); s.scrollIntoView({ block: "center" }); } } break;
       case "?":
@@ -977,6 +990,11 @@ ${r.topArtists.length ? `<div class="rep-sect">🎤 ${esc(L("repTopArtists"))}</
       keyRow(["M"], L("kMute")) +
       keyRow(["S"], L("kShuf")) +
       keyRow(["R"], L("kRep")) +
+      keyRow(["Y"], L("kLyrics")) +
+      keyRow(["A"], L("kRadio")) +
+      keyRow(["O"], L("kRoom")) +
+      keyRow(["B"], L("kBoard")) +
+      keyRow(["G"], L("kBadges")) +
       keyRow(["/"], L("kSearch")) +
       keyRow(["?"], L("kHelp")) +
       `</div>`;

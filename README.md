@@ -16,13 +16,16 @@
 - **Birlikdə dinləmə otağı:** dostlar eyni mahnını eyni anda dinləyir (Firebase Realtime Database ilə sinxron) — otaq kodu və dəvət linki ilə
 - **YouTube-dan paylaş → tətbiqdə aç:** PWA-nın share_target-i ilə YouTube-dan paylaşılan link birbaşa Music Universe-də çalınır
 - **Şəxsi dinləmə hesabatı:** son 7 günün qrafiki, saat üzrə dinləmə, ən çox dinlənən ifaçılar, ardıcıl gün seriyası
-- **Əlçatanlıq:** tam klaviatura idarəetməsi (?, Space, ←→, ↑↓, N, P, M, S, R), ekran oxuyucu etiketləri, yüksək kontrast və böyük mətn rejimləri
+- **Əlçatanlıq:** tam klaviatura idarəetməsi (?, Space, ←→, ↑↓, N, P, M, S, R, Y-sözlər, A-radio, O-otaq, B-liderlik, G-nişanlar), ekran oxuyucu etiketləri, yüksək kontrast və böyük mətn rejimləri
 - **Mahnı sözləri:** cari mahnının sözləri playerdən bir kliklə (LRCLIB)
 - **Radio / ağıllı mix:** mahnı bitəndə oxşar mahnılar avtomatik çalınır
 - **Otaq reaksiyaları:** birlikdə dinləyərkən ❤️🔥👏😂🎉 üzən emoji ilə
 - **Həftəlik liderlik:** dostlar arasında bu həftənin dinləmə sıralaması
 - **Ortaq playlistlər:** link ilə dostları dəvət et, hamı mahnı əlavə etsin
-- **Nişanlar:** ardıcıl gün seriyası (🔥3–👑100) və dinləmə mərhələləri (🎧50–🏆1000) profildə görünür
+- **107 nişan, 21 kateqoriya:** seriya (🔥2–365 gün), dinləmə (🎧10–10000), həftəlik/günlük rekordlar, ifaçı/mahnı müxtəlifliyi, gecə-səhər dinləmələri, dostlar, mesajlar, otaqlar, reaksiyalar, playlistlər, bəyənmələr, yükləmələr, paylaşımlar, hesab yaşı, radio, sözlər, ortaq playlistlər — profildə kateqoriya üzrə irəliləyiş ilə görünür
+- **Nişan bildirişi:** yeni nişan qazananda toast + sistem bildirişi (icazə verilibsə)
+- **Zənginləşmiş profil:** mahnı/ifaçı sayı, seriya, ən aktiv saat və gün, ilk dinləmə tarixi, qazanılmış nişanlar
+- **Dost seriyası və zövq uyğunluğu:** sosial bölmədə hər dostun üstündə 🔥 ardıcıl söhbət günü və 🎧% ortaq musiqi zövqü faizi (dostun məxfilik seçiminə hörmətlə)
 - **PWA:** oflayn rejim, quraşdırma, 3 dil (AZ, EN, RU)
 
 ## Texnologiyalar
