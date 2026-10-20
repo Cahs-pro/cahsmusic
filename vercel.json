@@ -5,8 +5,9 @@
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/copyright", "destination": "/copyright.html" },
     { "source": "/s/:videoId", "destination": "/index.html" },
+    { "source": "/room/:roomId", "destination": "/index.html" },
     {
-      "source": "/((?!api/)(?!icon\\.png)(?!icon-192\\.png)(?!icon-512\\.png)(?!icon-maskable-)(?!manifest\\.json)(?!sw\\.js)(?!features\\.js)(?!background\\.js)(?!stats\\.js)(?!favicon\\.ico)(?!terms\\.html)(?!privacy\\.html)(?!copyright\\.html).*)",
+      "source": "/((?!api/)(?!icon\\.png)(?!icon-192\\.png)(?!icon-512\\.png)(?!icon-maskable-)(?!manifest\\.json)(?!sw\\.js)(?!features\\.js)(?!background\\.js)(?!stats\\.js)(?!plus\\.js)(?!favicon\\.ico)(?!terms\\.html)(?!privacy\\.html)(?!copyright\\.html).*)",
       "destination": "/index.html"
     }
   ],

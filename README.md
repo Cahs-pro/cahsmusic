@@ -12,6 +12,11 @@
 - **Bildiriş paneli / kilid ekranı:** oynat-dayan, əvvəlki-sonrakı, irəli-geri (Media Session API)
 - **Paylaşma kartı** və **“Ən çox dinlədiklərim”** xülasə şəkli
 - **Ehtiyat nüsxə:** playlist, sevimli və parametrləri JSON fayl kimi ixrac/idxal
+- **“Məlumatlarım” mərkəzi:** bütün məlumatların ixracı, dostlara görünənlərin seçimi (indi çalınan, statistika, onlayn status), hesabın və məlumatların tam silinməsi
+- **Birlikdə dinləmə otağı:** dostlar eyni mahnını eyni anda dinləyir (Firebase Realtime Database ilə sinxron) — otaq kodu və dəvət linki ilə
+- **YouTube-dan paylaş → tətbiqdə aç:** PWA-nın share_target-i ilə YouTube-dan paylaşılan link birbaşa Music Universe-də çalınır
+- **Şəxsi dinləmə hesabatı:** son 7 günün qrafiki, saat üzrə dinləmə, ən çox dinlənən ifaçılar, ardıcıl gün seriyası
+- **Əlçatanlıq:** tam klaviatura idarəetməsi (?, Space, ←→, ↑↓, N, P, M, S, R), ekran oxuyucu etiketləri, yüksək kontrast və böyük mətn rejimləri
 - **PWA:** oflayn rejim, quraşdırma, 3 dil (AZ, EN, RU)
 
 ## Texnologiyalar
@@ -23,6 +28,7 @@ index.html          əsas tətbiq (HTML + CSS + JS)
 features.js         tempo, oflayn zolaq, ixrac/idxal, paylaşma kartı, xülasə, mahnı adlarının təmizlənməsi
 background.js       bildiriş paneli və fon rejimi
 stats.js            profil statistikası
+plus.js             məlumatlarım mərkəzi, dinləmə otağı, dinləmə hesabatı, əlçatanlıq
 sw.js               service worker (oflayn işləmə)
 manifest.json       PWA parametrləri
 api/dl.js           oflayn saxlama / axın üçün audio linki (istəyə bağlı)
@@ -41,6 +47,16 @@ Tətbiq statikdir, `index.html`-i hər hansı statik serverdə açmaq kifayətdi
 | `YT_API_KEY` | mahnı adları üçün YouTube Data API (yoxdursa oEmbed işləyir) | istəyə bağlı |
 
 Firebase konfiqurasiyası `index.html`-dədir (veb açarları açıq olmaq üçün nəzərdə tutulub), məlumatları **Firebase Realtime Database qaydaları** qoruyur.
+
+### ⚠️ Birlikdə dinləmə otağı üçün qayda yeniləməsi (məcburi)
+
+Otaqlar `/rooms` düyünündə saxlanır. `permission_denied` xətası alırsınızsa, qaydalara `rooms` bloku əlavə olunmayıb:
+
+1. Firebase Console → layihə → **Realtime Database → Rules**
+2. `database.rules.json` faylındakı **`rooms`** blokunu mövcud qaydalarınıza köçürün (və ya bütün faylı tətbiq edin)
+3. **Publish** basın
+
+Alternativ: `firebase deploy --only database` (firebase.json-də rules faylı göstərilibsə).
 
 ## Məxfilik və hüquqlar
 - [İstifadə Şərtləri](https://cahsmusic.vercel.app/terms) · [Məxfilik Siyasəti](https://cahsmusic.vercel.app/privacy) · [Müəllif Hüquqları](https://cahsmusic.vercel.app/copyright)

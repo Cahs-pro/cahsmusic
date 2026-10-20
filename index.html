@@ -894,7 +894,7 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
       </div>
     </div>
     <!-- Desktop theme toggle -->
-    <button class="ibtn theme-ibtn" id="thbtn">
+    <button class="ibtn theme-ibtn" id="thbtn" aria-label="Tema dəyiş">
       <svg id="ico-m" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       <svg id="ico-s" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
     </button>
@@ -902,7 +902,7 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
       <img id="uav" src="" alt=""/>
       <span class="vip-crown" id="vip-crown" style="display:none">👑</span>
     </div>
-    <button class="ibtn" id="notif-btn" style="position:relative;display:none">
+    <button class="ibtn" id="notif-btn" style="position:relative;display:none" aria-label="Bildirişlər">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span id="notif-badge"></span>
     </button>
@@ -1101,32 +1101,32 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
   </div>
   <div class="pctrl">
     <div class="crow">
-      <button class="pbtn" id="b-shuf"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg></button>
-      <button class="pbtn" id="b-prev"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></button>
-      <button class="pbtn main" id="b-play">
+      <button class="pbtn" id="b-shuf" aria-label="Qarışdırma" aria-pressed="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg></button>
+      <button class="pbtn" id="b-prev" aria-label="Əvvəlki mahnı"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></button>
+      <button class="pbtn main" id="b-play" aria-label="Oynat / Dayandır">
         <svg id="ico-play" width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         <svg id="ico-pause" width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
         <div id="p-spin" style="display:none"><div class="spin"></div></div>
       </button>
-      <button class="pbtn" id="b-next"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></button>
-      <button class="pbtn" id="b-rep"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
+      <button class="pbtn" id="b-next" aria-label="Növbəti mahnı"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></button>
+      <button class="pbtn" id="b-rep" aria-label="Təkrar" aria-pressed="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
     </div>
     <div class="pbar">
       <span class="ptime" id="p-cur">0:00</span>
-      <div class="ptrack" id="ptrack"><div class="pbuf" id="pbuf"></div><div class="pfill" id="pfill"></div></div>
+      <div class="ptrack" id="ptrack" role="slider" tabindex="0" aria-label="Mahnı mövqeyi" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="pbuf" id="pbuf"></div><div class="pfill" id="pfill"></div></div>
       <span class="ptime r" id="p-dur">0:00</span>
     </div>
   </div>
   <!-- Desktop player actions -->
   <div class="pacts">
-    <button class="pbtn" id="b-bar-pl" title="Playlist-ə əlavə et"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-    <button class="pbtn" id="b-bar-dl" title="Endir"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
-    <button class="pbtn" id="b-bar-sh" title="Paylaş"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="pbtn" id="b-bar-pl" title="Playlist-ə əlavə et" aria-label="Playlist-ə əlavə et"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <button class="pbtn" id="b-bar-dl" title="Endir" aria-label="Mahnını endir"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+    <button class="pbtn" id="b-bar-sh" title="Paylaş" aria-label="Mahnını paylaş"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
   </div>
   <!-- Volume (desktop) -->
   <div class="pvol">
     <svg class="vico" id="v-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-    <div class="vtrack" id="vtrack"><div class="vfill" id="vfill"></div></div>
+    <div class="vtrack" id="vtrack" role="slider" tabindex="0" aria-label="Səs səviyyəsi" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72"><div class="vfill" id="vfill"></div></div>
   </div>
   <!-- Mobile/tablet meatball menu -->
   <button class="p-meatball" id="p-meatball" aria-label="Əlavə seçimlər">
@@ -1200,7 +1200,7 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
 </div>
 
 <div id="yt-wrap"><div id="yt-player"></div></div>
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <!-- Modals -->
 <div class="moverlay" id="m-prof"><div class="mbox">
@@ -1236,6 +1236,30 @@ body.search-open #main{padding-top:calc(var(--nav) + 52px + 16px)}
   <div id="m-notif-b"></div>
 </div></div>
 
+<!-- Məlumatlarım Modal -->
+<div class="moverlay" id="m-data"><div class="mbox" style="max-width:430px" role="dialog" aria-modal="true">
+  <button class="mcls" onclick="closeM('m-data')" aria-label="Bağla"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div id="m-data-b"></div>
+</div></div>
+
+<!-- Birlikdə Dinləmə Otağı Modal -->
+<div class="moverlay" id="m-room"><div class="mbox" style="max-width:400px" role="dialog" aria-modal="true">
+  <button class="mcls" onclick="closeM('m-room')" aria-label="Bağla"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div id="m-room-b"></div>
+</div></div>
+
+<!-- Dinləmə Hesabatı Modal -->
+<div class="moverlay" id="m-report"><div class="mbox" style="max-width:430px" role="dialog" aria-modal="true">
+  <button class="mcls" onclick="closeM('m-report')" aria-label="Bağla"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div id="m-report-b"></div>
+</div></div>
+
+<!-- Klaviatura Qısayolları Modal -->
+<div class="moverlay" id="m-keys"><div class="mbox" style="max-width:380px" role="dialog" aria-modal="true">
+  <button class="mcls" onclick="closeM('m-keys')" aria-label="Bağla"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div id="m-keys-b"></div>
+</div></div>
+
 <script>
 /* ══ FIREBASE CONFIG ══ */
 const FB_CFG = {
@@ -1252,6 +1276,10 @@ const FB = !!FB_CFG.apiKey && typeof firebase !== "undefined";
 if (FB) firebase.initializeApp(FB_CFG);
 const fbA = FB ? firebase.auth()     : null;
 const fbD = FB ? firebase.database() : null;
+
+/* ══ MƏXFİLİK (dostlara görünən) — plus.js sinxronlayır ══ */
+window.MU_PRIV=(()=>{const d={nowPlaying:true,stats:true,online:true};try{return Object.assign(d,JSON.parse(localStorage.getItem("mu_privacy")||"{}"))}catch(_){return d}})();
+window.MU_PRIV_ON=k=>window.MU_PRIV[k]!==false;
 
 /* ══ I18N ══ */
 const TX = {
@@ -1918,12 +1946,12 @@ async function playSong(song){
               || await ldb.offline.where("videoId").equals(song.videoId).first().catch(()=>null);
   if(cached && cached.blob){
     playFromBlob(cached, song);
-    if(FB&&S.user) fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});
+    if(FB&&S.user&&window.MU_PRIV_ON("nowPlaying")) fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});else if(FB&&S.user) fbD.ref(`users/${S.user.uid}/nowPlaying`).remove().catch(()=>{});
     return;
   }
 
   if(!navigator.onLine){ toast("📵 İnternet yoxdur — ⬇ Endir ilə oflayn saxla"); setPUI("pause"); return; }
-  if(FB&&S.user) fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});
+  if(FB&&S.user&&window.MU_PRIV_ON("nowPlaying")) fbD.ref(`users/${S.user.uid}/nowPlaying`).set({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId)}).catch(()=>{});else if(FB&&S.user) fbD.ref(`users/${S.user.uid}/nowPlaying`).remove().catch(()=>{});
 
   // Layer 2: YouTube IFrame (Chrome/Edge)
   if(S.ytOk && S.ytp){
@@ -2272,9 +2300,10 @@ if(FB){
       av.src=user.photoURL||PHO;av.style.display="block";av.onclick=()=>showMyProfile();
       if(wrap){ wrap.classList.add("show"); wrap.onclick=()=>showMyProfile(); }
       btn.innerHTML=`<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>${T("signout")}</span>`;
-      fbD.ref(`users/${user.uid}`).update({uid:user.uid,name:user.displayName,email:user.email,photo:user.photoURL||"",online:true,lastSeen:Date.now()});
+      const _shOn=window.MU_PRIV_ON("online");
+      fbD.ref(`users/${user.uid}`).update({uid:user.uid,name:user.displayName,email:user.email,photo:user.photoURL||"",online:_shOn?true:false,lastSeen:Date.now()});
       fbD.ref(`users/${user.uid}/online`).onDisconnect().set(false);
-      fbD.ref(`users/${user.uid}/lastSeen`).onDisconnect().set(Date.now());
+      if(_shOn) fbD.ref(`users/${user.uid}/lastSeen`).onDisconnect().set(Date.now());
       document.getElementById("login-wall").style.display="none";
       document.getElementById("soc-main").style.display="grid";
       initFriends();
@@ -2597,7 +2626,7 @@ async function addToHistory(song){
     await ldb.history.add({videoId:song.videoId,title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId),playedAt:Date.now()});
     const all=await ldb.history.orderBy("playedAt").toArray();
     if(all.length>50){ await ldb.history.bulkDelete(all.slice(0,all.length-50).map(r=>r.id)); }
-    if(FB&&S.user){
+    if(FB&&S.user&&window.MU_PRIV_ON("stats")){
       fbD.ref(`stats/${S.user.uid}/songs/${song.videoId}`).transaction(cur=>({
         title:song.title,artist:song.artist,thumb:song.thumb||TH(song.videoId),
         count:((cur&&cur.count)||0)+1,lastPlayed:Date.now()
@@ -2922,23 +2951,55 @@ async function shareSong(song){
 
 function handleDeepLink(){
   try{
-    const params = new URLSearchParams(window.location.search);
+    const playWhenReady = (videoId, title) => {
+      const tryPlay = (attempts=0) => {
+        if(S.ytOk || attempts > 40){
+          playSong({ videoId, title: title || "YouTube: "+videoId, artist: "YouTube", thumb: TH(videoId) });
+          toast("▶ " + T("sharedSong"));
+        } else {
+          setTimeout(()=>tryPlay(attempts+1), 300);
+        }
+      };
+      setTimeout(()=>tryPlay(), 400);
+    };
 
+    // ── YouTube paylaşımı (manifest share_target): /?url=...&text=...&title=... ──
+    const params = new URLSearchParams(window.location.search);
+    if(params.has("url") || params.has("text")){
+      const cand = [params.get("url"), params.get("text"), params.get("title")].filter(Boolean);
+      let vid = null, sharedTitle = null;
+      for(const c of cand){
+        vid = extractYTId(c);
+        if(vid){ break; }
+      }
+      if(!vid){
+        // bəzən "text" həm adı, həm linki saxlayır — içindən link tap
+        for(const c of cand){
+          const mUrl = c.match(/https?:\/\/\S+/);
+          if(mUrl){ vid = extractYTId(mUrl[0]); if(vid) break; }
+        }
+      }
+      if(vid){
+        sharedTitle = (params.get("title")||"").trim() || null;
+        window.history.replaceState({}, document.title, "/");
+        playWhenReady(vid, sharedTitle);
+        return;
+      }
+      // Video ID tapılmadı — axtarış kimi aç
+      const q = (params.get("text") || params.get("title") || "").trim();
+      if(q){
+        window.history.replaceState({}, document.title, "/");
+        setTimeout(()=>doSearch(q.toLowerCase()), 600);
+      }
+      return;
+    }
 
     // Song deep link: /s/VIDEO_ID
     const m = window.location.pathname.match(/^\/s\/([a-zA-Z0-9_-]{11})$/);
     if(!m) return;
     const videoId = m[1];
     window.history.replaceState({}, document.title, "/");
-    const tryPlay = (attempts=0) => {
-      if(S.ytOk || attempts > 40){
-        playSong({ videoId, title: "YouTube: "+videoId, artist: "YouTube", thumb: TH(videoId) });
-        toast("▶ " + T("sharedSong"));
-      } else {
-        setTimeout(()=>tryPlay(attempts+1), 300);
-      }
-    };
-    setTimeout(()=>tryPlay(), 400);
+    playWhenReady(videoId);
   }catch(e){ console.warn("[DeepLink]", e); }
 }
 
@@ -3035,6 +3096,7 @@ function handleDeepLink(){
 <script src="/features.js"></script>
 <script src="/background.js"></script>
 <script src="/stats.js"></script>
+<script src="/plus.js"></script>
 <!--MilliNet --> <script type="text/javascript" src="https://millinet.az/banner.js?id=612"></script>
 </body>
 </html>
