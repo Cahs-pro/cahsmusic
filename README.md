@@ -50,26 +50,6 @@ api/admin-vip.js    VIP statusunu admin verir
 terms.html · privacy.html · copyright.html   hüquqi səhifələr
 ```
 
-## Quraşdırma
-Tətbiq statikdir, `index.html`-i hər hansı statik serverdə açmaq kifayətdir. Vercel-də serverless funksiyalar üçün **Settings → Environment Variables**:
-
-| Dəyişən | Nə üçün | Məcburi? |
-|---|---|---|
-| `RAPIDAPI_KEY` | oflayn saxlama / axın üçün audio çevirmə xidməti | istəyə bağlı |
-| `FIREBASE_SERVICE_ACCOUNT` | `api/admin-vip.js` (VIP statusu vermək) | istəyə bağlı |
-| `YT_API_KEY` | mahnı adları üçün YouTube Data API (yoxdursa oEmbed işləyir) | istəyə bağlı |
-
-Firebase konfiqurasiyası `index.html`-dədir (veb açarları açıq olmaq üçün nəzərdə tutulub), məlumatları **Firebase Realtime Database qaydaları** qoruyur.
-
-### ⚠️ Firebase qaydaları və indekslər (məcburi)
-
-Dostluq, şəxsi mesaj, bildiriş və statistika sorğuları üçün `database.rules.json` daxilindəki bütün qaydalar tətbiq olunmalıdır. Xüsusilə `/users` altında `".indexOn": ["email"]` olmadıqda dost əlavə etmək zamanı **“Index not defined”** xətası yaranır.
-
-1. Firebase Console → layihə → **Realtime Database → Rules** bölməsini açın.
-2. `database.rules.json` faylının məzmununu köçürüb mövcud qaydalarla əvəz edin.
-3. **Publish** basın. Vercel deploy-u Firebase qaydalarını avtomatik yeniləmir.
-
-Alternativ: `firebase.json`-də rules faylı göstərilibsə, `firebase deploy --only database` əmrini işlədin. Qaydalarda e-poçt indeksləri, yalnız giriş etmiş istifadəçilər üçün profil oxuma, DM iştirakçılarının yoxlanması və VIP sahələrinin yalnız Admin SDK tərəfindən dəyişməsi təmin edilir.
 
 ## Məxfilik və hüquqlar
 - [İstifadə Şərtləri](https://cahsmusic.vercel.app/terms) · [Məxfilik Siyasəti](https://cahsmusic.vercel.app/privacy) · [Müəllif Hüquqları](https://cahsmusic.vercel.app/copyright)
