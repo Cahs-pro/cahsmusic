@@ -26,14 +26,28 @@ function getFirebaseAdmin(){
 }
 
 module.exports = async function handler(req, res){
-  res.setHeader("Access-Control-Allow-Origin",  "*");
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  const origin = req.headers.origin;
+  if(origin){
+    try{
+      if(new URL(origin).host === req.headers.host){
+        res.setHeader("Access-Control-Allow-Origin", origin);
+        res.setHeader("Vary", "Origin");
+      }
+    }catch(_){/* etibarsız Origin başlığına CORS icazəsi verilmir */}
+  }
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if(req.method === "OPTIONS") return res.status(200).end();
   if(req.method !== "POST")   return res.status(405).json({ error: "POST only" });
 
   const { idToken, targetUid, vip } = req.body || {};
-  if(!idToken || !targetUid) return res.status(400).json({ error: "Missing fields" });
+  if(typeof idToken !== "string" || !idToken || idToken.length > 4096 ||
+     typeof targetUid !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(targetUid) ||
+     typeof vip !== "boolean"){
+    return res.status(400).json({ error: "Yanlış və ya çatışmayan parametrlər" });
+  }
 
   try{
     getFirebaseAdmin();
@@ -80,6 +94,9 @@ module.exports = async function handler(req, res){
 
   }catch(e){
     console.error("[admin-vip]", e);
-    return res.status(500).json({ error: e.message });
+    if(typeof e.code === "string" && e.code.startsWith("auth/")){
+      return res.status(401).json({ error: "Sessiya etibarsızdır. Yenidən giriş edin." });
+    }
+    return res.status(500).json({ error: "Əməliyyat alınmadı. Yenidən cəhd edin." });
   }
 };

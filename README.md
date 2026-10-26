@@ -61,15 +61,15 @@ Tətbiq statikdir, `index.html`-i hər hansı statik serverdə açmaq kifayətdi
 
 Firebase konfiqurasiyası `index.html`-dədir (veb açarları açıq olmaq üçün nəzərdə tutulub), məlumatları **Firebase Realtime Database qaydaları** qoruyur.
 
-### ⚠️ Birlikdə dinləmə otağı üçün qayda yeniləməsi (məcburi)
+### ⚠️ Firebase qaydaları və indekslər (məcburi)
 
-Otaqlar `/rooms`, ortaq playlistlər `/collab` düyünündə saxlanır. `permission_denied` xətası alırsınızsa, qaydalara `rooms` bloku əlavə olunmayıb:
+Dostluq, şəxsi mesaj, bildiriş və statistika sorğuları üçün `database.rules.json` daxilindəki bütün qaydalar tətbiq olunmalıdır. Xüsusilə `/users` altında `".indexOn": ["email"]` olmadıqda dost əlavə etmək zamanı **“Index not defined”** xətası yaranır.
 
-1. Firebase Console → layihə → **Realtime Database → Rules**
-2. `database.rules.json` faylındakı **`rooms`** blokunu mövcud qaydalarınıza köçürün (və ya bütün faylı tətbiq edin)
-3. **Publish** basın
+1. Firebase Console → layihə → **Realtime Database → Rules** bölməsini açın.
+2. `database.rules.json` faylının məzmununu köçürüb mövcud qaydalarla əvəz edin.
+3. **Publish** basın. Vercel deploy-u Firebase qaydalarını avtomatik yeniləmir.
 
-Alternativ: `firebase deploy --only database` (firebase.json-də rules faylı göstərilibsə).
+Alternativ: `firebase.json`-də rules faylı göstərilibsə, `firebase deploy --only database` əmrini işlədin. Qaydalarda e-poçt indeksləri, yalnız giriş etmiş istifadəçilər üçün profil oxuma, DM iştirakçılarının yoxlanması və VIP sahələrinin yalnız Admin SDK tərəfindən dəyişməsi təmin edilir.
 
 ## Məxfilik və hüquqlar
 - [İstifadə Şərtləri](https://cahsmusic.vercel.app/terms) · [Məxfilik Siyasəti](https://cahsmusic.vercel.app/privacy) · [Müəllif Hüquqları](https://cahsmusic.vercel.app/copyright)

@@ -43,10 +43,10 @@
   first.parentNode.insertBefore(tag, first);
 })();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js" integrity="sha384-vG8R9Zn5YZHCeXt9gLNp8MnsUCqmIy7HPxhdOdLGa/30/c8uZXFrrN0iKGID/ZvC" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" integrity="sha384-sEVIly94UBRLKWdkYoPpSG7GD/e79YHMrxVyZaOk712Ga7+EAw6w1EFi+xBzBdd+" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" integrity="sha384-EkqK+ezBWJuvO3hfrSx2iVqr3YQbhmnzn8kPhOpBZ+0GMVU5oGSgptwIu8D84HjE" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js" integrity="sha384-1/m+A1jVWbD3yiK3/vtFvm1+LjK1WLpSoDY+Kaxppwn/yP9BVSgdHTNQVOjrzUO5" crossorigin="anonymous"></script>
 
 <style>
 /* ══ TOKENS ══ */
@@ -1529,6 +1529,13 @@ const openM=id=>document.getElementById(id).classList.add("open");
 const closeM=id=>document.getElementById(id).classList.remove("open");
 window.closeM=closeM;
 document.querySelectorAll(".moverlay").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)o.classList.remove("open");}));
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape")return;
+  const open=document.querySelector(".moverlay.open");
+  if(open){closeM(open.id);return;}
+  if(document.body.classList.contains("search-open")){closeMobileSearch();return;}
+  if(hamOpen)closeHam();
+});
 
 /* ══ HAMBURGER MENU ══ */
 let hamOpen = false;
@@ -2301,7 +2308,7 @@ if(FB){
       if(wrap){ wrap.classList.add("show"); wrap.onclick=()=>showMyProfile(); }
       btn.innerHTML=`<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>${T("signout")}</span>`;
       const _shOn=window.MU_PRIV_ON("online");
-      fbD.ref(`users/${user.uid}`).update({uid:user.uid,name:user.displayName,email:user.email,photo:user.photoURL||"",online:_shOn?true:false,lastSeen:Date.now()});
+      fbD.ref(`users/${user.uid}`).update({uid:user.uid,name:user.displayName,email:(user.email||"").toLowerCase(),photo:user.photoURL||"",online:_shOn?true:false,lastSeen:Date.now()});
       fbD.ref(`users/${user.uid}/online`).onDisconnect().set(false);
       if(_shOn) fbD.ref(`users/${user.uid}/lastSeen`).onDisconnect().set(Date.now());
       document.getElementById("login-wall").style.display="none";
@@ -2402,8 +2409,9 @@ document.getElementById("fr-add").addEventListener("click", async()=>{
     toast("✅ "+T("reqsent")+" → "+(td?.name||email));
   }catch(e){
     console.error("[FR add]",e);
-    if(e.code==="PERMISSION_DENIED"||e.message?.includes("Permission denied")){toast("❌ İcazə xətası — Firebase Rules yoxlayın");}
-    else{toast("❌ Xəta: "+e.message);}
+    if(e.message?.includes("Index not defined")){toast("❌ Firebase-də users → .indexOn → email qaydasını Publish edin");}
+    else if(e.code==="PERMISSION_DENIED"||e.code==="permission_denied"||e.message?.includes("Permission denied")){toast("❌ İcazə xətası — Firebase Rules yoxlayın");}
+    else{toast("❌ Dostluq istəyi göndərilmədi. Yenidən cəhd edin.");}
   }finally{btn.disabled=false;if(lbl)lbl.textContent=T("add")||"Əlavə et";}
 });
 
@@ -2440,7 +2448,7 @@ function openDM(friend){
     if(!ms.length){c.innerHTML='<div class="echint">Hələ mesaj yoxdur 👋<br><small style="color:var(--t3)">Mərhabalaş!</small></div>';return;}
     ms.forEach(m=>appendMsg(m,c));
     requestAnimationFrame(()=>{c.scrollTop=c.scrollHeight;});
-  },err=>{document.getElementById("msgs").innerHTML='<div class="echint" style="color:var(--red)">❌ '+err.message+'<br><small>Firebase Rules yoxlayın</small></div>';});
+  },err=>{console.warn("[DM] yükləmə xətası:",err);document.getElementById("msgs").innerHTML='<div class="echint" style="color:var(--red)">❌ Mesajlar yüklənmədi.<br><small>Firebase Rules yoxlayın</small></div>';});
 }
 
 function closeMobileChat(){
@@ -2459,7 +2467,7 @@ function appendMsg(m,c){
   const me=S.user&&m.uid===S.user.uid;
   const d=document.createElement("div");d.className="mrow"+(me?" me":"");
   const tm=m.ts?new Date(m.ts).toLocaleTimeString("az",{hour:"2-digit",minute:"2-digit"}):"";
-  d.innerHTML='<img class="mav" src="'+(m.photo||PHO)+'" alt="" onerror="this.src=\''+(PHO)+'\'"/><div class="mbody">'+(me?"":'<div class="mname">'+X(m.name)+'</div>')+'<div class="mbbl">'+X(m.text)+'</div><div class="mtime">'+tm+'</div></div>';
+  d.innerHTML='<img class="mav" src="'+X(m.photo||PHO)+'" alt="" onerror="this.onerror=null;this.src=\''+X(PHO)+'\'"/><div class="mbody">'+(me?"":'<div class="mname">'+X(m.name)+'</div>')+'<div class="mbbl">'+X(m.text)+'</div><div class="mtime">'+tm+'</div></div>';
   c.appendChild(d);
 }
 
@@ -2477,7 +2485,7 @@ async function sendMsg(){
   try{
     await fbD.ref("dms/"+room).push({uid:S.user.uid,name:S.user.displayName||"Anonim",photo:S.user.photoURL||"",text:txt,ts:firebase.database.ServerValue.TIMESTAMP});
     requestAnimationFrame(()=>{const c=document.getElementById("msgs");c.scrollTop=c.scrollHeight;});
-  }catch(e){inp.value=txt;toast("❌ Göndərilmədi: "+e.message);}
+  }catch(e){console.warn("[DM] göndərmə xətası:",e);inp.value=txt;toast("❌ Mesaj göndərilmədi. Yenidən cəhd edin.");}
   finally{btn.disabled=false;inp.focus();}
 }
 
@@ -3098,6 +3106,5 @@ function handleDeepLink(){
 <script src="/stats.js"></script>
 <script src="/plus.js"></script>
 <script src="/extras.js"></script>
-<!--MilliNet --> <script type="text/javascript" src="https://millinet.az/banner.js?id=612"></script>
 </body>
 </html>

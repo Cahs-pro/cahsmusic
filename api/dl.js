@@ -103,6 +103,6 @@ module.exports = async function handler(req, res) {
   } catch (err) {
     console.error("[dl] xəta:", err.message);
     res.setHeader("Cache-Control", "no-store");      // xəta heç vaxt keşlənmir
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Audio linki hazırlanmadı. Yenidən cəhd edin." });
   }
 };
