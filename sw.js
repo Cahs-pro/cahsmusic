@@ -1,7 +1,7 @@
-const CACHE_NAME  = 'mu-v45';
-const THUMB_CACHE = 'mu-thumb-v41';
-const FONT_CACHE  = 'mu-font-v41';
-const CDN_CACHE   = 'mu-cdn-v41';
+const CACHE_NAME  = 'mu-v46';
+const THUMB_CACHE = 'mu-thumb-v46';
+const FONT_CACHE  = 'mu-font-v46';
+const CDN_CACHE   = 'mu-cdn-v46';
 
 const SHELL = ['/', '/index.html', '/features.js', '/background.js', '/stats.js', '/plus.js', '/extras.js', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 // Oflayn açılışda yüklənməsələr əsas skript yarıda dayanır və səhifələr arası keçid işləmir.
