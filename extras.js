@@ -30,6 +30,7 @@
   /* ══ DİLLƏR ══ */
   const I18N = {
     az: {
+      actionFailed: "❌ Əməliyyat alınmadı. Yenidən cəhd edin.", anonymous: "Anonim", playlist: "Playlist", close: "Bağla", delete: "Sil",
       lyrics: "Sözlər", lyLoading: "Sözlər axtarılır…", lyNone: "Bu mahnının sözləri tapılmadı 😔",
       lyNoSong: "⚠ Əvvəlcə mahnı seçin", lySrc: "Mənbə: LRCLIB",
       radio: "Radio", radioOn: "📻 Radio aktiv — oxşar mahnılar avtomatik çalınacaq", radioOff: "📻 Radio söndürüldü",
@@ -51,6 +52,7 @@
       streakB: "günlük seriya", playsB: "dinləmə", locked: "açılmayıb",
     },
     en: {
+      actionFailed: "❌ Something went wrong. Please try again.", anonymous: "Anonymous", playlist: "Playlist", close: "Close", delete: "Delete",
       lyrics: "Lyrics", lyLoading: "Looking for lyrics…", lyNone: "No lyrics found for this song 😔",
       lyNoSong: "⚠ Pick a song first", lySrc: "Source: LRCLIB",
       radio: "Radio", radioOn: "📻 Radio on — similar songs will play automatically", radioOff: "📻 Radio off",
@@ -72,6 +74,7 @@
       streakB: "day streak", playsB: "plays", locked: "locked",
     },
     ru: {
+      actionFailed: "❌ Не удалось выполнить действие. Попробуйте ещё раз.", anonymous: "Аноним", playlist: "Плейлист", close: "Закрыть", delete: "Удалить",
       lyrics: "Текст", lyLoading: "Ищу текст…", lyNone: "Текст этой песни не найден 😔",
       lyNoSong: "⚠ Сначала выбери песню", lySrc: "Источник: LRCLIB",
       radio: "Радио", radioOn: "📻 Радио включено — похожие песни будут играть автоматически", radioOff: "📻 Радио выключено",
@@ -141,7 +144,7 @@
     ov = document.createElement("div");
     ov.className = "moverlay"; ov.id = id;
     ov.innerHTML = `<div class="mbox" role="dialog" aria-modal="true" style="max-width:${maxW || 420}px">
-      <button class="mcls" aria-label="Bağla">✕</button>
+      <button class="mcls" aria-label="${esc(L("close"))}">✕</button>
       <div id="${id}-b"></div></div>`;
     ov.querySelector(".mcls").addEventListener("click", () => closeM(id));
     ov.addEventListener("click", e => { if (e.target === ov) closeM(id); });
@@ -294,7 +297,7 @@
     if (!rid || !hasFB() || !me()) return;
     cntInc("react");
     fbD.ref(`rooms/${rid}/reactions`).push({
-      emoji, by: me().uid, name: me().displayName || "Anonim", at: Date.now()
+      emoji, by: me().uid, name: me().displayName || L("anonymous"), at: Date.now()
     }).catch(() => {});
   }
 
@@ -363,7 +366,7 @@
     fuids.forEach((f, i) => {
       const v = snaps[i] && snaps[i].exists() ? snaps[i].val() : null;
       entries.push({
-        uid: f, name: (S.friends[f] && (S.friends[f].name || S.friends[f].displayName)) || "Anonim",
+        uid: f, name: (S.friends[f] && (S.friends[f].name || S.friends[f].displayName)) || L("anonymous"),
         photo: (S.friends[f] && S.friends[f].photo) || "",
         plays: (v && v.week === wk) ? (v.plays | 0) : 0, me: false
       });
@@ -406,13 +409,13 @@
     if (!name) { say(L("collabBad")); return; }
     const ref = fbD.ref("collab").push();
     try {
-      await ref.set({ name, owner: me().uid, ownerName: me().displayName || "Anonim", createdAt: Date.now() });
-      await ref.child(`members/${me().uid}`).set({ name: me().displayName || "Anonim", photo: me().photoURL || "", at: Date.now() });
+      await ref.set({ name, owner: me().uid, ownerName: me().displayName || L("anonymous"), createdAt: Date.now() });
+      await ref.child(`members/${me().uid}`).set({ name: me().displayName || L("anonymous"), photo: me().photoURL || "", at: Date.now() });
       rememberCollab(ref.key, name);
       renderCollabSection();
       openCollab(ref.key);
       copyText(location.origin + "/collab/" + ref.key, L("collabCopied"));
-    } catch (e) { console.warn("[collab] yaratma:", e); say("❌ " + (e.message || e)); }
+    } catch (e) { console.warn("[collab] yaratma:", e); say(L("actionFailed")); }
   }
 
   async function joinCollab(id) {
@@ -422,8 +425,8 @@
     const snap = await fbD.ref(`collab/${id}`).get().catch(() => null);
     if (!snap || !snap.exists()) { say(L("collab404")); return; }
     const v = snap.val() || {};
-    await fbD.ref(`collab/${id}/members/${me().uid}`).set({ name: me().displayName || "Anonim", photo: me().photoURL || "", at: Date.now() }).catch(() => {});
-    rememberCollab(id, v.name || "Playlist");
+    await fbD.ref(`collab/${id}/members/${me().uid}`).set({ name: me().displayName || L("anonymous"), photo: me().photoURL || "", at: Date.now() }).catch(() => {});
+    rememberCollab(id, v.name || L("playlist"));
     renderCollabSection();
     openCollab(id);
   }
@@ -454,7 +457,7 @@
     const songs = Object.entries(v.songs || {}).map(([vid, s]) => ({ videoId: vid, ...s }))
       .filter(s => VID.test(s.videoId)).sort((a, c) => (a.at || 0) - (c.at || 0));
 
-    b.innerHTML = `<div class="mtit">🤝 ${esc(v.name || "Playlist")}</div>
+    b.innerHTML = `<div class="mtit">🤝 ${esc(v.name || L("playlist"))}</div>
 <div class="mu-note">${Object.keys(members).length} ${esc(L("collabMembers"))} · ${songs.length} 🎵</div>
 <div style="display:flex;gap:7px;margin-bottom:8px">
   <button class="mu-btn" id="mu-c-share" style="flex:1">🔗 ${esc(L("collabCopied").replace("🔗 ", "").split(" — ")[0])}</button>
@@ -466,7 +469,7 @@
   ${songs.map(s => `<div class="mu-csong" data-v="${esc(s.videoId)}">
     <img src="${esc(s.thumb || thumbOf(s.videoId))}" alt="" onerror="this.style.visibility='hidden'"/>
     <div class="t"><div class="tt">${esc(s.title)}</div><div class="ta">${esc(s.artist || "")} · ${esc(L("addedBy"))} ${esc(s.byName || "?")}</div></div>
-    ${(isOwner || (me() && s.by === me().uid)) ? `<button class="mu-cdel" data-del="${esc(s.videoId)}" aria-label="Sil">✕</button>` : ""}
+    ${(isOwner || (me() && s.by === me().uid)) ? `<button class="mu-cdel" data-del="${esc(s.videoId)}" aria-label="${esc(L("delete"))}">✕</button>` : ""}
   </div>`).join("")}
 </div>
 <button class="${isOwner ? "mu-danger-btn" : "mu-ghost-btn"}" id="mu-c-exit" style="margin-top:10px">${esc(isOwner ? L("collabDel") : L("collabLeave"))}</button>`;
@@ -484,7 +487,7 @@
       if (!me()) { say("⚠ " + L("needLogin")); return; }
       await fbD.ref(`collab/${id}/songs/${s.videoId}`).set({
         title: clip(s.title, 200), artist: clip(s.artist, 120), thumb: s.thumb || thumbOf(s.videoId),
-        by: me().uid, byName: me().displayName || "Anonim", at: Date.now()
+        by: me().uid, byName: me().displayName || L("anonymous"), at: Date.now()
       }).catch(() => {});
       cntInc("collabAdd");
       say(L("collabAdded"));
@@ -799,7 +802,7 @@
           cell(st.artists, "🎤 " + LX("cats", "artists")) +
           cell(st.streak + " 🔥", LX("cats", "streak")) +
           `</div>
-          <div class="mu-note" style="margin-top:6px">🕐 ${esc(bestHour + ":00")} · 📅 ${esc(bestDay)} · 🗓 ${esc(first.toLocaleDateString())}</div>`;
+          <div class="mu-note" style="margin-top:6px">🕐 ${esc(bestHour + ":00")} · 📅 ${esc(bestDay)} · 🗓 ${esc(first.toLocaleDateString(curLang()))}</div>`;
       }
       const badgeHtml = earned.length
         ? `<div class="sh" style="margin:10px 0 6px"><span class="dot"></span>🏅 ${esc(L("badges"))} (${earned.length}/${ALL_BADGES.length})</div>
@@ -828,7 +831,7 @@
       if (html) container.insertAdjacentHTML("beforeend", html);
     }
   }
-  function compatText() { return curLang() === "en" ? "Taste match" : curLang() === "ru" ? "Совпадение вкуса" : "Zövq uyğunluğu"; }
+  function compatText() { return (I18NX[curLang()] || I18NX.az).compat; }
 
   /* ════════════════════════════════════════════
      7) DOST SERİYASI + ZÖVQ UYĞUNLUĞU
@@ -1024,6 +1027,21 @@
       });
     } catch (_) {}
   }
+
+  window.addEventListener("mu:languagechange", () => {
+    try {
+      if ($("m-lyrics")?.classList.contains("open")) openLyrics();
+      if ($("m-board")?.classList.contains("open")) openBoard();
+      if ($("m-collab")?.classList.contains("open") && collabId) openCollab(collabId);
+      if ($("m-badges")?.classList.contains("open")) openBadges();
+      renderCollabSection(); decorateFriendRows(); injectPlayerButtons(); injectBoardButton();
+      [["b-bar-ly", "lyrics"], ["b-bar-radio", "radio"]].forEach(([id,k]) => { const b=$(id); if(b){b.title=L(k);b.setAttribute("aria-label",L(k));} });
+      const pl=$("pem-ly")?.querySelector("span:last-child"); if(pl)pl.textContent=L("lyrics");
+      const pr=$("pem-radio")?.querySelector("span:last-child"); if(pr)pr.textContent=L("radio");
+      const bb=$("mu-board-open")?.querySelector("span"); if(bb)bb.textContent=L("board");
+      document.querySelectorAll(".moverlay .mcls").forEach(b => b.setAttribute("aria-label", L("close")));
+    } catch (_) {}
+  });
 
   /* ══ BAŞLAT ══ */
   try {

@@ -1,9 +1,9 @@
-const CACHE_NAME  = 'mu-v46';
-const THUMB_CACHE = 'mu-thumb-v46';
-const FONT_CACHE  = 'mu-font-v46';
-const CDN_CACHE   = 'mu-cdn-v46';
+const CACHE_NAME  = 'mu-v47';
+const THUMB_CACHE = 'mu-thumb-v47';
+const FONT_CACHE  = 'mu-font-v47';
+const CDN_CACHE   = 'mu-cdn-v47';
 
-const SHELL = ['/', '/index.html', '/features.js', '/background.js', '/stats.js', '/plus.js', '/extras.js', '/manifest.json', '/icon-192.png', '/icon-512.png'];
+const SHELL = ['/', '/index.html', '/features.js', '/background.js', '/stats.js', '/plus.js', '/extras.js', '/legal-i18n.js', '/terms.html', '/privacy.html', '/copyright.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 // Oflayn açılışda yüklənməsələr əsas skript yarıda dayanır və səhifələr arası keçid işləmir.
 const CDN_LIBS = [
   'https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js',

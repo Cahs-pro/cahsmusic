@@ -39,6 +39,7 @@
       card: "Paylaşma kartı", cardSub: "Cari mahnı üçün şəkil kartı", noSong: "⚠ Əvvəlcə mahnı seçin",
       making: "⏳ Kart hazırlanır…", share: "Paylaş", save: "Yüklə", saved: "✅ Şəkil yükləndi",
       recap: "Xülasə", recapSub: "Ən çox dinlədiklərin kartı", recapTitle: "Ən çox dinlədiklərim",
+      actionFailed: "❌ Əməliyyat alınmadı. Yenidən cəhd edin.",
       plays: "DİNLƏMƏ", mins: "DƏQİQƏ", noData: "Hələ kifayət qədər dinləmə yoxdur", open: "Aç"
     },
     en: {
@@ -54,6 +55,7 @@
       card: "Share card", cardSub: "Image card for the current song", noSong: "⚠ Pick a song first",
       making: "⏳ Making the card…", share: "Share", save: "Save", saved: "✅ Image saved",
       recap: "Recap", recapSub: "Card of your most played songs", recapTitle: "My most played",
+      actionFailed: "❌ Something went wrong. Please try again.",
       plays: "PLAYS", mins: "MINUTES", noData: "Not enough listening data yet", open: "Open"
     },
     ru: {
@@ -69,6 +71,7 @@
       card: "Карточка", cardSub: "Картинка для текущей песни", noSong: "⚠ Сначала выберите песню",
       making: "⏳ Создаю карточку…", share: "Поделиться", save: "Сохранить", saved: "✅ Картинка сохранена",
       recap: "Итоги", recapSub: "Карточка самых прослушиваемых", recapTitle: "Мои самые частые",
+      actionFailed: "❌ Не удалось выполнить действие. Попробуйте ещё раз.",
       plays: "ПРОСЛУШИВАНИЙ", mins: "МИНУТ", noData: "Пока недостаточно данных", open: "Открыть"
     }
   };
@@ -273,7 +276,7 @@ body.mu-off #npw{top:calc(var(--nav) + 38px)}
       const day = new Date().toISOString().slice(0, 10);
       saveFile("music-universe-backup-" + day + ".json", new Blob([JSON.stringify(data, null, 1)], { type: "application/json" }));
       say(L("exported"));
-    } catch (e) { console.warn("[export]", e); say("❌ " + e.message); }
+    } catch (e) { console.warn("[export]", e); say(L("actionFailed")); }
   }
 
   const cleanSong = o => (o && typeof o === "object" && typeof o.videoId === "string" && VID.test(o.videoId))
@@ -632,7 +635,7 @@ body.mu-off #npw{top:calc(var(--nav) + 38px)}
       const blob = await makeSongCard(song);
       let url = ""; try { url = buildShareUrl(song.videoId); } catch (_) {}
       showCard(blob, "music-universe-" + song.videoId + ".png", L("card"), (cleanTitle(song.title) || song.title) + (song.artist ? " — " + song.artist : "") + (url ? "\n" + url : ""));
-    } catch (e) { console.warn("[card]", e); say("❌ " + e.message); }
+    } catch (e) { console.warn("[card]", e); say(L("actionFailed")); }
   }
 
   /* ── Xülasənin açılışı ── */
@@ -705,7 +708,7 @@ body.mu-off #npw{top:calc(var(--nav) + 38px)}
       const mins = Math.round(plays * 3.5);                 // tətbiqin mövcud hesablaması ilə eyni
       const blob = await makeRecapCard(rows.slice(0, 5), { plays, mins });
       showCard(blob, "music-universe-recap.png", L("recap"), L("recapTitle") + " 🎧\n" + location.origin);
-    } catch (e) { console.warn("[recap]", e); say("❌ " + e.message); }
+    } catch (e) { console.warn("[recap]", e); say(L("actionFailed")); }
   }
 
   /* ════════════════════════════════════════════

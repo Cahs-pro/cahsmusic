@@ -29,6 +29,7 @@
   /* ══ DİLLƏR ══ */
   const I18N = {
     az: {
+      actionFailed: "❌ Əməliyyat alınmadı. Yenidən cəhd edin.", firebaseNotLoaded: "❌ Firebase yüklənməyib", anonymous: "Anonim", roomSuffix: "otaq",
       myData: "Məlumatlarım", myDataSub: "İxrac, məxfilik, hesabın silinməsi",
       open: "Aç", close: "Bağla",
       exportT: "Məlumatları ixrac et", exportSub: "Profil, playlistlər, sevimlilər, tarix, statistika və parametrlər — bir JSON faylda (endirilmiş audio fayllar daxil deyil)",
@@ -68,6 +69,7 @@
       kLyrics: "Mahnı sözləri", kRadio: "Radio aç / bağla", kRoom: "Dinləmə otağı", kBoard: "Liderlik", kBadges: "Nişanlar",
     },
     en: {
+      actionFailed: "❌ Something went wrong. Please try again.", firebaseNotLoaded: "❌ Firebase failed to load", anonymous: "Anonymous", roomSuffix: "room",
       myData: "My Data", myDataSub: "Export, privacy, account deletion",
       open: "Open", close: "Close",
       exportT: "Export my data", exportSub: "Profile, playlists, likes, history, stats and settings in one JSON file (downloaded audio not included)",
@@ -107,6 +109,7 @@
       kLyrics: "Song lyrics", kRadio: "Toggle radio", kRoom: "Listening room", kBoard: "Leaderboard", kBadges: "Badges",
     },
     ru: {
+      actionFailed: "❌ Не удалось выполнить действие. Попробуйте ещё раз.", firebaseNotLoaded: "❌ Firebase не загрузился", anonymous: "Аноним", roomSuffix: "комната",
       myData: "Мои данные", myDataSub: "Экспорт, приватность, удаление аккаунта",
       open: "Открыть", close: "Закрыть",
       exportT: "Экспорт данных", exportSub: "Профиль, плейлисты, лайки, история, статистика и настройки в одном JSON (без аудиофайлов)",
@@ -331,7 +334,7 @@ html.mu-big input,html.mu-big textarea{font-size:1rem!important}
       document.body.appendChild(a); a.click();
       setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 2000);
       say(L("exported"));
-    } catch (e) { console.warn("[mydata] ixrac:", e); say("❌ " + e.message); }
+    } catch (e) { console.warn("[mydata] ixrac:", e); say(L("actionFailed")); }
   }
 
   /* ── Hesabın və bütün məlumatların silinməsi ── */
@@ -565,7 +568,7 @@ ${privRow("online", "🟢 " + L("privOnline"), L("privOnlineSub"))}
 
     // üzvlük + avtomatik çıxış
     ROOM.memRef = fbD.ref(`rooms/${id}/members/${me().uid}`);
-    ROOM.joinPromise = ROOM.memRef.set({ name: me().displayName || "Anonim", photo: me().photoURL || "", at: Date.now() });
+    ROOM.joinPromise = ROOM.memRef.set({ name: me().displayName || L("anonymous"), photo: me().photoURL || "", at: Date.now() });
     ROOM.memRef.onDisconnect().remove().catch(() => {});
     ROOM.hb = setInterval(() => { try { ROOM.memRef && ROOM.memRef.child("at").set(Date.now()).catch(() => {}); } catch (_) {} }, 15000);
 
@@ -595,19 +598,19 @@ ${privRow("online", "🟢 " + L("privOnline"), L("privOnlineSub"))}
   }
 
   const isPermErr = e => !!(e && /permission_denied|PERMISSION_DENIED/i.test(String(e.code || e.message || e)));
-  const roomFail = e => { say(isPermErr(e) ? L("roomPerm") : "❌ " + (e && e.message ? e.message : e), isPermErr(e) ? 7000 : 3500); };
+  const roomFail = e => { say(isPermErr(e) ? L("roomPerm") : L("actionFailed"), isPermErr(e) ? 7000 : 3500); };
 
   const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
   const mkCode = () => Array.from({ length: 6 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join("");
 
   async function createRoom() {
-    if (!hasFB()) { say("❌ Firebase yüklənməyib"); return; }
+    if (!hasFB()) { say(L("firebaseNotLoaded")); return; }
     if (!me()) { say("⚠ " + L("roomNeedLogin")); renderRoomModal(); return; }
     for (let i = 0; i < 5; i++) {
       const code = mkCode();
       const snap = await fbD.ref(`rooms/${code}`).get().catch(() => null);
       if (snap && snap.exists()) continue;
-      const data = { name: (me().displayName || "Anonim") + " — otaq", host: me().uid, createdAt: Date.now() };
+      const data = { name: (me().displayName || L("anonymous")) + " — " + L("roomSuffix"), host: me().uid, createdAt: Date.now() };
       try { await fbD.ref(`rooms/${code}`).set(data); } catch (e) { console.warn("[room] yaratma:", e); roomFail(e); return; }
       detachRoom();
       attachRoom(code, data);
@@ -621,7 +624,7 @@ ${privRow("online", "🟢 " + L("privOnline"), L("privOnlineSub"))}
   async function joinRoom(codeRaw) {
     const code = String(codeRaw || "").trim().toUpperCase();
     if (!/^[A-Z0-9-]{4,24}$/.test(code)) { say(L("roomBadCode")); return; }
-    if (!hasFB()) { say("❌ Firebase yüklənməyib"); return; }
+    if (!hasFB()) { say(L("firebaseNotLoaded")); return; }
     if (!me()) { pendingRoom = code; say("⚠ " + L("roomNeedLogin")); renderRoomModal(); return; }
     let snap = null;
     try { snap = await fbD.ref(`rooms/${code}`).get(); }
@@ -1117,6 +1120,18 @@ ${r.topArtists.length ? `<div class="rep-sect">🎤 ${esc(L("repTopArtists"))}</
       });
     } catch (_) {}
   }
+
+  window.addEventListener("mu:languagechange", () => {
+    try {
+      if ($("m-data")?.classList.contains("open")) openDataCenter();
+      if ($("m-room")?.classList.contains("open")) renderRoomModal();
+      if ($("m-report")?.classList.contains("open")) openReport();
+      if ($("m-keys")?.classList.contains("open")) openKeysModal();
+      const rb=$("mu-room-open")?.querySelector("span"); if(rb)rb.textContent=L("room");
+      const rep=$("mu-report-btn"); if(rep)rep.textContent="📈 "+L("report");
+      document.querySelectorAll(".mcls").forEach(b => b.setAttribute("aria-label", L("close")));
+    } catch (_) {}
+  });
 
   /* ══ BAŞLAT ══ */
   try {
