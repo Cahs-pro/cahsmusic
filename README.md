@@ -1,62 +1,62 @@
 # 🎵 Music Universe
 
-**Music Universe** — musiqi dinləmək, playlist yaratmaq və dostlarla paylaşmaq üçün pulsuz, reklamsız veb tətbiqidir (PWA). Telefona quraşdırıla bilər, bildiriş panelindən idarə olunur.
+**Music Universe** is a free, ad-free web app (PWA) for listening to music, creating playlists, and sharing them with friends. It can be installed on your phone and controlled from the notification panel.
 
-🌐 Canlı: **https://cahsmusic.vercel.app**
+🌐 Live demo: **https://cahsmusic.vercel.app**
 
-## İmkanlar
-- **Musiqi dinləmə:** hazır kataloq və YouTube linki yapışdıraraq mahnı əlavə etmək (YouTube-un yerləşdirilmiş pleyeri ilə)
-- **Playlistlər, sevimlilər, dinləmə tarixçəsi**
-- **Dostlar və söhbət:** dost əlavə et, dostunun nə dinlədiyini gör, profil statistikası (oynatma, dəqiqə)
-- **Səs imkanları:** tempo (0.75x–1.5x), ekvalayzer, crossfade, yuxu taymeri
-- **Bildiriş paneli / kilid ekranı:** oynat-dayan, əvvəlki-sonrakı, irəli-geri (Media Session API)
-- **Paylaşma kartı** və **“Ən çox dinlədiklərim”** xülasə şəkli
-- **Ehtiyat nüsxə:** playlist, sevimli və parametrləri JSON fayl kimi ixrac/idxal
-- **“Məlumatlarım” mərkəzi:** bütün məlumatların ixracı, dostlara görünənlərin seçimi (indi çalınan, statistika, onlayn status), hesabın və məlumatların tam silinməsi
-- **Birlikdə dinləmə otağı:** dostlar eyni mahnını eyni anda dinləyir (Firebase Realtime Database ilə sinxron) — otaq kodu və dəvət linki ilə
-- **YouTube-dan paylaş → tətbiqdə aç:** PWA-nın share_target-i ilə YouTube-dan paylaşılan link birbaşa Music Universe-də çalınır
-- **Şəxsi dinləmə hesabatı:** son 7 günün qrafiki, saat üzrə dinləmə, ən çox dinlənən ifaçılar, ardıcıl gün seriyası
-- **Əlçatanlıq:** tam klaviatura idarəetməsi (?, Space, ←→, ↑↓, N, P, M, S, R, Y-sözlər, A-radio, O-otaq, B-liderlik, G-nişanlar), ekran oxuyucu etiketləri, yüksək kontrast və böyük mətn rejimləri
-- **Mahnı sözləri:** cari mahnının sözləri playerdən bir kliklə (LRCLIB)
-- **Radio / ağıllı mix:** mahnı bitəndə oxşar mahnılar avtomatik çalınır
-- **Otaq reaksiyaları:** birlikdə dinləyərkən ❤️🔥👏😂🎉 üzən emoji ilə
-- **Həftəlik liderlik:** dostlar arasında bu həftənin dinləmə sıralaması
-- **Ortaq playlistlər:** link ilə dostları dəvət et, hamı mahnı əlavə etsin
-- **107 nişan, 21 kateqoriya:** seriya (🔥2–365 gün), dinləmə (🎧10–10000), həftəlik/günlük rekordlar, ifaçı/mahnı müxtəlifliyi, gecə-səhər dinləmələri, dostlar, mesajlar, otaqlar, reaksiyalar, playlistlər, bəyənmələr, yükləmələr, paylaşımlar, hesab yaşı, radio, sözlər, ortaq playlistlər — profildə kateqoriya üzrə irəliləyiş ilə görünür
-- **Nişan bildirişi:** yeni nişan qazananda toast + sistem bildirişi (icazə verilibsə)
-- **Zənginləşmiş profil:** mahnı/ifaçı sayı, seriya, ən aktiv saat və gün, ilk dinləmə tarixi, qazanılmış nişanlar
-- **Dost seriyası və zövq uyğunluğu:** sosial bölmədə hər dostun üstündə 🔥 ardıcıl söhbət günü və 🎧% ortaq musiqi zövqü faizi (dostun məxfilik seçiminə hörmətlə)
-- **PWA:** oflayn rejim, quraşdırma, 3 dil (AZ, EN, RU)
+## Features
+- **Music playback:** a ready-made catalog, plus adding songs by pasting a YouTube link (using YouTube's embedded player)
+- **Playlists, favorites, and listening history**
+- **Friends and chat:** add friends, see what your friends are listening to, and view profile statistics (plays, minutes)
+- **Audio features:** tempo (0.75x–1.5x), equalizer, crossfade, and sleep timer
+- **Notification panel / lock screen:** play-pause, previous-next, and forward-back controls (Media Session API)
+- **Share card** and a **"My most played"** summary image
+- **Backup:** export and import playlists, favorites, and settings as a JSON file
+- **"My Data" center:** export all your data, choose what friends can see (now playing, statistics, online status), and fully delete your account and data
+- **Listen-together rooms:** friends listen to the same song at the same time (synced with Firebase Realtime Database), joined with a room code and invite link
+- **Share from YouTube → open in the app:** with the PWA share_target, a link shared from YouTube plays directly in Music Universe
+- **Personal listening report:** a chart of the last 7 days, listening by hour, top artists, and a day streak
+- **Accessibility:** full keyboard control (?, Space, ←→, ↑↓, N, P, M, S, R, Y lyrics, A radio, O room, B leaderboard, G badges), screen reader labels, and high-contrast and large-text modes
+- **Lyrics:** the lyrics of the current song with one click from the player (LRCLIB)
+- **Radio / smart mix:** when a song ends, similar songs play automatically
+- **Room reactions:** floating emoji (❤️🔥👏😂🎉) while listening together
+- **Weekly leaderboard:** this week's listening ranking among friends
+- **Shared playlists:** invite friends with a link, and everyone can add songs
+- **107 badges in 21 categories:** streak (🔥 2–365 days), listening (🎧 10–10000), weekly/daily records, artist/song variety, night and morning listening, friends, messages, rooms, reactions, playlists, likes, downloads, shares, account age, radio, lyrics, and shared playlists, shown on the profile with progress per category
+- **Badge notifications:** a toast and a system notification (if permission is granted) when you earn a new badge
+- **Enriched profile:** song/artist counts, streak, most active hour and day, first listening date, and earned badges
+- **Friend streaks and taste match:** in the social section, each friend shows a 🔥 streak of consecutive chat days and a 🎧 percentage of shared music taste (respecting the friend's privacy settings)
+- **PWA:** offline mode, installation, and 3 languages (AZ, EN, RU)
 
-## Texnologiyalar
-Vanilla JavaScript (build addımı yoxdur), Dexie (IndexedDB), Firebase Authentication və Realtime Database, YouTube IFrame Player API, Service Worker, Vercel Serverless Functions.
+## Technologies
+Vanilla JavaScript (no build step), Dexie (IndexedDB), Firebase Authentication and Realtime Database, YouTube IFrame Player API, Service Worker, Vercel Serverless Functions.
 
-## Quruluş
+## Structure
 ```
-index.html          əsas tətbiq (HTML + CSS + JS)
-features.js         tempo, oflayn zolaq, ixrac/idxal, paylaşma kartı, xülasə, mahnı adlarının təmizlənməsi
-background.js       bildiriş paneli və fon rejimi
-stats.js            profil statistikası
-plus.js             məlumatlarım mərkəzi, dinləmə otağı, dinləmə hesabatı, əlçatanlıq
-extras.js           sözlər, radio, otaq reaksiyaları, liderlik, ortaq playlistlər, nişanlar
-api/lyrics.js       mahnı sözləri (LRCLIB)
-api/related.js      oxşar mahnılar (radio rejimi)
-database.rules.json Firebase Realtime Database qaydaları (rooms + collab daxil)
-sw.js               service worker (oflayn işləmə)
-manifest.json       PWA parametrləri
-api/dl.js           oflayn saxlama / axın üçün audio linki (istəyə bağlı)
-api/yt-meta.js      mahnı adı və kanal məlumatı
-api/admin-vip.js    VIP statusunu admin verir
-terms.html · privacy.html · copyright.html   hüquqi səhifələr
+index.html          main app (HTML + CSS + JS)
+features.js         tempo, offline bar, export/import, share card, summary, song title cleanup
+background.js       notification panel and background mode
+stats.js            profile statistics
+plus.js             "My Data" center, listening room, listening report, accessibility
+extras.js           lyrics, radio, room reactions, leaderboard, shared playlists, badges
+api/lyrics.js       song lyrics (LRCLIB)
+api/related.js      similar songs (radio mode)
+database.rules.json Firebase Realtime Database rules (including rooms + collab)
+sw.js               service worker (offline support)
+manifest.json       PWA settings
+api/dl.js           audio link for offline storage / streaming (optional)
+api/yt-meta.js      song title and channel information
+api/admin-vip.js    admin grants VIP status
+terms.html · privacy.html · copyright.html   legal pages
 ```
 
 
-## Məxfilik və hüquqlar
-- [İstifadə Şərtləri](https://cahsmusic.vercel.app/terms) · [Məxfilik Siyasəti](https://cahsmusic.vercel.app/privacy) · [Müəllif Hüquqları](https://cahsmusic.vercel.app/copyright)
-- Musiqi fayllarını serverimizdə saxlamırıq və yaymırıq. Məzmun YouTube-un pleyeri ilə göstərilir, hüquqlar sahiblərinə məxsusdur.
-- Xidmət pulsuzdur, reklam və ödəniş yoxdur.
+## Privacy and legal
+- [Terms of Use](https://cahsmusic.vercel.app/terms) · [Privacy Policy](https://cahsmusic.vercel.app/privacy) · [Copyright](https://cahsmusic.vercel.app/copyright)
+- We do not store or distribute music files on our servers. Content is displayed through YouTube's player, and all rights belong to their owners.
+- The service is free, with no ads and no payments.
 
-## Əlaqə
+## Contact
 alahsukur120@gmail.com
 
 © 2026 Music Universe
